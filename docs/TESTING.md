@@ -95,6 +95,8 @@ Preview images and the temporary invisible-window probe are in ignored `.local/s
 | Executable smoke | Hidden Release executable created its actual titled main window and exited normally with code 0 |
 | Preview inspection | Inspected Ready/Running full-window DrawToBitmap images at desktop DPI 120; updated copy readable and bird position follows simulation |
 | Manual checks pending | Physical Space/Alt-Tab, perceived animation smoothness, live cover/uncover, real monitor DPI changes, and VS Code F5 |
-| Hosted CI | To be checked for the Stage 02 PR; local results are separate evidence |
+| Hosted CI | [Windows run 43828515337](https://github.com/alaamadii/FlappyBird/actions/runs/43828515337) passed for 22bf05c: restore/build/test/format and test-artifact upload successful |
 
 The temporary probe and images are ignored under `.local/flight-probe/`; it uses synthetic messages and lifecycle calls, not physical input. The executable probe initially matched a helper window and then exposed an input-idle/main-window startup race. Restricting the lookup to the titled Flappy Bird window with a bounded startup wait resolved the probe; the actual executable then passed launch/normal shutdown. No product fix was needed for those probe failures. Diagnostic images do not fulfill the final gameplay/Game Over screenshot requirement.
+
+[PR #3](https://github.com/alaamadii/FlappyBird/pull/3) remains open and unmerged for owner review. The hosted result identifies the tested implementation/documentation commit. Publication-evidence updates trigger new checks; verify the current head's result in the PR before merging.

@@ -8,7 +8,7 @@
 
 **Submission deadline:** 2026-11-30, 23:59 (working schedule: Asia/Riyadh)
 
-**Current position:** Stages 00/01 merged in PRs #1/#2. Stage 02 bird flight, Space input, focus pause, and fixed-step loop are implemented on `feat/bird-physics`; owner acceptance is pending. Obstacles and game rules have not started.
+**Current position:** Stages 00/01 merged in PRs #1/#2. Stage 02 bird flight, Space input, focus pause, and fixed-step loop are published in [PR #3](https://github.com/alaamadii/FlappyBird/pull/3); owner acceptance is pending. Obstacles and game rules have not started.
 
 This is the working plan for finishing **Flappy Bird only**. The other four NTP assignments have separate repositories and are outside this plan. Update this file as stages are accepted, recording actual completion dates rather than replacing targets with assumed results.
 
@@ -223,7 +223,7 @@ These are planning targets, not recorded completion dates or guarantees. Owner r
 | --- | --- | --- | --- |
 | 00 | Foundation and plan merged in PR #1 | Owner merged on 2026-11-16; historical manual/debugger checks remain recorded in TESTING | 2026-11-16 (merge) |
 | 01 | Static renderer and tests merged in PR #2 | Owner merged 2026-11-16; historical visual checks remain recorded in TESTING | 2026-11-16 (merge) |
-| 02 | Bird/settings, Ready/Running, Space input, focus pause, bounded loop | Local 56-test check and invisible window-message probe pass; hosted CI/owner review pending | — |
+| 02 | Bird/settings, Ready/Running, Space input, focus pause, bounded loop in PR #3 | Local 56-test check, invisible window-message probe, and Windows CI for 22bf05c pass; owner review pending | — |
 | 03 | Not started | Pending | — |
 | 04 | Not started | Pending | — |
 | 05 | Not started | Pending | — |
