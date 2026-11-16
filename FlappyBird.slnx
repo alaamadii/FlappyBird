@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FlappyBird.App/FlappyBird.App.csproj" />
+    <Project Path="src/FlappyBird.Core/FlappyBird.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FlappyBird.Core.Tests/FlappyBird.Core.Tests.csproj" />
+  </Folder>
+</Solution>
