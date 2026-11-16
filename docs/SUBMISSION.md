@@ -14,7 +14,7 @@ This checklist tracks remaining work; unchecked items are not complete. The brie
 - [ ] Visual appearance, DPI behavior, and VS Code debugging reviewed.
 - [x] Requested repository `alaamadii/FlappyBird` inspected: owner push access confirmed; empty and private on 2026-11-16.
 - [ ] Repository is public and accessible without authentication before submission.
-- [ ] Initialization commits and PR reviewed.
+- [x] Initialization PR #1 merged by the owner (confirmed 2026-11-16).
 - [ ] GitHub Actions passes for the reviewed commit.
 
 ## Final game acceptance

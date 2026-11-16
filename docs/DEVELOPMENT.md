@@ -63,7 +63,26 @@ This is initialization only. Gameplay remains planned. Detailed local validation
 - Updated `origin` to `https://github.com/alaamadii/FlappyBird.git` as requested.
 - Published empty bootstrap commit `997e5f4` to `main` as the review base; application development stays on the stage branch.
 - Published initialization/plan commit `dcbd97e` to `chore/initialize-project`, including all source/configuration/docs and no generated output.
-- Opened [PR #1](https://github.com/alaamadii/FlappyBird/pull/1) against `main`; it remains open and unmerged.
+- Opened [PR #1](https://github.com/alaamadii/FlappyBird/pull/1) against `main`; its merge was subsequently confirmed on 2026-11-16 before Stage 01 began.
 - Re-ran `./scripts/dev.ps1 check`: restore/build/test/format passed, with zero warnings/errors and ten passing tests. Documentation links and the staged whitespace check also passed.
 - The first [hosted CI run](https://github.com/alaamadii/FlappyBird/actions/runs/43817906408) was queued when inspected. Queue status is not a passing result. Subsequent documentation commits trigger their own checks; inspect the current PR head before merging.
 - Remote visibility remains private. The owner must authorize changing visibility before the public-access submission requirement can be marked complete.
+
+## 2026-11-16 — Stage 01 game window and rendering
+
+### Preparation and implementation
+
+- Confirmed PR #1 merged at commit `0c4f66e`; working tree was clean. Switched to main, pulled with `--ff-only`, and created `feat/game-window`.
+- Replaced the initialization Label with an original static GDI+ scene: gradient sky, clouds/hills, yellow bird preview, shared-boundary ground, heading, and Ready panel explaining Stage 02 controls.
+- Added App-owned GameRenderer and delegated GameForm.OnPaint to it. Form and renderer share one immutable Playfield; Core remains unchanged and independent of Windows drawing.
+- Added uniform client-area scaling, centered borders, pixel-unit text, explicit 96-DPI Form baseline, repaint-on-resize, and accessible Ready text. Kept fixed borders and disabled maximize.
+- Used scoped disposal for drawing resources and saved/restored the caller's graphics state. Added no timer, input behavior, gameplay models, pipes, score, or restart.
+- Added nine Windows-only renderer regression cases without altering the ten Core cases. Added App.Tests to the solution so existing local/CI commands include it.
+
+### Validation and review boundary
+
+- `./scripts/dev.ps1 check` passed: zero warnings/errors, 19 tests passing, clean formatting.
+- Visually inspected off-screen previews at 100%/125%/150% equivalent sizes and a different aspect ratio. Increased heading contrast and used a union cloud path after inspecting the initial preview.
+- An invisible actual Form at desktop DPI 120 had a 600×800 client area and identical image output after 30 repaint cycles and minimize/restore. The Release executable created its hidden titled window and exited normally with code 0.
+- Live cover/uncover, flicker perception, actual desktop DPI changes/cross-monitor transitions, and VS Code debugger checks remain owner checks. See TESTING for evidence and limits.
+- Updated README, architecture, decisions, plan progress, and testing documentation. Stage 01 owner acceptance remains pending; Stage 02 has not begun.
