@@ -8,7 +8,7 @@
 
 **Submission deadline:** 2026-11-30, 23:59 (working schedule: Asia/Riyadh)
 
-**Current position:** Stage 00 implemented locally; publication and review pending. Gameplay has not started.
+**Current position:** Stage 00 foundation and plan published in [PR #1](https://github.com/alaamadii/FlappyBird/pull/1); owner review and hosted-check verification pending. Gameplay has not started.
 
 This is the working plan for finishing **Flappy Bird only**. The other four NTP assignments have separate repositories and are outside this plan. Update this file as stages are accepted, recording actual completion dates rather than replacing targets with assumed results.
 
@@ -221,7 +221,7 @@ These are planning targets, not recorded completion dates or guarantees. Owner r
 
 | Stage | Implementation | Validation/review status | Actual acceptance date |
 | --- | --- | --- | --- |
-| 00 | Foundation and plan prepared | Local foundation checks pass; remote publication/CI/owner review pending | — |
+| 00 | Foundation and plan published in PR #1 | Local checks pass; hosted checks and owner review pending | — |
 | 01 | Not started | Pending | — |
 | 02 | Not started | Pending | — |
 | 03 | Not started | Pending | — |

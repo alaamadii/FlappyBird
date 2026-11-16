@@ -49,6 +49,12 @@ Environment: Windows x64, SDK 10.0.402, .NET/Windows Desktop runtime 10.0.13. Gi
 | VS Code F5 and visual DPI review | Not performed |
 | GitHub Actions | Not run/verified in this local task |
 
+### Publication validation — 2026-11-16
+
+Before publishing the foundation and instructor-aligned plan, `./scripts/dev.ps1 check` passed again: zero build warnings/errors, ten passing tests, and clean formatting. All local Markdown links resolved; `git diff --cached --check` passed after removing trailing whitespace. Generated-file exclusions remained in effect.
+
+[PR #1](https://github.com/alaamadii/FlappyBird/pull/1) is open against the empty bootstrap `main`. Its first [GitHub Actions run](https://github.com/alaamadii/FlappyBird/actions/runs/43817906408) was observed queued, so hosted validation remains pending. Verify the workflow for the current PR head before merging; do not interpret this local execution record as a CI pass.
+
 The first updated formatting check caught mixed line endings in the original `Program.cs`. `dotnet format FlappyBird.slnx --no-restore` normalized them, and the subsequent complete `check` passed. The launcher initially found multiple `dotnet` executables on PATH; it now explicitly selects the first resolved application and passes argument arrays by name.
 
 The first UI probe used `Process.MainWindowHandle`, which does not identify a hidden launch's window. A second probe enumerated windows by process ID and title, including hidden windows, then sent `WM_CLOSE`; it passed. This is launch/shutdown evidence only, not a visual review. Temporary probe processes were closed.

@@ -57,3 +57,13 @@ This is initialization only. Gameplay remains planned. Detailed local validation
 - Added missing submission requirements: public visibility, two screenshots embedded in README, full name/student number, package listing, and another-computer validation.
 - Retained the owner's requested repository name `FlappyBird`, recording the instructor's recommended name separately.
 - Prepared publication to the empty requested remote using an empty main baseline and an initialization review branch. Remote publication/CI results will be recorded after execution; no gameplay or merge is part of this task.
+
+### Publication record
+
+- Updated `origin` to `https://github.com/alaamadii/FlappyBird.git` as requested.
+- Published empty bootstrap commit `997e5f4` to `main` as the review base; application development stays on the stage branch.
+- Published initialization/plan commit `dcbd97e` to `chore/initialize-project`, including all source/configuration/docs and no generated output.
+- Opened [PR #1](https://github.com/alaamadii/FlappyBird/pull/1) against `main`; it remains open and unmerged.
+- Re-ran `./scripts/dev.ps1 check`: restore/build/test/format passed, with zero warnings/errors and ten passing tests. Documentation links and the staged whitespace check also passed.
+- The first [hosted CI run](https://github.com/alaamadii/FlappyBird/actions/runs/43817906408) was queued when inspected. Queue status is not a passing result. Subsequent documentation commits trigger their own checks; inspect the current PR head before merging.
+- Remote visibility remains private. The owner must authorize changing visibility before the public-access submission requirement can be marked complete.
