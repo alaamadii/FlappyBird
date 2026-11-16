@@ -1,28 +1,34 @@
+using FlappyBird.App.Rendering;
 using FlappyBird.Core.Models;
 
 namespace FlappyBird.App.Forms;
 
-/// <summary>The application shell. Rendering and input are added in later stages.</summary>
+/// <summary>Owns the window lifecycle and delegates the static scene to its renderer.</summary>
 public sealed class GameForm : Form
 {
+    private readonly Playfield playfield = new();
+    private readonly GameRenderer renderer;
+
     public GameForm()
     {
-        var playfield = new Playfield();
+        renderer = new GameRenderer(playfield);
         Text = "YMH219 — Flappy Bird";
         ClientSize = new Size(playfield.Width, playfield.Height);
         StartPosition = FormStartPosition.CenterScreen;
         FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
+        AutoScaleDimensions = new SizeF(96, 96);
         AutoScaleMode = AutoScaleMode.Dpi;
         DoubleBuffered = true;
+        ResizeRedraw = true;
         KeyPreview = true;
+        AccessibleName = "Flappy Bird static preview";
+        AccessibleDescription = "Ready. Bird and scenery preview. Controls arrive in Stage 02.";
+    }
 
-        Controls.Add(new Label
-        {
-            Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter,
-            Text = "Flappy Bird\nYMH219 — Nesne Tabanlı Programlama\n\n"
-                + "Project foundation ready.\nGameplay will be added in the next stages.",
-        });
+    protected override void OnPaint(PaintEventArgs e)
+    {
+        base.OnPaint(e);
+        renderer.Render(e.Graphics, ClientSize);
     }
 }

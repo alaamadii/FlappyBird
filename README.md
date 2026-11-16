@@ -2,7 +2,7 @@
 
 A C# Windows Forms desktop game project for **Nesne Tabanlı Programlama (YMH219)**. The project demonstrates object-oriented design, event-driven programming, testing, and a reviewed Git workflow.
 
-**Current stage: project initialization (00).** The application opens a fixed-size foundation window. Gameplay is planned and is not yet implemented. The Core library currently provides validated playfield dimensions with unit tests.
+**Current stage: game window and rendering (01), awaiting review.** The fixed-size window shows an original GDI+ scene: sky, clouds, hills, ground, a stationary bird, and a Ready panel explaining that controls arrive in Stage 02. Gameplay is not yet implemented. Initialization PR #1 is merged.
 
 ## Quick start
 
@@ -24,10 +24,11 @@ Open the root folder in VS Code, install the recommended extensions, and use **C
 
 ```text
 src/
-  FlappyBird.App/           Windows entry point and Forms/GameForm.cs
+  FlappyBird.App/           Windows entry point, Forms/GameForm.cs, Rendering/GameRenderer.cs
   FlappyBird.Core/          UI-independent domain code; Models/Playfield.cs
 tests/
   FlappyBird.Core.Tests/    xUnit behavior tests
+  FlappyBird.App.Tests/     Windows-only renderer regression tests
 scripts/dev.ps1            Local setup diagnostics and development commands
 docs/                      Architecture, decisions, workflow, QA, and requirements
 .github/                   Windows CI and pull request template
@@ -36,14 +37,14 @@ FlappyBird.slnx             Solution containing App, Core, and Tests
 global.json                SDK selection
 ```
 
-Rendering, physics, services, and assets folders will be added when they contain implemented features. The dependency direction is App → Core and Tests → Core. Core must not reference App or Windows Forms.
+Physics, services, and assets folders will be added when they contain implemented features. App and Core.Tests reference Core; App.Tests references App for Windows rendering checks. Core must not reference App or Windows Forms.
 
 ## Roadmap
 
 | Stage | Deliverable | Branch | Status |
 | --- | --- | --- | --- |
-| 00 | Solution, shell, tests, CI, and documentation | `chore/initialize-project` | Implemented locally; review pending |
-| 01 | Window rendering, background, ground, bird | `feat/game-window` | Planned |
+| 00 | Solution, shell, tests, CI, and documentation | `chore/initialize-project` | Merged in PR #1 |
+| 01 | Window rendering, background, ground, bird | `feat/game-window` | Implemented; owner review pending |
 | 02 | Gravity, flap, KeyDown/KeyUp input | `feat/bird-physics` | Planned |
 | 03 | Moving and recycled pipe obstacles | `feat/pipe-system` | Planned |
 | 04 | Collision, score, Game Over, restart | `feat/game-rules` | Planned |
@@ -72,7 +73,13 @@ There are no gameplay controls yet. Bird movement, pipe obstacles, collision, sc
 
 ## Technologies and NuGet packages
 
-C#/.NET 10, Windows Forms, and an independent .NET Core domain library. Custom GDI+ game rendering and a WinForms timer are planned for the gameplay stages. Tests currently reference `Microsoft.NET.Test.Sdk` 17.14.1, `xunit` 2.9.3, `xunit.runner.visualstudio` 3.1.4, and `coverlet.collector` 6.0.4. App and Core have no third-party package dependencies.
+C#/.NET 10, Windows Forms, original GDI+ drawing, and an independent .NET domain library. A WinForms timer is planned for Stage 02. Both test projects reference `Microsoft.NET.Test.Sdk` 17.14.1, `xunit` 2.9.3, and `xunit.runner.visualstudio` 3.1.4; Core.Tests also references `coverlet.collector` 6.0.4. App and Core have no third-party package dependencies.
+
+## Static scene behavior
+
+The renderer uses the 480 × 640 logical playfield with ground beginning at Y=560. Shapes, strokes, and pixel-unit fonts scale together to the actual client area. Uniform scaling and centered borders preserve proportions when the client aspect ratio differs. WinForms DPI autoscaling uses a 96-DPI baseline; the window remains fixed-size with maximize disabled.
+
+The scene redraws on paint events and contains no timer or animation. The bird is a visual preview rather than a gameplay model. The Form exposes an accessible Ready description; there are no functional gameplay controls yet.
 
 ## Screenshots and student details
 

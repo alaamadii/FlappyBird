@@ -4,6 +4,7 @@
     <Project Path="src/FlappyBird.Core/FlappyBird.Core.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/FlappyBird.App.Tests/FlappyBird.App.Tests.csproj" />
     <Project Path="tests/FlappyBird.Core.Tests/FlappyBird.Core.Tests.csproj" />
   </Folder>
 </Solution>
