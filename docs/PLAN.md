@@ -8,7 +8,7 @@
 
 **Submission deadline:** 2026-11-30, 23:59 (working schedule: Asia/Riyadh)
 
-**Current position:** Stage 00 merged in [PR #1](https://github.com/alaamadii/FlappyBird/pull/1). Stage 01 static rendering is implemented on `feat/game-window`; owner acceptance remains pending. Interactive gameplay has not started.
+**Current position:** Stage 00 merged in [PR #1](https://github.com/alaamadii/FlappyBird/pull/1). Stage 01 static rendering is published in [PR #2](https://github.com/alaamadii/FlappyBird/pull/2); owner acceptance remains pending. Interactive gameplay has not started.
 
 This is the working plan for finishing **Flappy Bird only**. The other four NTP assignments have separate repositories and are outside this plan. Update this file as stages are accepted, recording actual completion dates rather than replacing targets with assumed results.
 
@@ -222,7 +222,7 @@ These are planning targets, not recorded completion dates or guarantees. Owner r
 | Stage | Implementation | Validation/review status | Actual acceptance date |
 | --- | --- | --- | --- |
 | 00 | Foundation and plan merged in PR #1 | Owner merged on 2026-11-16; historical manual/debugger checks remain recorded in TESTING | 2026-11-16 (merge) |
-| 01 | Static renderer, Ready scene, and renderer tests implemented | Local checks pass; hosted CI and owner review pending; live cover/uncover and cross-monitor DPI pending | — |
+| 01 | Static renderer, Ready scene, and renderer tests published in PR #2 | Local checks and hosted Windows CI pass for ae0d535; owner review/live cover/uncover/cross-monitor DPI pending | — |
 | 02 | Not started | Pending | — |
 | 03 | Not started | Pending | — |
 | 04 | Not started | Pending | — |

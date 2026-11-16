@@ -74,6 +74,8 @@ Future test records should identify the date, commands, results, and limitations
 | Repaint/minimize/restore | Invisible Form exercised through 30 invalidate/update cycles and minimize/restore; full-window bitmap output identical before/after |
 | Release executable launch/close | Hidden executable created its titled window; normal WM_CLOSE shutdown exited with code 0 |
 | Live visual desktop checks | Cover/uncover, perceived flicker, physical monitor transitions, desktop DPI changes to 100%/150%, and VS Code F5 not performed; owner checks remain |
-| Hosted CI | To be checked on the Stage 01 PR; local results do not establish a hosted pass |
+| Hosted CI | [Windows run 43819540780](https://github.com/alaamadii/FlappyBird/actions/runs/43819540780) passed for ae0d535: restore/build/test/format and TRX artifact upload all successful |
 
 Preview images and the temporary invisible-window probe are in ignored `.local/scene-preview/`; they are diagnostic artifacts, not final gameplay screenshots or committed source. The repeated-paint, placement, and scale assertions are retained in App.Tests and run in CI. The full-window DrawToBitmap preview includes non-client chrome; it is not a desktop screenshot. No claims are made about actual gameplay or final screenshot requirements.
+
+[Stage 01 PR #2](https://github.com/alaamadii/FlappyBird/pull/2) remains open for owner review. The hosted result above identifies the tested commit; subsequent documentation commits receive their own CI run, visible on the PR. Check the latest result before merging.
