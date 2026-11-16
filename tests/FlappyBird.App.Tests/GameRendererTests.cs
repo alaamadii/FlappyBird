@@ -19,7 +19,7 @@ public sealed class GameRendererTests
         using var image = new Bitmap(width, height);
         using var graphics = Graphics.FromImage(image);
 
-        renderer.Render(graphics, image.Size);
+        RenderReady(renderer, graphics, image.Size);
 
         var scale = width / (float)playfield.Width;
         var grass = image.GetPixel(width / 2, (int)((playfield.GroundTop + 6) * scale));
@@ -41,11 +41,11 @@ public sealed class GameRendererTests
         var renderer = new GameRenderer(new Playfield());
         using var baseline = new Bitmap(480, 640);
         using var baselineGraphics = Graphics.FromImage(baseline);
-        renderer.Render(baselineGraphics, baseline.Size);
+        RenderReady(renderer, baselineGraphics, baseline.Size);
         using var image = new Bitmap(width, height);
         using var graphics = Graphics.FromImage(image);
 
-        renderer.Render(graphics, image.Size);
+        RenderReady(renderer, graphics, image.Size);
 
         var scale = Math.Min(width / 480f, height / 640f);
         Assert.Equal(image.GetPixel(0, 0), image.GetPixel(width - 1, height - 1));
@@ -68,7 +68,7 @@ public sealed class GameRendererTests
         using var originalTransform = graphics.Transform;
         var originalClip = graphics.ClipBounds;
 
-        renderer.Render(graphics, image.Size);
+        RenderReady(renderer, graphics, image.Size);
 
         using var restoredTransform = graphics.Transform;
         Assert.Equal(originalTransform.Elements, restoredTransform.Elements);
@@ -87,7 +87,7 @@ public sealed class GameRendererTests
         using var graphics = Graphics.FromImage(image);
         graphics.Clear(Color.Magenta);
 
-        renderer.Render(graphics, new Size(width, height));
+        RenderReady(renderer, graphics, new Size(width, height));
 
         Assert.Equal(Color.Magenta.ToArgb(), image.GetPixel(5, 5).ToArgb());
     }
@@ -96,19 +96,65 @@ public sealed class GameRendererTests
     public void RepeatedPaintingProducesTheSameStaticScene()
     {
         var renderer = new GameRenderer(new Playfield());
+        var bird = new Bird(new Playfield(), new GameSettings());
+        bird.Flap();
+        bird.Update(0.1);
+        var initialY = bird.Y;
+        var initialVelocity = bird.VerticalVelocity;
         using var image = new Bitmap(480, 640);
         using var graphics = Graphics.FromImage(image);
         using var first = new MemoryStream();
-        renderer.Render(graphics, image.Size);
+        renderer.Render(graphics, image.Size, bird, GameState.Running);
         image.Save(first, System.Drawing.Imaging.ImageFormat.Png);
 
         for (var paint = 0; paint < 20; paint++)
         {
-            renderer.Render(graphics, image.Size);
+            renderer.Render(graphics, image.Size, bird, GameState.Running);
         }
 
         using var last = new MemoryStream();
         image.Save(last, System.Drawing.Imaging.ImageFormat.Png);
         Assert.Equal(first.ToArray(), last.ToArray());
+        Assert.Equal(initialY, bird.Y);
+        Assert.Equal(initialVelocity, bird.VerticalVelocity);
     }
+
+    [Fact]
+    public void RenderingFollowsTheBirdAndRemovesTheReadyPanelWhenRunning()
+    {
+        var playfield = new Playfield();
+        var bird = new Bird(playfield, new GameSettings());
+        var renderer = new GameRenderer(playfield);
+        using var image = new Bitmap(480, 640);
+        using var graphics = Graphics.FromImage(image);
+        renderer.Render(graphics, image.Size, bird, GameState.Ready);
+        var readyPanel = image.GetPixel(100, 410);
+
+        bird.Flap();
+        bird.Update(0.1);
+        renderer.Render(graphics, image.Size, bird, GameState.Running);
+
+        var body = image.GetPixel(240, (int)(bird.Y + bird.Height / 2));
+        Assert.True(body.R > 200 && body.G > 150 && body.B < 100);
+        Assert.NotEqual(readyPanel, image.GetPixel(100, 410));
+    }
+
+    [Fact]
+    public void OffScreenBirdIsSafeToRenderWithoutChangingItsPosition()
+    {
+        var playfield = new Playfield();
+        var bird = new Bird(playfield, new GameSettings());
+        bird.Update(100);
+        var initialY = bird.Y;
+        using var image = new Bitmap(480, 640);
+        using var graphics = Graphics.FromImage(image);
+
+        new GameRenderer(playfield).Render(graphics, image.Size, bird, GameState.Running);
+
+        Assert.Equal(initialY, bird.Y);
+        Assert.Equal(255, image.GetPixel(240, 500).A);
+    }
+
+    private static void RenderReady(GameRenderer renderer, Graphics graphics, Size size) =>
+        renderer.Render(graphics, size, new Bird(new Playfield(), new GameSettings()), GameState.Ready);
 }

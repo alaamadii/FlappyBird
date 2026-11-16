@@ -4,14 +4,15 @@ using FlappyBird.Core.Models;
 
 namespace FlappyBird.App.Rendering;
 
-/// <summary>Draws a static preview in logical playfield units without changing domain state.</summary>
+/// <summary>Draws the current bird and state in logical units without advancing the game.</summary>
 public sealed class GameRenderer(Playfield playfield)
 {
     private readonly Playfield playfield = playfield ?? throw new ArgumentNullException(nameof(playfield));
 
-    public void Render(Graphics graphics, Size clientSize)
+    public void Render(Graphics graphics, Size clientSize, Bird bird, GameState gameState)
     {
         ArgumentNullException.ThrowIfNull(graphics);
+        ArgumentNullException.ThrowIfNull(bird);
         if (clientSize.Width <= 0 || clientSize.Height <= 0)
         {
             return;
@@ -36,9 +37,12 @@ public sealed class GameRenderer(Playfield playfield)
             graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
 
             DrawBackground(graphics);
-            DrawHeading(graphics);
-            DrawBird(graphics, playfield.Width / 2f, playfield.GroundTop * 0.51f);
-            DrawReadyPanel(graphics);
+            DrawHeading(graphics, gameState);
+            DrawCurrentBird(graphics, bird);
+            if (gameState == GameState.Ready)
+            {
+                DrawReadyPanel(graphics);
+            }
             DrawGround(graphics);
         }
         finally
@@ -72,14 +76,35 @@ public sealed class GameRenderer(Playfield playfield)
         graphics.FillPath(cloud, shape);
     }
 
-    private void DrawHeading(Graphics graphics)
+    private void DrawHeading(Graphics graphics, GameState gameState)
     {
         DrawText(graphics, "YMH219  /  NESNE TABANLI PROGRAMLAMA", 11, FontStyle.Bold,
             Color.FromArgb(46, 92, 103), new RectangleF(20, 30, playfield.Width - 40, 24));
         DrawText(graphics, "FLAPPY BIRD", 42, FontStyle.Bold,
             Color.FromArgb(29, 79, 83), new RectangleF(20, 76, playfield.Width - 40, 60));
-        DrawText(graphics, "A little bird. A big adventure.", 15, FontStyle.Regular,
+        DrawText(graphics, gameState == GameState.Ready ? "A little bird. A big adventure." : "Release and press Space to flap", 15, FontStyle.Regular,
             Color.FromArgb(39, 85, 96), new RectangleF(20, 140, playfield.Width - 40, 28));
+    }
+
+    private void DrawCurrentBird(Graphics graphics, Bird bird)
+    {
+        // Stage 02 has no ground collision. Cull an off-screen bird before float conversion.
+        if (bird.Y > playfield.Height)
+        {
+            return;
+        }
+
+        var state = graphics.Save();
+        try
+        {
+            graphics.TranslateTransform((float)(bird.X + bird.Width / 2), (float)(bird.Y + bird.Height / 2));
+            graphics.ScaleTransform((float)(bird.Width / 86), (float)(bird.Height / 48));
+            DrawBird(graphics, 0, 0);
+        }
+        finally
+        {
+            graphics.Restore(state);
+        }
     }
 
     private static void DrawBird(Graphics graphics, float x, float y)
@@ -117,9 +142,9 @@ public sealed class GameRenderer(Playfield playfield)
         graphics.DrawRoundedRectangle(border, panel, new SizeF(16, 16));
         DrawText(graphics, "READY", 25, FontStyle.Bold, Color.FromArgb(37, 86, 76),
             new RectangleF(panel.X, panel.Y + 14, panel.Width, 36));
-        DrawText(graphics, "Take a moment. Enjoy the view.", 14, FontStyle.Regular,
+        DrawText(graphics, "Space to start", 14, FontStyle.Regular,
             Color.FromArgb(64, 99, 91), new RectangleF(panel.X + 8, panel.Y + 58, panel.Width - 16, 24));
-        DrawText(graphics, "Controls arrive in Stage 02.", 12, FontStyle.Regular,
+        DrawText(graphics, "Release between presses to flap.", 12, FontStyle.Regular,
             Color.FromArgb(64, 99, 91), new RectangleF(panel.X + 8, panel.Y + 86, panel.Width - 16, 22));
     }
 
@@ -137,7 +162,7 @@ public sealed class GameRenderer(Playfield playfield)
             graphics.DrawLine(stripe, x, playfield.GroundTop + 24, x + 14, playfield.GroundTop + 38);
         }
 
-        DrawText(graphics, "STAGE 01  /  SCENE PREVIEW", 10, FontStyle.Bold,
+        DrawText(graphics, "STAGE 02  /  FLIGHT PRACTICE", 10, FontStyle.Bold,
             Color.FromArgb(111, 88, 58), new RectangleF(20, playfield.Height - 25, playfield.Width - 40, 18));
     }
 

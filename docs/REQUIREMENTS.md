@@ -6,15 +6,15 @@ Verified against the instructor's `YMH219_Ek_Uygulama_Odevleri_Ogrenci_Foyu.pdf`
 
 | ID | Requirement | Acceptance criterion | Status / intended stage |
 | --- | --- | --- | --- |
-| R01 | Bird input | Keyboard moves the bird upward, with a documented held-key policy; our implementation uses KeyDown/KeyUp | Planned / 02 |
-| R02 | Gravity | Bird vertical velocity changes over elapsed time; tests verify the update contract | Planned / 02 |
+| R01 | Bird input | Keyboard moves the bird upward, with a documented held-key policy; our implementation uses KeyDown/KeyUp | Implemented / 02; owner review pending; GameForm, FlapInput, Bird, input/engine tests |
+| R02 | Gravity | Bird vertical velocity changes over elapsed time; tests verify the update contract | Implemented / 02; owner review pending; BirdTests, FixedStepLoopTests |
 | R03 | Obstacles | At least two obstacles move right to left; our design uses at least two pipe pairs with passable gaps | Planned / 03 |
 | R04 | Recycling | Off-screen obstacles reappear to the right with valid gaps and spacing | Planned / 03 |
 | R05 | Collision | Pipe or ground contact ends the current run with documented boundary rules | Planned / 04 |
 | R06 | Game Over | Gameplay updates stop and the final score is displayed | Planned / 04 |
 | R07 | Score | Each successfully passed obstacle scores once | Planned / 04 |
 | R08 | Restart | New run resets entities, score, game state, and input state consistently | Planned / 04 |
-| R09 | OOP | Bird, obstacles, and game state have separate responsibilities; UI delegates gameplay | Foundation separated; gameplay classes planned |
+| R09 | OOP | Bird, obstacles, and game state have separate responsibilities; UI delegates gameplay | Bird/settings/state/GameEngine separated; obstacle and complete rule responsibilities remain planned |
 
 The PDF requires at least two obstacles rather than specifying pipe pairs. Our plan uses at least two active `PipePair` objects, each with upper/lower pipes, to satisfy the minimum clearly. Page 2 permits KeyDown/KeyUp or PreviewKeyDown; KeyDown/KeyUp is our chosen input approach.
 

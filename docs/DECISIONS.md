@@ -1,6 +1,6 @@
 # Decision log
 
-Record the date, context, decision, and consequences when changing an important design choice. Entries are chronological: initialization choices precede the Stage 01 rendering decisions. Gameplay remains planned.
+Record the date, context, decision, and consequences when changing an important design choice. Entries are chronological: initialization, rendering, then bird flight. Complete gameplay rules remain planned.
 
 ## ADR-001 — Windows Forms on .NET 10
 
@@ -40,7 +40,7 @@ Use the seven-stage branch/PR plan from the brief. Finish required behavior befo
 
 ## ADR-007 — Uniform logical rendering and DPI ownership
 
-**Date:** 2026-11-16. **Status:** Implemented in Stage 01; owner review pending.
+**Date:** 2026-11-16. **Status:** Accepted through merged Stage 01 PR #2.
 
 Keep Playfield dimensions as the logical coordinate system. GameForm delegates paint events to an App-only GameRenderer, passing its actual client size. The renderer scales uniformly, centers the scene, and uses borders when aspect ratios differ. WinForms autoscaling starts at 96 DPI; fonts use pixel units and the same transform as shapes, avoiding duplicate DPI scaling. The window remains fixed with maximize disabled.
 
@@ -48,6 +48,26 @@ Use original GDI+ primitives for the scenery and bird preview. No gameplay Bird 
 
 ## ADR-008 — Windows renderer regression tests
 
-**Date:** 2026-11-16. **Status:** Implemented in Stage 01; owner review pending.
+**Date:** 2026-11-16. **Status:** Accepted through merged Stage 01 PR #2.
 
 Add a separate `net10.0-windows` App.Tests project rather than coupling Core tests to System.Drawing. Bitmap tests cover common scale factors, centered borders, ground/bird placement, graphics-state restoration, empty client areas, and deterministic repaint. Keep visual review separate: these assertions do not prove live cover/uncover behavior, smoothness, or per-monitor DPI transitions. The existing Windows CI runs both suites through the solution without changing the Core target.
+
+## ADR-009 — Domain bird motion and initial state
+
+**Date:** 2026-11-16. **Status:** Implemented in Stage 02; owner review pending.
+
+Bird owns top-left position and vertical velocity, with private mutation through Flap/Update/Reset. GameSettings centralizes finite positive dimensions and tuning: gravity 900 logical units/s², flap-speed magnitude 320 units/s, artwork bounds 86 × 48. Bird must fit above ground initially. The small GameEngine coordinates only Ready/Running and the existing bird; it adds no placeholder obstacles or loss state.
+
+Use semi-implicit Euler: `v += gravity * dt`, then `y += v * dt`. Flap sets `v = -flapSpeed` rather than adding impulse. Reject negative/nonfinite time and overflow before mutation; zero time is a no-op. Clamp Y to zero on ceiling contact and clear upward velocity so gravity can resume. Reset methods are tested domain primitives only; complete restart remains Stage 04.
+
+Ground is deliberately not a collider yet: the bird can descend behind the ground and off-screen while Running continues. The renderer reads the real model without updating it and safely skips a below-viewport bird. Close/relaunch is the temporary way to return to Ready; there is no hidden restart behavior.
+
+## ADR-010 — Fixed updates, bounded catch-up, and focus-aware press edges
+
+**Date:** 2026-11-16. **Status:** Implemented in Stage 02; owner review pending.
+
+Keep the scheduler in App. A 15 ms WinForms timer measures elapsed seconds through Stopwatch and feeds FixedStepLoop. Updates are fixed at 1/60 second, with at most 0.1 seconds admitted and six updates per tick. Discard excess real time and any remaining whole overdue steps; retain a fractional remainder. A 1e-12-second comparison tolerance handles floating-point step boundaries. This trades wall-clock catch-up for bounded UI work after stalls. Core receives explicit elapsed time and knows nothing about Windows timers.
+
+FlapInput accepts a fresh Space edge, blocks repeated KeyDown until KeyUp, and handles activation separately from domain actions. Focus loss stops the timer and clears time/input accumulation. Focus return resets elapsed tracking and reads Space's held state once with GetAsyncKeyState in App: held Space is blocked until release, otherwise the next fresh press works. No global hook or background key processing is introduced. The first start press also clears Ready-time accumulation. Timer and Stopwatch are stopped, and Timer disposed, with the Form.
+
+Automated helper tests cover the input/timing contracts; window-message probes check adapter wiring separately. Simulating the activation-time held-key result does not replace a human Alt-Tab/physical-key check, which remains explicitly pending.
