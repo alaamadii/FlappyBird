@@ -87,3 +87,14 @@ This is initialization only. Gameplay remains planned. Detailed local validation
 - Live cover/uncover, flicker perception, actual desktop DPI changes/cross-monitor transitions, and VS Code debugger checks remain owner checks. See TESTING for evidence and limits.
 - Updated README, architecture, decisions, plan progress, and testing documentation. Stage 01 owner acceptance remains pending; Stage 02 has not begun.
 - Pushed implementation `bbc3e55` and documentation `ae0d535` on `feat/game-window`, then opened [PR #2](https://github.com/alaamadii/FlappyBird/pull/2) against main. [Windows CI run 43819540780](https://github.com/alaamadii/FlappyBird/actions/runs/43819540780) passed for ae0d535, including test artifact upload. This publication record is a documentation follow-up; inspect the PR's current checks before owner merge.
+
+## 2026-11-16 — Stage 02 bird physics, controls, and loop
+
+- Confirmed PR #2 merged at `544d50b`; working tree was clean. Fast-forwarded main and created `feat/bird-physics`.
+- Added immutable GameSettings, encapsulated Bird motion/reset, Ready/Running state, and the currently needed GameEngine coordination in Core. No Windows APIs or timers entered Core.
+- Added App press-edge input, activation-time held-key sampling, inactive pause, monotonic elapsed timing, fixed 1/60-second updates, 100 ms admission/six-update cap, and Form timer disposal.
+- Renderer now reads the real Bird and state, hides Ready instructions when Running, and retains Stage 01 scaling/resource guarantees. Ground remains decorative; the bird can leave the screen without ending the run. No Stage 03/04 features were introduced.
+- `./scripts/dev.ps1 check` passed with zero warnings/errors and 56 passing cases (34 Core, 22 App). Test coverage includes numeric physics, invalid inputs, ceiling, domain reset, press edges, bounded timing, and current-state rendering.
+- Invisible window-message/lifecycle probe passed tap/hold/release, actual timer pumping, inactive freeze, minimize/restore, simulated held-key reactivation, bounded 500 ms stall, and disposal. Actual hidden Release executable opened its main window and closed with exit code 0.
+- Inspected Ready/Running previews at current 125% DPI. Physical-key/focus behavior, perceived smoothness, and other unperformed desktop checks remain explicitly listed in TESTING.
+- Updated README, architecture, decisions, requirements, plan, and testing evidence. Owner review and hosted validation remain separate gates; Stage 03 has not begun.

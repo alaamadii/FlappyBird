@@ -6,40 +6,53 @@ The solution contains four projects:
 
 | Project | Target | Responsibility | Dependencies |
 | --- | --- | --- | --- |
-| `FlappyBird.App` | `net10.0-windows` | Windows entry point, window lifecycle, and static GDI+ renderer | Core, Windows Forms |
-| `FlappyBird.Core` | `net10.0` | Domain data and validation | .NET base libraries |
+| `FlappyBird.App` | `net10.0-windows` | Window, input/focus adapter, timing, and rendering | Core, Windows Forms |
+| `FlappyBird.Core` | `net10.0` | Bird motion, settings, Ready/Running state, validation | .NET base libraries |
 | `FlappyBird.Core.Tests` | `net10.0` | Core behavior tests | Core, xUnit, test SDK, coverage collector |
-| `FlappyBird.App.Tests` | `net10.0-windows` | Bitmap rendering and graphics-state regression tests | App, xUnit, test SDK, Windows drawing APIs |
+| `FlappyBird.App.Tests` | `net10.0-windows` | Rendering, input-edge, and timing tests | App, xUnit, test SDK, Windows drawing APIs |
 
-`Program.Main` is marked `[STAThread]`, initializes WinForms application configuration, and starts `GameForm`. `GameForm` owns one immutable `Playfield` and a `GameRenderer` using that same object. It configures a fixed border, a 96-DPI autoscale baseline, double buffering, and repaint-on-resize. Its `OnPaint` delegates to the renderer using the current client size. The initial status Label has been removed; the Ready copy is painted with the scene and exposed through the Form's accessible description.
+`Program.Main` initializes WinForms on an STA thread and starts GameForm. The Form constructs a shared Playfield, GameEngine with GameSettings, and GameRenderer. Engine owns Bird and Ready/Running state. Form owns FlapInput, FixedStepLoop, Stopwatch, and the WinForms timer. The fixed border, 96-DPI baseline, double buffering, and repaint-on-resize remain. OnPaint passes current Bird/state to the renderer without updating motion.
 
-`Playfield` is immutable. It rejects nonpositive dimensions and ground heights that fill or exceed the total height. `GroundTop` is computed as `Height - GroundHeight`; keeping that boundary in Core lets future collision and rendering use the same coordinate contract. Defaults are 480 × 640 with an 80-unit ground region. A stationary bird is drawn in App; no Bird model, timer, obstacle, or scoring behavior exists yet.
+Playfield is immutable with defaults 480 × 640 and ground height 80. `GroundTop = Height - GroundHeight` is shared with rendering and future collision. Ground is currently decorative; there are no pipes, score, Game Over, or restart controls.
+
+## Bird, settings, and state
+
+GameSettings validates finite positive gravity (900 units/s²), flap-speed magnitude (320 units/s), and nominal bird dimensions (86 × 48). Bird validates that its initial rectangle fits above ground. X/Y are top-left coordinates; initial X centers the bird and initial Y preserves the Stage 01 center at `GroundTop * 0.51`, clamped to the initial playable region.
+
+Bird uses private setters and deliberate Flap/Update/Reset methods. Flap sets velocity to `-FlapSpeed`. Semi-implicit Euler computes `vNext = v + gravity * dt`, then `yNext = y + vNext * dt`. Zero time changes nothing; negative/nonfinite elapsed time and overflowing results are rejected before mutation. At or above the ceiling, Y becomes zero and any upward velocity is cleared; gravity resumes downward movement on later steps.
+
+GameEngine ignores valid updates while Ready; Flap enters Running and flaps, then Running advances Bird. Reset primitives restore initial motion and Ready but have no UI/input binding yet. There is no ground stop: the bird can descend behind ground and off-screen while Running continues.
+
+## Input, timing, and lifecycle
+
+App handles KeyDown/KeyUp. FlapInput accepts one fresh press until release, suppressing OS key repeats. The first accepted Space clears Ready-time clock/accumulator, enters Running, and flaps; Space default processing is suppressed.
+
+The UI-thread timer has a 15 ms scheduling interval. Stopwatch measures elapsed time; FixedStepLoop advances Core by 1/60 second at a time. Each tick adds at most 0.1 seconds, performs at most six updates, drops any whole overdue steps, and retains only a fractional remainder. The comparison uses a 1e-12-second rounding tolerance. Repaint is requested after updates/input, and never drives simulation.
+
+Deactivation stops the timer, resets clock/accumulator, and suspends input. Activation resets timing and uses one Windows `GetAsyncKeyState` call to check whether Space is already held. Held Space must be released before another flap. There is no hook or background key processing. Bird state is preserved while inactive, and inactive time is not replayed. Form disposal stops/disposes the timer and stops Stopwatch.
 
 ## Renderer and coordinate mapping
 
-Coordinates use a top-left origin, X increasing rightward, and Y increasing downward. The static composition targets the default 480 × 640 playfield. Ground geometry is anchored to `Playfield.GroundTop` (560), and the bird preview is centered at `(Width / 2, GroundTop * 0.51)`.
+Coordinates use top-left origin, X rightward, Y downward. Ground is anchored at `GroundTop` (560). Artwork is centered in the model's bird rectangle and scaled from nominal 86 × 48 bounds. The shadow is decorative. Birds below the viewport are culled before converting coordinates to floats.
 
-`GameRenderer.Render(Graphics, Size)` computes `scale = min(clientWidth / logicalWidth, clientHeight / logicalHeight)`. It centers the scaled playfield using half of the remaining width/height, clips to the logical rectangle, and paints a dark border in any unused client area. It never stretches X and Y independently. Zero-size client areas are ignored.
+`GameRenderer.Render(Graphics, Size, Bird, GameState)` computes `scale = min(clientWidth / logicalWidth, clientHeight / logicalHeight)`. It centers the scaled playfield, clips to the logical rectangle, and fills unused client area with a dark border. Scene X/Y are never stretched independently. Empty client areas are ignored.
 
-The renderer draws sky/clouds/hills, a heading, the stationary bird, the Ready panel, and ground. All visuals are original GDI+ primitives. It uses pixel-unit fonts so fonts follow the same transform as geometry; it does not multiply by DPI a second time. WinForms handles DPI-related window sizing from the 96-DPI baseline. A 125% desktop was observed to produce a 600 × 800 client area.
+The renderer draws scenery, heading, current bird, a panel only while Ready, and ground. Pixel-unit fonts follow the scene transform without duplicate DPI multiplication. All visuals are original GDI+ primitives. WinForms scales the window from the 96-DPI baseline; a 125% desktop produced a 600 × 800 client area.
 
 Each render saves and restores the caller's graphics state, including transforms and clipping. Fonts, brushes, pens, paths, and string formats are locally owned with `using` disposal. The renderer retains only the immutable Playfield; it owns no persistent native drawing resources and therefore needs no disposal lifecycle. Painting reads dimensions and does not create or advance gameplay state.
 
 The Windows-only App test project renders into off-screen bitmaps; it does not introduce Windows dependencies into Core or make the Core tests require a UI.
 
-## Intended gameplay design — not yet implemented
+## Remaining gameplay design — not yet implemented
 
 | Type | Planned responsibility |
 | --- | --- |
-| `Bird` | Position, vertical velocity, gravity integration, flap action |
 | `PipePair` | Upper/lower obstacle geometry, gap, horizontal movement, score eligibility |
-| `GameEngine` | Update entities, recycle pipes, detect collisions, calculate score, manage state and reset |
-| `GameForm` | Keyboard events, timer lifecycle, rendering requests, and presentation |
-| Renderer | Draw a snapshot of Core state using GDI+; dispose drawing resources |
+| `GameEngine` extensions | Coordinate obstacles, collision, score, Game Over, and complete restart |
 
-The intended update flow is keyboard event → input command → Core engine, then timer tick → engine update → repaint request. Painting reads state without advancing it. Core receives elapsed time explicitly instead of consulting WinForms timers, allowing deterministic tests.
+The implemented flow is key event → input edge → Core engine, then timer signal → fixed updates → engine → repaint request. Future game rules must preserve this separation.
 
-The planned state flow is Ready → Running → GameOver, with restart returning to a clean initial state. The precise input, timing, collision-boundary, and score-ordering contracts will be decided and tested in the relevant stages rather than implied by this document.
+Current states are Ready and Running. GameOver, complete restart, collision, and score ordering remain Stage 04.
 
 ## Design constraints
 

@@ -22,18 +22,20 @@ CI uses Windows and the same `check` command. It uploads available TRX files eve
 - Ground height equal to or greater than total height.
 - The parameter name reported by rejected input.
 
-The Core suite contains two facts and eight theory cases, totaling ten test cases. It tests the current domain contract. The Windows-only App suite adds nine rendering cases, for **19 total tests**. It checks ground/bird placement at 1×/1.25×/1.5× sizes, centered borders for wide/tall client areas, caller graphics-state restoration, no drawing for empty client areas, and identical image output after repeated painting.
+The current suite has **56 cases: Core 34, App 22**. Core includes the original ten Playfield cases plus settings validation, Bird motion/flap/ceiling/reset/time rejection, and Ready/Running coordination. App tests cover 1×/1.25×/1.5× placement, borders, graphics-state restoration, empty clients, painting without advancing Bird, real-model rendering, and safe off-screen rendering. Input-edge tests cover repeat suppression and focus-held/released cases; fixed-step tests cover partition-independent flight, fractional accumulation, six-step stall caps, reset, and invalid time.
 
-Keyboard input, timing, collision, scoring, restart, and persistence remain unimplemented and untested. There is no coverage-percentage claim; the Core collector package is available but ordinary checks do not collect coverage. Bitmap assertions verify rendering behavior, not human visual acceptance or live desktop flicker.
+Collision, scoring, Game Over, complete restart, and persistence remain unimplemented/untested. Domain reset primitives are tested but do not imply a restart UI. There is no coverage-percentage claim. Bitmap and helper assertions do not replace human visual/physical keyboard acceptance.
 
 ## Windows UI smoke check
 
 1. Run `./scripts/dev.ps1 run` on Windows.
-2. Confirm a window titled `YMH219 — Flappy Bird` appears with sky/clouds/hills, a stationary yellow bird, ground, and a readable Ready panel stating that controls arrive in Stage 02.
+2. Confirm a window titled `YMH219 — Flappy Bird` appears with scenery, bird, and a Ready panel saying “Space to start”. Tap Space: the panel disappears and the bird rises, then falls under gravity. Hold Space: do not expect repeated flaps; release and press again to flap.
 3. Confirm the client area uses the Playfield dimensions, allowing for Windows DPI scaling.
 4. Confirm the window can move, its border is fixed, maximize is disabled, and closing exits normally.
 5. Check text readability and clipping at 100%, 125%, and 150% display scaling where available. Distinguish off-screen render sizes from changing the desktop's actual DPI settings.
 6. Minimize/restore and cover/uncover the live window; verify the same complete scene repaints cleanly.
+7. Hold Space, switch away, release while away or return still holding, then test the next fresh press. Motion freezes while inactive; no catch-up jump or repeated held-key flap should occur on return.
+8. Repeated taps can reach the ceiling: the bird stays within Y=0 and later falls. Ground remains decorative in this stage; falling behind it/off-screen is an expected limitation. Close/relaunch to return to Ready.
 
 Automated process/window inspection can establish that the app launches and closes; it does not establish visual correctness or debugger behavior. Record those distinctions explicitly. Do not mark future gameplay scenarios as passing during initialization.
 
@@ -78,4 +80,21 @@ Future test records should identify the date, commands, results, and limitations
 
 Preview images and the temporary invisible-window probe are in ignored `.local/scene-preview/`; they are diagnostic artifacts, not final gameplay screenshots or committed source. The repeated-paint, placement, and scale assertions are retained in App.Tests and run in CI. The full-window DrawToBitmap preview includes non-client chrome; it is not a desktop screenshot. No claims are made about actual gameplay or final screenshot requirements.
 
-[Stage 01 PR #2](https://github.com/alaamadii/FlappyBird/pull/2) remains open for owner review. The hosted result above identifies the tested commit; subsequent documentation commits receive their own CI run, visible on the PR. Check the latest result before merging.
+[Stage 01 PR #2](https://github.com/alaamadii/FlappyBird/pull/2) was confirmed merged on 2026-11-16 before Stage 02. Its final head 8afbd87 also passed [Windows run 43819762617](https://github.com/alaamadii/FlappyBird/actions/runs/43819762617). Historical unperformed visual checks are not silently marked passed by that merge.
+
+## Stage 02 execution record — 2026-11-16
+
+| Check | Actual evidence |
+| --- | --- |
+| `./scripts/dev.ps1 check` | Passed: restore, Release build with zero warnings/errors, 34 Core + 22 App tests, formatting clean |
+| Invisible Form/window-message probe | Sent Space WM_KEYDOWN/WM_KEYUP messages through the Form window: first press starts/flaps, repeat is ignored after a physics update, release/new press flaps again |
+| Actual timer pump | Pumped the WinForms message loop for 120 ms; bird moved upward after flap |
+| Focus/minimize/restore | Invoked focus lifecycle on the invisible Form, verified timer stops and motion freezes while inactive, exercised minimize/restore, then resumed |
+| Held-key reactivation | Simulated the activation-time held-Space sample in FlapInput; repeat ignored until release/new press. Actual physical-key/Alt-Tab behavior remains a manual check |
+| Stalled UI | Paused the probe UI thread for 500 ms, then delivered a timer tick: exactly six fixed updates, velocity −320 → −230, no unbounded catch-up |
+| Executable smoke | Hidden Release executable created its actual titled main window and exited normally with code 0 |
+| Preview inspection | Inspected Ready/Running full-window DrawToBitmap images at desktop DPI 120; updated copy readable and bird position follows simulation |
+| Manual checks pending | Physical Space/Alt-Tab, perceived animation smoothness, live cover/uncover, real monitor DPI changes, and VS Code F5 |
+| Hosted CI | To be checked for the Stage 02 PR; local results are separate evidence |
+
+The temporary probe and images are ignored under `.local/flight-probe/`; it uses synthetic messages and lifecycle calls, not physical input. The executable probe initially matched a helper window and then exposed an input-idle/main-window startup race. Restricting the lookup to the titled Flappy Bird window with a bounded startup wait resolved the probe; the actual executable then passed launch/normal shutdown. No product fix was needed for those probe failures. Diagnostic images do not fulfill the final gameplay/Game Over screenshot requirement.
