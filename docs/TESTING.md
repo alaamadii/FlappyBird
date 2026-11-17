@@ -139,10 +139,12 @@ After the fix, `./scripts/dev.ps1 check` passed again: restore, Release build wi
 | Release executable | Hidden executable created its titled main window and closed normally with exit code 0 |
 | Preview review | Inspected Ready, scored Running, and Game Over full-window DrawToBitmap captures at current 125% DPI; Running 100%/125%/150% equivalents also generated; native button aligns with final-score card |
 | Still manual | Human random-gap playthrough/tuning, physical Space/Alt-Tab/restart, perceived smoothness, cover/uncover, actual monitor DPI transitions, VS Code F5, second computer |
-| Hosted CI | To be checked on the Stage 04 PR; local passes are separate evidence |
+| Hosted CI | [Windows run 44043723178](https://github.com/alaamadii/FlappyBird/actions/runs/44043723178) passed for f0a9300 after native-window test isolation; build/test/format and artifact upload successful |
 
 Diagnostic probe/images are ignored under `.local/rules-probe/`. Controlled gaps/direct simulation were used for repeatable score/loss captures; this is not a human random-gap playthrough or a final submission screenshot sign-off. A ground-overlap regression prevents an already overlapping state from producing negative contact time. Initial compile failures from the renderer's new score argument were resolved by updating callers/tests before final verification. Stage 04 acceptance remains pending owner review.
 
 ### Hosted test isolation follow-up
 
-The first [Stage 04 CI run](https://github.com/alaamadii/FlappyBird/actions/runs/44043016504) built cleanly and passed all 92 Core cases, but one repeated-paint comparison failed while native Form tests and off-screen renderer tests could run in parallel. The new native-window collection now disables parallel execution with other collections, isolating WinForms process-wide DPI/font initialization from exact bitmap comparisons. The exact assertion is retained. Local/full hosted results after this change must be recorded separately from that failed run.
+The first [Stage 04 CI run](https://github.com/alaamadii/FlappyBird/actions/runs/44043016504) built cleanly and passed all 92 Core cases, but one repeated-paint comparison failed while native Form tests and off-screen renderer tests could run in parallel. The new native-window collection disables parallel execution with other collections, isolating WinForms process-wide DPI/font initialization from exact bitmap comparisons. The exact assertion is retained. After isolation, the full local check and [hosted run 44043723178](https://github.com/alaamadii/FlappyBird/actions/runs/44043723178) passed all 125 tests; the earlier failure remains recorded rather than relabeled.
+
+[PR #5](https://github.com/alaamadii/FlappyBird/pull/5) remains open and unmerged for owner acceptance. The passing run identifies tested commit f0a9300; this publication-evidence update triggers its own check, whose result is visible on the PR before merging.
