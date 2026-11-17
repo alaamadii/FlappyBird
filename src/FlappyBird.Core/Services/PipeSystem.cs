@@ -43,11 +43,25 @@ public sealed class PipeSystem
         // Sample before movement so an invalid supplied source cannot corrupt pipe positions.
         var firstGap = pairs[0].Right - distance < 0 ? NextGap() : pairs[0].GapTop;
         var secondGap = pairs[1].Right - distance < 0 ? NextGap() : pairs[1].GapTop;
-        foreach (var pair in pairs)
-        {
-            pair.Move(distance);
-        }
+        MoveWithoutRecycling(elapsedSeconds);
+        RecycleExited(firstGap, secondGap);
+    }
 
+    internal void MoveWithoutRecycling(double elapsedSeconds)
+    {
+        ValidateElapsed(elapsedSeconds);
+        foreach (var pair in pairs) pair.Move(settings.PipeSpeed * elapsedSeconds);
+    }
+
+    internal void RecycleExited()
+    {
+        var firstGap = pairs[0].Right < 0 ? NextGap() : pairs[0].GapTop;
+        var secondGap = pairs[1].Right < 0 ? NextGap() : pairs[1].GapTop;
+        RecycleExited(firstGap, secondGap);
+    }
+
+    private void RecycleExited(double firstGap, double secondGap)
+    {
         // With travel <= two spacings, each pair can recycle at most once per update.
         var recycled = 0;
         while (pairs[0].Right < 0)

@@ -32,10 +32,17 @@ public sealed class Bird
 
     public void Update(double elapsedSeconds)
     {
+        var next = Predict(elapsedSeconds);
+        Y = next.Y;
+        VerticalVelocity = next.Velocity;
+    }
+
+    internal (double Y, double Velocity) Predict(double elapsedSeconds)
+    {
         ValidateElapsed(elapsedSeconds);
         if (elapsedSeconds == 0)
         {
-            return;
+            return (Y, VerticalVelocity);
         }
 
         // Semi-implicit Euler: update velocity first, then position using that velocity.
@@ -46,8 +53,13 @@ public sealed class Bird
             throw new ArgumentOutOfRangeException(nameof(elapsedSeconds), "Update would overflow bird motion.");
         }
 
-        Y = Math.Max(0, position);
-        VerticalVelocity = position <= 0 && velocity < 0 ? 0 : velocity;
+        return (Math.Max(0, position), position <= 0 && velocity < 0 ? 0 : velocity);
+    }
+
+    internal void StopAt(double y)
+    {
+        Y = y;
+        VerticalVelocity = 0;
     }
 
     public void Reset()

@@ -118,3 +118,17 @@ This is initialization only. Gameplay remains planned. Detailed local validation
 - Clamped only recycled positions to their mathematical `-Width` lower bound, keeping strict off-screen detection unchanged.
 - Re-ran `./scripts/dev.ps1 check`: zero warnings/errors, 67 Core and 25 App tests passing (92 total), formatting clean. Updated current counts and documented the rounding policy separately from the 2026-11-16 visual/lifecycle checks.
 - Published implementation `d8ecfee` and documentation `e847e0f` to `feat/pipe-system`, then opened [PR #4](https://github.com/alaamadii/FlappyBird/pull/4). [Windows CI run 44027176448](https://github.com/alaamadii/FlappyBird/actions/runs/44027176448) passed for e847e0f, including artifact upload. This documentation follow-up records that evidence; current-head checks remain visible on the PR. No merge or Stage 04 implementation was performed.
+
+## 2026-11-17 — Stage 04 collision, score, Game Over, restart
+
+- Confirmed PR #4 merged at `f458b10`; clean working tree. Fast-forwarded main and created `feat/game-rules`.
+- Added inclusive swept AABB contact, up to 60 bounded rule steps per supported one-second engine update, earliest-contact stopping, and ground/ceiling policies. Existing ground overlap resolves at zero time; unsupported elapsed values are rejected before mutation.
+- Added controlled score, per-pair eligibility, contact-before-score-before-recycle ordering, GameOver freeze/ignored flap, and clean Core reset.
+- Added live/final score presentation, dimmed Game Over card, one native New game button, Enter reset, focused-button Space suppression, held-Space protection, complete clock/accumulator reset, and state-aware accessible copy.
+- Extracted SceneViewport for shared paint/native-control positioning; kept DPI scaling, original shapes, and scoped graphics resource ownership.
+- `./scripts/dev.ps1 check` passed with zero warnings/errors, 92 Core + 33 App cases (125 total), and clean formatting. Coverage includes contact boundaries/sweeps, score ordering, 40 Core reset cycles and twelve STA native-button/Enter restart cycles.
+- Invisible actual-Form probe passed a controlled scored pass, pipe/ground loss, final score, BM_CLICK/Enter reset, held keys, focus/minimize/restore, bounded stall, and close. The actual hidden Release executable launched/closed with exit code 0.
+- Reviewed Ready/Running/GameOver diagnostic previews at 125% DPI and equivalent Running scale images. Human random-gap playtesting and other unperformed checks remain explicit in TESTING.
+- Updated README, architecture, decisions, requirements, testing, and plan. Stage 04 owner acceptance remains pending; no Stage 05 extras were implemented.
+- First hosted run passed build/Core but failed the repeated-paint bitmap comparison with concurrent native UI tests. Isolated the native Form collection from other test collections while keeping the exact comparison assertion; tracked the failed run and subsequent verification separately in TESTING.
+- Published implementation `d419cd2`, documentation `f66ff32`, and test isolation fix `f0a9300` to `feat/game-rules` in [PR #5](https://github.com/alaamadii/FlappyBird/pull/5). Full local validation and [Windows run 44043723178](https://github.com/alaamadii/FlappyBird/actions/runs/44043723178) passed for f0a9300, including all 125 tests, formatting, and artifact upload. This evidence update is documentation-only; final-head checks remain tracked on the PR. No merge or Stage 05 work was performed.

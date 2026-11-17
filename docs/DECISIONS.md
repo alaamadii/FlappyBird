@@ -1,6 +1,6 @@
 # Decision log
 
-Record the date, context, decision, and consequences when changing an important design choice. Entries are chronological: initialization, rendering, then bird flight. Complete gameplay rules remain planned.
+Record the date, context, decision, and consequences when changing an important design choice. Entries are chronological; later stages supersede earlier temporary limitations. Stage 04 implements mandatory game rules, with owner acceptance still pending.
 
 ## ADR-001 — Windows Forms on .NET 10
 
@@ -74,7 +74,7 @@ Automated helper tests cover the input/timing contracts; window-message probes c
 
 ## ADR-011 — Two reusable pairs and bounded ordered recycling
 
-**Date:** 2026-11-16. **Status:** Implemented in Stage 03; owner review pending.
+**Date:** 2026-11-16. **Status:** Accepted through merged Stage 03 PR #4.
 
 Keep numeric PipePair/PipeRectangle geometry in Core and manage two pairs in PipeSystem. The engine updates bird and pipes together only while Running. Expose a read-only collection, reuse the same pair objects, and rotate the departing leftmost pair behind the furthest remaining pair. Recycle only at Right < 0; touching X=0 alone does not recycle. Do not add scoring flags or collision rules before their stage.
 
@@ -86,8 +86,28 @@ Support Core obstacle steps up to one second and require speed <= two spacings p
 
 ## ADR-012 — Gap-source substitution and read-only rendering
 
-**Date:** 2026-11-16. **Status:** Implemented in Stage 03; owner review pending.
+**Date:** 2026-11-16. **Status:** Accepted through merged Stage 03 PR #4.
 
 IGapSource requests an explicit inclusive-minimum/exclusive-maximum interval: [40, 340) with defaults. RandomGapSource owns a Random instance, optionally seeded, instead of using global shared randomness. Protect the exclusive endpoint from rounding and reject provider values outside the interval. Generate only during initialization, recycling, and domain reset. Sample required recycle/reset gaps before changing pipe positions so a faulty supplied source cannot partially reposition pipes.
 
 Renderer reads Upper/Lower rectangles and draws original green GDI+ bodies/lips within those bounds. It does not consume randomness, move pairs, or advance the engine. Draw bird after pipes, and keep a compact Running instruction banner over scenery. Stage 03 explicitly allows passing through pipes and falling behind ground; collision, score, loss, and restart UI remain Stage 04.
+
+## ADR-013 — Inclusive swept contact and collision-first rules
+
+**Date:** 2026-11-17. **Status:** Implemented in Stage 04; owner review pending.
+
+Use Bird's nominal rectangular hitbox and both complete pipe rectangles, with edge/corner touching counted as collision. The bird rectangle conservatively includes empty artwork corners, but not the decorative shadow. Ground contact is the bird bottom at GroundTop; ceiling remains nonfatal.
+
+GameEngine validates [0, 1] seconds in all states before mutation. Running calls are divided into at most 60 steps no longer than 1/60 second. Bird.Predict supplies the semi-implicit, ceiling-clamped endpoint without mutation. Swept AABB slabs test relative horizontal pipe travel and the linear bird segment, finding contact even through thin geometry. This combines bounded work with protection against tunneling rather than relying on endpoint overlap alone.
+
+At earliest contact, advance only the contact fraction, clamp ground presentation, clear vertical velocity, enter GameOver, and stop. Existing ground overlap resolves at time zero. A collision step earns no point and does not recycle. Earlier valid steps' points survive later loss. Tests cover exact boundaries, diagonal time intervals, existing ground overlap, and a tiny bird/pipe crossing between disjoint endpoints.
+
+## ADR-014 — Per-pair score lifecycle and complete UI restart
+
+**Date:** 2026-11-17. **Status:** Implemented in Stage 04; owner review pending.
+
+After a collision-free movement step, award once when pair.Right < Bird.X and HasScored is false; equality does not score. Mark before recycling, then Reset clears eligibility for the new cycle. Separate PipeSystem's internal movement and recycling phases to preserve this ordering while keeping its standalone diagnostic API. Score and game-state mutation stay in Core.
+
+On GameOver, stop the Form timer, clear time debt, show final score and one native New game button. Enter and click share a guarded restart method returning Ready, not directly Running. Reset domain score/motion/pipes/gaps/eligibility and App input/clock/accumulator. Preserve a release requirement if Space is held. Intercept Space preview from the button so native default behavior cannot restart or flap accidentally. Reuse timer, button, handlers, and pairs across runs.
+
+Extract SceneViewport so painted content and native button use the same uniform, centered logical mapping. Accessible copy follows state; activation never resumes GameOver. Keep optional persistence/audio/progression outside this stage. Invisible STA window-message tests validate repeated restart, focused-button keys, focus return, and timing reset separately from pending human checks.

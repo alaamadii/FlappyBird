@@ -4,4 +4,5 @@ public enum GameState
 {
     Ready,
     Running,
+    GameOver,
 }

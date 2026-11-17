@@ -8,7 +8,7 @@
 
 **Submission deadline:** 2026-11-30, 23:59 (working schedule: Asia/Riyadh)
 
-**Current position:** Stages 00–02 merged in PRs #1–#3. Stage 03 pipe geometry, generation, movement, recycling, and rendering are published in [PR #4](https://github.com/alaamadii/FlappyBird/pull/4); owner acceptance is pending. Collision and scoring rules have not started.
+**Current position:** Stages 00–03 merged in PRs #1–#4. Stage 04 collision, score, Game Over, and restart are published in [PR #5](https://github.com/alaamadii/FlappyBird/pull/5); owner acceptance is pending. Stage 05 has not started.
 
 This is the working plan for finishing **Flappy Bird only**. The other four NTP assignments have separate repositories and are outside this plan. Update this file as stages are accepted, recording actual completion dates rather than replacing targets with assumed results.
 
@@ -224,9 +224,9 @@ These are planning targets, not recorded completion dates or guarantees. Owner r
 | 00 | Foundation and plan merged in PR #1 | Owner merged on 2026-11-16; historical manual/debugger checks remain recorded in TESTING | 2026-11-16 (merge) |
 | 01 | Static renderer and tests merged in PR #2 | Owner merged 2026-11-16; historical visual checks remain recorded in TESTING | 2026-11-16 (merge) |
 | 02 | Bird flight and loop merged in PR #3 | Owner merged 2026-11-16; historical physical input/visual checks remain recorded in TESTING | 2026-11-16 (merge) |
-| 03 | Two pairs, gap generation, movement/recycling, and rendering in PR #4 | Local 92-test check and Windows CI for e847e0f pass (2026-11-17); owner review pending | — |
-| 04 | Not started | Pending | — |
+| 03 | Pipe system merged in PR #4 | Owner merged 2026-11-17; historical manual checks remain recorded in TESTING | 2026-11-17 (merge) |
+| 04 | Mandatory game rules and native restart UI in PR #5 | Local 125-test check, window probe, and Windows CI for f0a9300 pass; owner acceptance pending | — |
 | 05 | Not started | Pending | — |
 | 06 | Not started | Pending | — |
 
-After Stage 03 owner review and merge, the next task is **Stage 04: collision, score, Game Over, and restart**. Stage 03 allows the bird to pass through pipes or fall behind ground without ending the run. Close/relaunch to return to Ready until restart UI is implemented.
+After Stage 04 owner review and merge, the next task is **Stage 05: usability/polish and selected extras**. Mandatory gameplay implementation does not complete final manual QA, screenshot, identity, public-access, or second-computer submission checks. Those remain tracked explicitly; Stage 05/06 have not begun.

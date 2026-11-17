@@ -46,7 +46,7 @@ public sealed class GameEngineTests
         Assert.Equal(2, source.Calls);
         engine.Flap();
         engine.Update(0.5);
-        Assert.Equal(450, first.X);
+        Assert.Equal(450, first.X, 8);
         engine.Reset();
         Assert.Equal(GameState.Ready, engine.State);
         Assert.Equal(520, engine.Pipes.Pairs[0].X);

@@ -2,7 +2,7 @@
 
 A C# Windows Forms desktop game project for **Nesne Tabanlı Programlama (YMH219)**. The project demonstrates object-oriented design, event-driven programming, testing, and a reviewed Git workflow.
 
-**Current stage: pipes and movement (03), awaiting review.** Press Space to start bird flight and two moving pipe pairs with randomized gaps and automatic recycling. Gravity, ceiling clamping, focus pause, and fixed-step timing remain intact. PRs #1–#3 are merged; collision, scoring, and Game Over are future work.
+**Current stage: mandatory game rules (04), awaiting review.** Fly through moving pipes, earn points, lose on pipe/ground contact, and start a new run with Enter or the New game button. Physics, focus pause, and DPI-aware rendering remain intact. PRs #1–#4 are merged; polish and final submission QA remain future stages.
 
 ## Quick start
 
@@ -25,10 +25,10 @@ Open the root folder in VS Code, install the recommended extensions, and use **C
 ```text
 src/
   FlappyBird.App/           Window, rendering, Input/FlapInput, Timing/FixedStepLoop
-  FlappyBird.Core/          Domain models, GameEngine/PipeSystem, injectable gap generation
+  FlappyBird.Core/          Models, swept collision, GameEngine/PipeSystem, gap generation
 tests/
   FlappyBird.Core.Tests/    xUnit behavior tests
-  FlappyBird.App.Tests/     Windows renderer, input-edge, and timing tests
+  FlappyBird.App.Tests/     Renderer, input/timing, invisible Form/restart tests
 scripts/dev.ps1            Local setup diagnostics and development commands
 docs/                      Architecture, decisions, workflow, QA, and requirements
 .github/                   Windows CI and pull request template
@@ -46,8 +46,8 @@ App and Core.Tests reference Core; App.Tests references App for rendering/input/
 | 00 | Solution, shell, tests, CI, and documentation | `chore/initialize-project` | Merged in PR #1 |
 | 01 | Window rendering, background, ground, bird | `feat/game-window` | Merged in PR #2 |
 | 02 | Gravity, flap, KeyDown/KeyUp input | `feat/bird-physics` | Merged in PR #3 |
-| 03 | Moving and recycled pipe obstacles | `feat/pipe-system` | Implemented; owner review pending |
-| 04 | Collision, score, Game Over, restart | `feat/game-rules` | Planned |
+| 03 | Moving and recycled pipe obstacles | `feat/pipe-system` | Merged in PR #4 |
+| 04 | Collision, score, Game Over, restart | `feat/game-rules` | Implemented; owner review pending |
 | 05 | UI polish and optional enhancements | `feat/game-polish` | Planned |
 | 06 | Final QA, screenshots, submission review | `docs/final-submission` | Planned |
 
@@ -69,7 +69,7 @@ Every stage uses a separate branch and pull request. Review the diff, test resul
 
 Use `./scripts/dev.ps1 check` to restore, build Release, run tests, and verify formatting. The Windows GitHub Actions workflow runs the same command on pull requests and pushes to `main`, then uploads TRX results. Workflow configuration does not imply that a hosted CI run has passed; execution evidence is recorded in [TESTING.md](docs/TESTING.md).
 
-This is pipe practice, not yet a complete game. Ground/pipe collision, scoring, Game Over, restart, persistence, audio, and difficulty changes remain future work. The bird can pass through pipes or fall behind the ground/off-screen while simulation continues; no loss or automatic reset occurs. Close and relaunch to return to Ready. No distribution package or third-party game assets are included. A license has not yet been selected; do not assume public-domain or open-source reuse rights.
+Mandatory gameplay is implemented but still needs owner playtesting and final submission QA. High-score persistence, audio, and difficulty progression are not implemented. The bird uses a conservative rectangular hitbox rather than pixel-perfect artwork collision. See the testing document for checks performed and remaining physical keyboard/display checks. No distribution package or third-party assets are included. A license has not yet been selected.
 
 ## Technologies and NuGet packages
 
@@ -81,11 +81,20 @@ C#/.NET 10, Windows Forms, original GDI+ drawing, a WinForms timer with Stopwatc
 | --- | --- |
 | Space while Ready | Starts Running and flaps upward |
 | Release, then press Space while Running | Flaps once; holding Space does not repeat |
-| Switch away or minimize | Freezes motion and clears input/timing state |
-| Return | Resumes without inactive-time catch-up; release Space first if held on return |
-| Close and relaunch | Returns to Ready; no in-game restart yet |
+| Space during Game Over | Ignored; does not click a focused New game button |
+| Enter or click New game during Game Over | Resets to Ready with score zero; release Space, then press to start |
+| Switch away or minimize | Freezes the run and clears timing accumulation |
+| Return | Resumes a live run without catch-up; Game Over remains stopped |
 
 Gravity is 900 logical units/s² and flap velocity is −320 units/s. Motion uses fixed 1/60-second updates; each timer tick accepts at most 100 ms and performs at most six updates. Excess stall time is discarded. At the ceiling, Y is clamped and upward velocity cleared. See [architecture](docs/ARCHITECTURE.md) for the formula and policies.
+
+## Collision, score, and restart
+
+The bird's logical 86 × 48 rectangle touches either pipe rectangle or the ground to trigger Game Over; exact edge/corner contact counts. The decorative shadow is excluded. Ceiling contact clamps movement without ending the run. Swept contact checks prevent fast movement from skipping thin obstacles.
+
+Each pair earns one point when its trailing edge is strictly left of the bird's left edge, during a collision-free simulation step. Contact is evaluated before a new point; a loss keeps earlier points and freezes motion, recycling, and scoring. Pair eligibility resets on recycling.
+
+Game Over shows the final score and a New game button. Button or Enter resets score, bird, pipes/gaps, eligibility, state, input and timing to a clean Ready state. A held Space must be released before it can start the new run. There is no automatic restart or saved high score.
 
 ## Pipe behavior
 
@@ -93,19 +102,19 @@ Two pairs (four pipe shapes) remain still while Ready and move left at 140 logic
 
 Each pair is 64 units wide with a 180-unit vertical opening. Spacing is **260 units between left edges**, leaving 196 units of empty horizontal space. Gap tops are sampled in **[40, 340)**: minimum included, maximum excluded. Upper/lower rectangles end at the gap edges and shared ground boundary. Generation uses an instance-owned random source that tests can replace.
 
-A pair recycles only when its right edge is strictly below X=0. It moves after the other pair at the same spacing and receives a fresh gap sample; the same two objects are reused. Focus pause freezes the whole engine. Domain reset primitives also restore pipes, but no restart control exists yet.
+A pair recycles only when its right edge is strictly below X=0. It moves after the other pair at the same spacing and receives a fresh gap sample; the same two objects are reused. The engine checks collision and score before recycling, preserving the departing pair's pass. Focus pause freezes the whole engine.
 
-Settings are finite/positive and validated against Playfield when creating the engine/pipe system. Core obstacle updates support up to one second, with speed limited to two spacings per second, so at most two pairs recycle in one call. The UI still uses only 1/60-second steps.
+Settings are finite/positive and validated against Playfield. Engine updates accept [0, 1] seconds in every state and split Running updates into at most 60 rule steps of no more than 1/60 second. Swept contact is checked before movement/recycling. The UI retains its existing fixed-step loop and catch-up cap.
 
 ## Scene behavior
 
 The renderer uses the 480 × 640 logical playfield with ground beginning at Y=560. Shapes, strokes, and pixel-unit fonts scale together to the actual client area. Uniform scaling and centered borders preserve proportions when the client aspect ratio differs. WinForms DPI autoscaling uses a 96-DPI baseline; the window remains fixed-size with maximize disabled.
 
-The renderer reads Bird, Ready/Running state, and the existing PipePair geometry. It paints pipes before the bird, keeps their lips within the model bounds, and places a compact instruction banner over the Running scene. Ready instructions disappear when flight starts. Painting never changes positions or consumes randomness. Ground remains decorative. The Form exposes accessible control descriptions.
+The renderer reads Bird, state, score, and pipe geometry. It paints pipes before the bird, shows a live score/banner while Running, and a dimmed final-score card on Game Over. A shared SceneViewport mapping keeps the native restart button aligned with painted content at different DPI scales. Painting never changes domain state or randomness. Accessible descriptions cover Ready, Running, Game Over, and restart.
 
 ## Screenshots and student details
 
-Two real screenshots must be embedded before submission: gameplay with score, and Game Over with final score/restart. They remain pending until those rules are implemented. See the [submission checklist](docs/SUBMISSION.md).
+Two owner-reviewed screenshots must be embedded before final submission: gameplay with score, and Game Over with final score/restart. Local diagnostic Ready/Running/Game Over captures now exist, but final screenshot selection remains Stage 06. See the [submission checklist](docs/SUBMISSION.md).
 
 Student full name and student number are awaiting the owner's input. These required README details must be filled before submission.
 
