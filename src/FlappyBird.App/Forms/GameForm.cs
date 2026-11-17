@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using FlappyBird.App.Input;
 using FlappyBird.App.Rendering;
+using FlappyBird.App.Services;
 using FlappyBird.App.Timing;
 using FlappyBird.Core.Models;
 using FlappyBird.Core.Services;
@@ -14,6 +15,8 @@ public sealed class GameForm : Form
     private readonly Playfield playfield = new();
     private readonly GameRenderer renderer;
     private readonly GameEngine engine;
+    private readonly HighScoreService highScores;
+    private Font? restartFont;
     private readonly FlapInput input = new();
     private readonly FixedStepLoop loop = new();
     private readonly Stopwatch clock = new();
@@ -34,8 +37,11 @@ public sealed class GameForm : Form
         Visible = false,
     };
 
-    public GameForm()
+    public GameForm() : this(new FileHighScoreStore()) { }
+
+    public GameForm(IHighScoreStore highScoreStore)
     {
+        highScores = new HighScoreService(highScoreStore);
         renderer = new GameRenderer(playfield);
         engine = new GameEngine(playfield, new GameSettings());
         timer.Tick += OnTimerTick;
@@ -51,15 +57,22 @@ public sealed class GameForm : Form
         KeyPreview = true;
         AccessibleName = "Flappy Bird";
         AccessibleDescription = "Ready. Press Space to start. Release and press Space again to flap.";
-        restartButton.FlatAppearance.BorderSize = 0;
+        restartButton.FlatAppearance.BorderSize = 2;
+        restartButton.FlatAppearance.BorderColor = Color.FromArgb(37, 86, 76);
+        restartButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(47, 107, 93);
+        restartButton.FlatAppearance.MouseDownBackColor = Color.FromArgb(25, 66, 58);
+        restartButton.GotFocus += (_, _) => restartButton.FlatAppearance.BorderColor = Color.FromArgb(255, 207, 70);
+        restartButton.LostFocus += (_, _) => restartButton.FlatAppearance.BorderColor = Color.FromArgb(37, 86, 76);
         restartButton.Click += (_, _) => RestartGame();
         Controls.Add(restartButton);
+        UpdateAccessibleDescription();
     }
 
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
-        renderer.Render(e.Graphics, ClientSize, engine.Bird, engine.State, engine.Pipes.Pairs, engine.Score);
+        renderer.Render(e.Graphics, ClientSize, engine.Bird, engine.State, engine.Pipes.Pairs, engine.Score,
+            highScores.BestScore, paused: !active && engine.State == GameState.Running, highScores.StatusMessage);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
@@ -128,9 +141,31 @@ public sealed class GameForm : Form
     protected override void OnLayout(LayoutEventArgs e)
     {
         base.OnLayout(e);
+        LayoutRestartButton();
+    }
+
+    protected override void OnClientSizeChanged(EventArgs e)
+    {
+        base.OnClientSizeChanged(e);
+        // A fixed Form can finish a client-size change after its layout event.
+        LayoutRestartButton();
+    }
+
+    private void LayoutRestartButton()
+    {
         if (restartButton is not null && playfield is not null)
         {
-            restartButton.Bounds = SceneViewport.Create(playfield, ClientSize).Map(SceneViewport.RestartButton(playfield));
+            var viewport = SceneViewport.Create(playfield, ClientSize);
+            restartButton.Bounds = viewport.Map(SceneViewport.RestartButton(playfield));
+            var size = Math.Max(1, 16 * viewport.Scale);
+            if (restartFont is null || Math.Abs(restartFont.Size - size) > 0.01)
+            {
+                var previous = restartFont;
+                restartFont = new Font("Segoe UI", size, FontStyle.Bold, GraphicsUnit.Pixel);
+                restartButton.Font = restartFont;
+                previous?.Dispose();
+            }
+            else if (!ReferenceEquals(restartButton.Font, restartFont)) restartButton.Font = restartFont;
         }
     }
 
@@ -152,6 +187,8 @@ public sealed class GameForm : Form
             clock.Start();
             timer.Start();
         }
+        UpdateAccessibleDescription();
+        Invalidate();
     }
 
     protected override void OnDeactivate(EventArgs e)
@@ -166,6 +203,8 @@ public sealed class GameForm : Form
         }
 
         base.OnDeactivate(e);
+        UpdateAccessibleDescription();
+        Invalidate();
     }
 
     private void OnTimerTick(object? sender, EventArgs e)
@@ -197,16 +236,24 @@ public sealed class GameForm : Form
             clock.Reset();
             loop.Reset();
             input.Resume(input.IsHeld || SpaceHeld());
-            AccessibleDescription = $"Game Over. Final score {engine.Score}. Press Enter or click New game to return to Ready.";
-        }
-        else
-        {
-            AccessibleDescription = engine.State == GameState.Ready
-                ? "Ready. Release Space, then press it to start a new run."
-                : "Running. Release and press Space to flap. Avoid pipes and ground. Score is shown at the top.";
+            highScores.RecordCompletedRun(engine.Score);
         }
 
+        UpdateAccessibleDescription();
         Invalidate();
+    }
+
+    private void UpdateAccessibleDescription()
+    {
+        if (engine is null || highScores is null) return;
+        var description = engine.State switch
+        {
+            GameState.Ready => "Ready. Release Space, then press it to start a new run.",
+            GameState.GameOver => $"Game Over. Final score {engine.Score}. Press Enter or click New game to return to Ready.",
+            _ when !active => "Paused while the window is inactive. Return to continue, releasing Space before the next flap.",
+            _ => "Running. Release and press Space to flap. Avoid pipes and ground.",
+        };
+        AccessibleDescription = $"{description} Best score {highScores.BestScore}. {highScores.StatusMessage}".Trim();
     }
 
     private void RestartGame()
@@ -236,7 +283,8 @@ public sealed class GameForm : Form
             clock.Stop();
         }
 
-        base.Dispose(disposing);
+        try { base.Dispose(disposing); }
+        finally { if (disposing) restartFont?.Dispose(); }
     }
 
     [DllImport("user32.dll")]

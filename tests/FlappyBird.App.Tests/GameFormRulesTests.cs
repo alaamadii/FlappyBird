@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using FlappyBird.App.Forms;
 using FlappyBird.App.Input;
 using FlappyBird.App.Rendering;
+using FlappyBird.App.Services;
 using FlappyBird.App.Timing;
 using FlappyBird.Core.Models;
 using FlappyBird.Core.Services;
@@ -86,6 +87,111 @@ public sealed class GameFormRulesTests
         Assert.Equal(GameState.GameOver, engine.State);
     }
 
+    [Fact]
+    public void CompletedBestSavesOnceSurvivesRestartAndLoadsInAFreshWindow()
+    {
+        var store = new TestHighScoreStore();
+        RunOnSta((form, engine, button) =>
+        {
+            ScoreThenLose(form, engine);
+            var best = Field<HighScoreService>(form, "highScores");
+            Assert.Equal(1, best.BestScore);
+            Assert.Equal(1, store.Saves);
+            for (var repaint = 0; repaint < 8; repaint++)
+            {
+                using var image = new System.Drawing.Bitmap(form.ClientSize.Width, form.ClientSize.Height);
+                form.DrawToBitmap(image, form.ClientRectangle);
+                Invoke(form, "OnTimerTick", null, EventArgs.Empty);
+                Invoke(form, "OnDeactivate", EventArgs.Empty);
+                Invoke(form, "OnActivated", EventArgs.Empty);
+            }
+            Assert.Equal(1, store.Saves);
+            button.PerformClick();
+            Assert.Equal(GameState.Ready, engine.State);
+            Assert.Equal(0, engine.Score);
+            Assert.Equal(1, best.BestScore);
+            Assert.Contains("Best score 1", form.AccessibleDescription);
+            Lose(form, engine); // Lower run must not rewrite the file.
+            Assert.Equal(1, store.Saves);
+        }, store);
+        RunOnSta((form, engine, button) =>
+        {
+            Assert.Equal(GameState.Ready, engine.State);
+            Assert.Equal(1, Field<HighScoreService>(form, "highScores").BestScore);
+            Assert.Equal(1, store.Saves);
+        }, store);
+        Assert.Equal(2, store.Loads);
+    }
+
+    [Fact]
+    public void StorageFailureDoesNotBlockLossRestartOrPlayAndRetriesOnlyNextCompletedRun()
+    {
+        var store = new TestHighScoreStore
+        {
+            LoadFailure = new IOException("test read failure"),
+            SaveFailure = new UnauthorizedAccessException("test write failure"),
+        };
+        RunOnSta((form, engine, button) =>
+        {
+            Assert.Contains("Saved best score unavailable.", form.AccessibleDescription);
+            ScoreThenLose(form, engine);
+            Assert.Contains("Best score couldn't be saved.", form.AccessibleDescription);
+            Assert.Equal(1, store.Saves);
+            Invoke(form, "OnTimerTick", null, EventArgs.Empty);
+            Assert.Equal(1, store.Saves);
+            button.PerformClick();
+            Assert.Equal(GameState.Ready, engine.State);
+            Assert.Equal(1, Field<HighScoreService>(form, "highScores").BestScore);
+            Assert.Equal(1, store.Saves);
+            store.SaveFailure = null;
+            Lose(form, engine);
+            Assert.Equal(2, store.Saves);
+            Assert.Equal(1, store.Value);
+            Assert.Null(Field<HighScoreService>(form, "highScores").StatusMessage);
+        }, store);
+    }
+
+    [Fact]
+    public void PauseDescriptionAndRestartButtonScaleWithTheSameViewport() => RunOnSta((form, engine, button) =>
+    {
+        Key(form, Keys.Space, down: true);
+        Key(form, Keys.Space, down: false);
+        Invoke(form, "OnDeactivate", EventArgs.Empty);
+        Assert.Contains("Paused", form.AccessibleDescription);
+        Assert.False(Field<System.Windows.Forms.Timer>(form, "timer").Enabled);
+        Invoke(form, "OnActivated", EventArgs.Empty);
+        Assert.Contains("Running", form.AccessibleDescription);
+        Lose(form, engine);
+        foreach (var scale in new[] { 1f, 1.25f, 1.5f, 1f })
+        {
+            form.ClientSize = new System.Drawing.Size((int)(480 * scale), (int)(640 * scale));
+            var viewport = SceneViewport.Create(new Playfield(), form.ClientSize);
+            Assert.Equal(viewport.Map(SceneViewport.RestartButton(new Playfield())), button.Bounds);
+            Assert.Equal(16 * scale, button.Font.Size);
+            Assert.Equal(System.Drawing.GraphicsUnit.Pixel, button.Font.Unit);
+            Assert.True(button.Font.Bold);
+        }
+        button.Focus();
+        Assert.True(button.Focused);
+        Assert.Equal(System.Drawing.Color.FromArgb(255, 207, 70), button.FlatAppearance.BorderColor);
+        Key(button, Keys.Enter, down: true);
+        Assert.Equal(GameState.Ready, engine.State);
+        Assert.False(button.Visible);
+        Assert.Equal(System.Drawing.Color.FromArgb(37, 86, 76), button.FlatAppearance.BorderColor);
+    });
+
+    private static void ScoreThenLose(GameForm form, GameEngine engine)
+    {
+        engine.Flap();
+        engine.Pipes.Pairs[0].Reset(engine.Bird.X - engine.Pipes.Pairs[0].Width - 1, 190);
+        engine.Update(1d / 60);
+        Assert.Equal(1, engine.Score);
+        engine.Pipes.Pairs[1].Reset(engine.Bird.X + engine.Bird.Width, 300);
+        engine.Update(1d / 60);
+        Invoke(form, "OnTimerTick", null, EventArgs.Empty);
+        Assert.Equal(GameState.GameOver, engine.State);
+    }
+
     private static void Key(Control control, Keys key, bool down) =>
         SendMessage(control.Handle, down ? 0x0100u : 0x0101u, (IntPtr)key, IntPtr.Zero);
 
@@ -93,14 +199,14 @@ public sealed class GameFormRulesTests
     private static void Invoke(GameForm form, string name, params object?[] args) =>
         typeof(GameForm).GetMethod(name, Flags)!.Invoke(form, args);
 
-    private static void RunOnSta(Action<GameForm, GameEngine, Button> action)
+    private static void RunOnSta(Action<GameForm, GameEngine, Button> action, IHighScoreStore? store = null)
     {
         Exception? failure = null;
         var thread = new Thread(() =>
         {
             try
             {
-                using var form = new GameForm
+                using var form = new GameForm(store ?? new TestHighScoreStore())
                 {
                     Opacity = 0,
                     ShowInTaskbar = false,

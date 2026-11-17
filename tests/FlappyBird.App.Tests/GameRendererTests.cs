@@ -238,4 +238,36 @@ public sealed class GameRendererTests
         Assert.Equal(0, bird.VerticalVelocity);
         Assert.All(pipes, pair => Assert.False(pair.HasScored));
     }
+
+    [Theory]
+    [InlineData(480, 640)]
+    [InlineData(600, 800)]
+    [InlineData(720, 960)]
+    public void BestPauseAndStorageWarningAreRenderedWithoutChangingGameplay(int width, int height)
+    {
+        var engine = new GameEngine(new Playfield(), new GameSettings());
+        engine.Flap();
+        var pipes = engine.Pipes.Pairs.Select(p => (p.X, p.GapTop, p.HasScored)).ToArray();
+        var bird = (engine.Bird.Y, engine.Bird.VerticalVelocity);
+        var renderer = new GameRenderer(new Playfield());
+        using var image = new Bitmap(width, height);
+        using var graphics = Graphics.FromImage(image);
+        byte[] Snapshot(int best, bool paused = false, string? warning = null)
+        {
+            renderer.Render(graphics, image.Size, engine.Bird, engine.State, engine.Pipes.Pairs,
+                engine.Score, best, paused, warning);
+            using var data = new MemoryStream();
+            image.Save(data, System.Drawing.Imaging.ImageFormat.Png);
+            return data.ToArray();
+        }
+        var ordinary = Snapshot(0);
+        Assert.False(ordinary.SequenceEqual(Snapshot(int.MaxValue)));
+        Assert.False(ordinary.SequenceEqual(Snapshot(0, paused: true)));
+        Assert.False(ordinary.SequenceEqual(Snapshot(0, warning: "Best score couldn't be saved.")));
+        Assert.Equal(ordinary, Snapshot(0));
+        Assert.Equal(bird, (engine.Bird.Y, engine.Bird.VerticalVelocity));
+        Assert.Equal(pipes, engine.Pipes.Pairs.Select(p => (p.X, p.GapTop, p.HasScored)).ToArray());
+        Assert.Equal(0, engine.Score);
+        Assert.Equal(GameState.Running, engine.State);
+    }
 }
