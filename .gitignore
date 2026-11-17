@@ -22,3 +22,7 @@ coverage/
 *.snk
 .DS_Store
 Thumbs.db
+
+# Personal score data, including accidentally copied storage files
+high-score.txt
+.high-score.txt.*.tmp

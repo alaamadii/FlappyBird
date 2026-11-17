@@ -10,7 +10,8 @@ public sealed class GameRenderer(Playfield playfield)
     private readonly Playfield playfield = playfield ?? throw new ArgumentNullException(nameof(playfield));
 
     public void Render(Graphics graphics, Size clientSize, Bird bird, GameState gameState,
-        IReadOnlyList<PipePair> pipes, int score)
+        IReadOnlyList<PipePair> pipes, int score, int bestScore = 0,
+        bool paused = false, string? storageMessage = null)
     {
         ArgumentNullException.ThrowIfNull(graphics);
         ArgumentNullException.ThrowIfNull(bird);
@@ -39,13 +40,14 @@ public sealed class GameRenderer(Playfield playfield)
             DrawBackground(graphics);
             DrawPipes(graphics, pipes);
             DrawCurrentBird(graphics, bird);
-            DrawHeading(graphics, gameState, score);
+            DrawHeading(graphics, gameState, score, bestScore);
             if (gameState == GameState.Ready)
             {
                 DrawReadyPanel(graphics);
             }
-            DrawGround(graphics);
-            if (gameState == GameState.GameOver) DrawGameOver(graphics, score);
+            DrawGround(graphics, storageMessage);
+            if (gameState == GameState.GameOver) DrawGameOver(graphics, score, bestScore, storageMessage);
+            else if (gameState == GameState.Running && paused) DrawPause(graphics);
         }
         finally
         {
@@ -115,25 +117,36 @@ public sealed class GameRenderer(Playfield playfield)
         graphics.FillPath(cloud, shape);
     }
 
-    private void DrawHeading(Graphics graphics, GameState gameState, int score)
+    private void DrawHeading(Graphics graphics, GameState gameState, int score, int bestScore)
     {
         if (gameState != GameState.Ready)
         {
-            using var banner = new SolidBrush(Color.FromArgb(235, 255, 255, 244));
-            graphics.FillRectangle(banner, 0, 0, playfield.Width, 34);
-            DrawText(graphics, $"Score: {score}", 16, FontStyle.Bold,
-                Color.FromArgb(37, 86, 76), new RectangleF(12, 4, 130, 26));
-            DrawText(graphics, "Space: flap  /  Avoid pipes and ground", 12, FontStyle.Regular,
-                Color.FromArgb(39, 85, 96), new RectangleF(145, 4, playfield.Width - 157, 26));
+            var cardWidth = (playfield.Width - 140) / 2f;
+            DrawScoreCard(graphics, "SCORE", score, new RectangleF(12, 10, cardWidth, 52));
+            DrawScoreCard(graphics, "BEST", bestScore, new RectangleF(playfield.Width - cardWidth - 12, 10, cardWidth, 52));
             return;
         }
 
-        DrawText(graphics, "YMH219  /  NESNE TABANLI PROGRAMLAMA", 11, FontStyle.Bold,
+        DrawText(graphics, "ONE LITTLE BIRD. ONE MORE TRY.", 12, FontStyle.Bold,
             Color.FromArgb(46, 92, 103), new RectangleF(20, 30, playfield.Width - 40, 24));
         DrawText(graphics, "FLAPPY BIRD", 42, FontStyle.Bold,
             Color.FromArgb(29, 79, 83), new RectangleF(20, 76, playfield.Width - 40, 60));
-        DrawText(graphics, gameState == GameState.Ready ? "A little bird. A big adventure." : "Release and press Space to flap", 15, FontStyle.Regular,
+        DrawText(graphics, "Fly through the gaps. Beat your best.", 15, FontStyle.Regular,
             Color.FromArgb(39, 85, 96), new RectangleF(20, 140, playfield.Width - 40, 28));
+        DrawText(graphics, $"BEST  {bestScore}", 16, FontStyle.Bold, Color.FromArgb(37, 86, 76),
+            new RectangleF(80, 176, playfield.Width - 160, 30));
+    }
+
+    private static void DrawScoreCard(Graphics graphics, string label, int score, RectangleF bounds)
+    {
+        using var background = new SolidBrush(Color.FromArgb(245, 255, 255, 244));
+        using var border = new Pen(Color.FromArgb(96, 144, 126), 1);
+        graphics.FillRoundedRectangle(background, bounds, new SizeF(10, 10));
+        graphics.DrawRoundedRectangle(border, bounds, new SizeF(10, 10));
+        DrawText(graphics, label, 11, FontStyle.Bold, Color.FromArgb(64, 99, 91),
+            new RectangleF(bounds.X + 6, bounds.Y + 3, bounds.Width - 12, 17));
+        DrawText(graphics, score.ToString(), 22, FontStyle.Bold, Color.FromArgb(37, 86, 76),
+            new RectangleF(bounds.X + 6, bounds.Y + 20, bounds.Width - 12, 29));
     }
 
     private void DrawCurrentBird(Graphics graphics, Bird bird)
@@ -190,15 +203,15 @@ public sealed class GameRenderer(Playfield playfield)
         using var border = new Pen(Color.FromArgb(191, 215, 191), 1.5f);
         graphics.FillRoundedRectangle(background, panel, new SizeF(16, 16));
         graphics.DrawRoundedRectangle(border, panel, new SizeF(16, 16));
-        DrawText(graphics, "READY", 25, FontStyle.Bold, Color.FromArgb(37, 86, 76),
+        DrawText(graphics, "READY TO FLY?", 25, FontStyle.Bold, Color.FromArgb(37, 86, 76),
             new RectangleF(panel.X, panel.Y + 14, panel.Width, 36));
-        DrawText(graphics, "Space to start", 14, FontStyle.Regular,
+        DrawText(graphics, "Press Space to start", 16, FontStyle.Bold,
             Color.FromArgb(64, 99, 91), new RectangleF(panel.X + 8, panel.Y + 58, panel.Width - 16, 24));
-        DrawText(graphics, "Release between presses to flap.", 12, FontStyle.Regular,
+        DrawText(graphics, "Tap, release, repeat to stay in the air.", 13, FontStyle.Regular,
             Color.FromArgb(64, 99, 91), new RectangleF(panel.X + 8, panel.Y + 86, panel.Width - 16, 22));
     }
 
-    private void DrawGround(Graphics graphics)
+    private void DrawGround(Graphics graphics, string? storageMessage)
     {
         using var soil = new SolidBrush(Color.FromArgb(229, 201, 151));
         using var grass = new SolidBrush(Color.FromArgb(108, 163, 101));
@@ -212,11 +225,16 @@ public sealed class GameRenderer(Playfield playfield)
             graphics.DrawLine(stripe, x, playfield.GroundTop + 24, x + 14, playfield.GroundTop + 38);
         }
 
-        DrawText(graphics, "YMH219  /  FLAPPY BIRD", 10, FontStyle.Bold,
-            Color.FromArgb(111, 88, 58), new RectangleF(20, playfield.Height - 25, playfield.Width - 40, 18));
+        DrawText(graphics, "Space: flap  /  Enter: new game after a loss", 11, FontStyle.Bold,
+            Color.FromArgb(91, 70, 42), new RectangleF(20, playfield.Height - 40, playfield.Width - 40, 18));
+        if (storageMessage is not null)
+        {
+            DrawText(graphics, storageMessage, 11, FontStyle.Bold, Color.FromArgb(116, 52, 32),
+                new RectangleF(20, playfield.Height - 21, playfield.Width - 40, 17));
+        }
     }
 
-    private void DrawGameOver(Graphics graphics, int score)
+    private void DrawGameOver(Graphics graphics, int score, int bestScore, string? storageMessage)
     {
         using var veil = new SolidBrush(Color.FromArgb(100, 28, 57, 65));
         graphics.FillRectangle(veil, 0, 0, playfield.Width, playfield.Height);
@@ -232,11 +250,31 @@ public sealed class GameRenderer(Playfield playfield)
             new RectangleF(panel.X, panel.Y + 78, panel.Width, 24));
         DrawText(graphics, score.ToString(), 44, FontStyle.Bold, ink,
             new RectangleF(panel.X, panel.Y + 104, panel.Width, 62));
-        DrawText(graphics, "New game returns to Ready.", 13, FontStyle.Regular, ink,
-            new RectangleF(panel.X, panel.Y + 172, panel.Width, 26));
+        DrawText(graphics, $"Best: {bestScore}", 16, FontStyle.Bold, ink,
+            new RectangleF(panel.X, panel.Y + 163, panel.Width, 26));
+        if (storageMessage is not null)
+        {
+            DrawText(graphics, storageMessage, 11, FontStyle.Regular, Color.FromArgb(116, 52, 32),
+                new RectangleF(panel.X + 10, panel.Y + 190, panel.Width - 20, 18));
+        }
         DrawText(graphics, "Press Enter or click New game.", 12, FontStyle.Regular, ink,
             new RectangleF(panel.X, panel.Bottom - 32, panel.Width, 24));
         // The native button occupies SceneViewport.RestartButton; painting does not own input.
+    }
+
+    private void DrawPause(Graphics graphics)
+    {
+        using var veil = new SolidBrush(Color.FromArgb(90, 28, 57, 65));
+        graphics.FillRectangle(veil, 0, 0, playfield.Width, playfield.Height);
+        var panel = new RectangleF(48, 230, playfield.Width - 96, 150);
+        using var background = new SolidBrush(Color.FromArgb(255, 255, 244));
+        graphics.FillRoundedRectangle(background, panel, new SizeF(16, 16));
+        var ink = Color.FromArgb(37, 86, 76);
+        DrawText(graphics, "PAUSED", 28, FontStyle.Bold, ink, new RectangleF(panel.X, panel.Y + 16, panel.Width, 40));
+        DrawText(graphics, "Return to this window to continue.", 14, FontStyle.Regular, ink,
+            new RectangleF(panel.X + 10, panel.Y + 70, panel.Width - 20, 24));
+        DrawText(graphics, "Release Space before your next flap.", 13, FontStyle.Regular, ink,
+            new RectangleF(panel.X + 10, panel.Y + 104, panel.Width - 20, 24));
     }
 
     private static void DrawText(Graphics graphics, string text, float size, FontStyle style,

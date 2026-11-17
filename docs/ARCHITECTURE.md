@@ -6,14 +6,14 @@ The solution contains four projects:
 
 | Project | Target | Responsibility | Dependencies |
 | --- | --- | --- | --- |
-| `FlappyBird.App` | `net10.0-windows` | Window, input/focus adapter, timing, and rendering | Core, Windows Forms |
+| `FlappyBird.App` | `net10.0-windows` | Window, input/focus adapter, timing, rendering, high-score storage | Core, Windows Forms |
 | `FlappyBird.Core` | `net10.0` | Geometry, motion, gaps, swept contact, scoring, three-state game/reset | .NET base libraries |
 | `FlappyBird.Core.Tests` | `net10.0` | Core behavior tests | Core, xUnit, test SDK, coverage collector |
-| `FlappyBird.App.Tests` | `net10.0-windows` | Rendering, input-edge, and timing tests | App, xUnit, test SDK, Windows drawing APIs |
+| `FlappyBird.App.Tests` | `net10.0-windows` | Rendering, input/timing, native restart, and isolated storage tests | App, xUnit, test SDK, Windows drawing APIs |
 
 Program initializes WinForms on an STA thread. GameForm owns window/input/focus, FixedStepLoop, Stopwatch, one timer and one restart Button. GameEngine owns Bird, PipeSystem, Score, and Ready/Running/GameOver. Renderer receives read-only presentation inputs; it owns no game rules. The existing fixed-window/DPI/double-buffering behavior remains.
 
-Playfield remains 480 × 640 with an 80-unit ground region. GroundTop=560 is shared by geometry, collision, and rendering. Mandatory contact, score, loss, and restart behavior are now implemented; optional persistence/audio/progression are not.
+Playfield remains 480 × 640 with an 80-unit ground region. GroundTop=560 is shared by geometry, collision, and rendering. Mandatory contact, score, loss, and restart behavior and optional best-score persistence are implemented. Audio, progressive speed, and selectable difficulty are deferred.
 
 ## Bird, settings, and state
 
@@ -67,24 +67,34 @@ Deactivation stops the timer and clears timing/input accumulation. Activation sa
 
 Coordinates use top-left origin, X rightward, Y downward. Ground is anchored at `GroundTop` (560). Artwork is centered in the model's bird rectangle and scaled from nominal 86 × 48 bounds. The shadow is decorative. Birds below the viewport are culled before converting coordinates to floats.
 
-Renderer now also receives Score. SceneViewport computes `scale = min(clientWidth/logicalWidth, clientHeight/logicalHeight)` and centered offsets for both graphics and native button bounds. It maps the logical restart rectangle (centered, Y=390, 220 × 48) inside the Game Over panel. Graphics transforms/clipping remain unchanged; empty clients are ignored.
+Renderer receives current Score, cached BestScore, paused flag, and a cached storage-status string. SceneViewport computes `scale = min(clientWidth/logicalWidth, clientHeight/logicalHeight)` and centered offsets for both graphics and native button bounds. It maps the logical restart rectangle (centered, Y=390, 220 × 48) inside the Game Over panel. GameForm updates the mapping on layout and after client-size changes, since a fixed Form can finalize its client size after layout. Graphics transforms/clipping remain unchanged; empty clients are ignored.
 
-Renderer paints scenery/pipes/bird, live score and guidance, Ready panel if applicable, ground, and a dimmed Game Over/final-score card when finished. The native Button owns input and paints above the card. Lips remain within model bounds. Pixel-unit fonts scale with geometry; no paint advances rules or randomness. A 125% desktop yields a 600 × 800 client area.
+Renderer paints scenery/pipes/bird, distinct Score/Best corner cards, Ready panel if applicable, ground with controls/status, and a dimmed Game Over/final-score card when finished. The corner cards leave the bird's central ceiling path clear. An inactive Running window gets a Paused card; there is no additional Core state or change in resume semantics. The native Button owns input and paints above the card, with hover/press colors and a gold focus border. Lips remain within model bounds. Pixel-unit fonts scale with geometry; no paint advances rules, randomness, or storage. A 125% desktop yields a 600 × 800 client area.
 
 Each render saves and restores the caller's graphics state, including transforms and clipping. Fonts, brushes, pens, paths, and string formats are locally owned with `using` disposal. The renderer retains only the immutable Playfield; it owns no persistent native drawing resources and therefore needs no disposal lifecycle. Painting reads dimensions and does not create or advance gameplay state.
 
 The Windows-only App test project renders into off-screen bitmaps; it does not introduce Windows dependencies into Core or make the Core tests require a UI.
 
+GameForm owns a reusable bold restart Font sized to `16 * viewport.Scale` pixels, replacing/disposing it when size changes and disposing it with the Form after its controls. This avoids an independent point/DPI conversion for the native control. Other renderer resources retain scoped ownership.
+
+## Best-score ownership and I/O
+
+GameForm's production constructor injects FileHighScoreStore into HighScoreService; an overload accepts IHighScoreStore for isolated tests. The service loads once, retains session best, tracks the last persisted best, and exposes brief cached status. Core owns only the current run's Score and never references these services, files, or Windows paths.
+
+On the first presentation transition into GameOver, the Form calls RecordCompletedRun once. A strictly improved completed best is saved; equal/lower runs do not rewrite successful data. Failed writes leave the session best unsaved and retry once at the next completed run, including a lower run. Timer/focus/repaint calls while already GameOver cannot trigger another save. Reset leaves the same high-score service alive. The startup best is not refreshed every frame or reset.
+
+FileHighScoreStore resolves LocalApplicationData in production. It reads a bounded, validated nonnegative decimal integer and treats missing files/directories as zero. A new save rechecks the existing valid maximum, writes/flushed bytes to a unique same-directory temporary file, then replaces the destination. Expected storage/data/security failures become nonmodal UI status through the service. This is small synchronous local I/O at startup and run completion, with no background task or cloud/concurrent-instance guarantee. See [HIGH_SCORE.md](HIGH_SCORE.md) for the file contract, failure paths, and test isolation.
+
 ## Remaining work
 
 | Type | Planned responsibility |
 | --- | --- |
-| Stage 05 | Usability/tuning and selected optional enhancements |
+| Stage 05 review | Owner gameplay, physical-input, readability and real-DPI acceptance |
 | Stage 06 | Final manual QA, screenshots, second-computer and submission checks |
 
 The implemented flow is key event → input edge → Core engine, then timer signal → fixed updates → engine → repaint request. Future game rules must preserve this separation.
 
-The state flow is Ready → Running → GameOver → Ready. Stage 04 is implemented but owner acceptance remains pending.
+The state flow is Ready → Running → GameOver → Ready. Stage 04 merged in PR #5; Stage 05 implementation awaits owner review. Stage 06 has not started.
 
 ## Design constraints
 
@@ -93,6 +103,6 @@ The state flow is Ready → Running → GameOver → Ready. Stage 04 is implemen
 - Use private mutation and deliberate methods for gameplay objects; avoid exposing writable state merely to make tests convenient.
 - Use simple composition and narrowly scoped classes. Add interfaces when there is an actual substitution need, such as controlled randomness or score storage.
 - Keep timer updates on the WinForms UI thread. Stop/dispose timers with the Form lifecycle once they exist.
-- Make restart reset all gameplay state and input latches. Future persistence must not block normal play if storage fails.
+- Make restart reset all gameplay state and input latches. Storage failures must leave gameplay usable and retain the session best.
 
 The project avoids external game frameworks and unnecessary abstractions so the student can explain its own GameEngine class, OOP relationships, and event flow.
