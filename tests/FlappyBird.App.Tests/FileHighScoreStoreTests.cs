@@ -62,6 +62,16 @@ public sealed class FileHighScoreStoreTests : IDisposable
     }
 
     [Fact]
+    public void SavingZeroOverCorruptDataProducesAValidReloadableFile()
+    {
+        Write("invalid");
+        var store = new FileHighScoreStore(ScorePath);
+        Assert.Equal(0, store.Save(0));
+        Assert.Equal(0, new FileHighScoreStore(ScorePath).Load());
+        Assert.Single(Directory.GetFiles(Path.GetDirectoryName(ScorePath)!));
+    }
+
+    [Fact]
     public void NewBestCanReplaceCorruptDataAfterLoadWarning()
     {
         Write("corrupt");

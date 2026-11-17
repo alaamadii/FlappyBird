@@ -45,11 +45,14 @@ public sealed class FileHighScoreStore(string? filePath = null) : IHighScoreStor
         var path = FilePath;
         var directory = Path.GetDirectoryName(path)!;
         Directory.CreateDirectory(directory);
-        int existing;
-        try { existing = Load(); }
-        catch (InvalidDataException) { existing = 0; }
+        var existing = 0;
+        try
+        {
+            existing = Load();
+            if (existing >= score && File.Exists(path)) return existing;
+        }
+        catch (InvalidDataException) { }
         var best = Math.Max(score, existing);
-        if (existing >= score && File.Exists(path)) return existing;
 
         var temporary = Path.Combine(directory, $".{Path.GetFileName(path)}.{Guid.NewGuid():N}.tmp");
         try

@@ -226,7 +226,7 @@ These are planning targets, not recorded completion dates or guarantees. Owner r
 | 02 | Bird flight and loop merged in PR #3 | Owner merged 2026-11-16; historical physical input/visual checks remain recorded in TESTING | 2026-11-16 (merge) |
 | 03 | Pipe system merged in PR #4 | Owner merged 2026-11-17; historical manual checks remain recorded in TESTING | 2026-11-17 (merge) |
 | 04 | Mandatory game rules and native restart UI merged in PR #5 | Owner merged 2026-11-17; historical manual checks remain recorded in TESTING | 2026-11-17 (merge) |
-| 05 | UI polish, pause/focus feedback, persistent best and isolated tests in PR #6 | Local 156-test check/probes and hosted CI for 88626d3 pass; owner acceptance pending | — |
+| 05 | UI polish, pause/focus feedback, persistent best and isolated tests in PR #6 | Local 157-test check/probes pass; initial hosted CI for 88626d3 passed 156 cases; final head tracked on PR; owner acceptance pending | — |
 | 06 | Not started | Pending | — |
 
 The next gate is **owner review of Stage 05**, followed by Stage 06 only after approval/merge. Implementation does not complete final human gameplay/DPI QA, screenshot selection, identity, public-access, or second-computer submission checks. Those remain tracked explicitly; Stage 06 has not begun.

@@ -22,7 +22,7 @@ CI uses Windows and the same `check` command. It uploads available TRX files eve
 - Ground height equal to or greater than total height.
 - The parameter name reported by rejected input.
 
-The current suite has **156 cases: Core 92, App 64**. Existing model, pipe, gap/randomness, timing, input, scaling, and repaint coverage remains. Stage 04 adds inclusive/swept contact, loss, score threshold/ordering/eligibility, frozen GameOver, existing ground contact, largest supported updates, 40 loss/reset cycles, score/overlay rendering, shared restart layout, and invisible STA Form tests. Twelve UI restart cycles reuse the timer/pairs and alternate button and focused-button Enter; held-Space and time-debt tests cover App reset wiring.
+The current suite has **157 cases: Core 92, App 65**. Existing model, pipe, gap/randomness, timing, input, scaling, and repaint coverage remains. Stage 04 adds inclusive/swept contact, loss, score threshold/ordering/eligibility, frozen GameOver, existing ground contact, largest supported updates, 40 loss/reset cycles, score/overlay rendering, shared restart layout, and invisible STA Form tests. Twelve UI restart cycles reuse the timer/pairs and alternate button and focused-button Enter; held-Space and time-debt tests cover App reset wiring.
 
 Stage 05 adds isolated file/service tests for first launch, valid maximum, fresh-instance reload, invalid/oversized/UTF-8 data, retained maximum, locked reads/replacement, unchanged valid files, retry and status. Form tests prove best survives restart/fresh windows, one save per completed best, no writes from repaint/focus/ticks/reset, failure-tolerant gameplay, pause descriptions, native font/bounds at three logical scales, and keyboard focus color. Renderer checks include best, pause, and warnings without model mutation. See [HIGH_SCORE.md](HIGH_SCORE.md) for isolation. Audio/progression remain deferred.
 
@@ -158,6 +158,7 @@ The first [Stage 04 CI run](https://github.com/alaamadii/FlappyBird/actions/runs
 | --- | --- |
 | `./scripts/dev.ps1 test` | Passed after the layout fix: 92 Core + 64 App = 156 cases, zero failed/skipped |
 | Full `./scripts/dev.ps1 check` | Passed: restore, Release build with zero warnings/errors, all 156 tests, and formatting verification |
+| Final storage-boundary review/check | Corrected direct Save(0) over corrupt data to write a reloadable zero instead of returning early. Added regression; full `./scripts/dev.ps1 check` passed again with **92 Core + 65 App = 157 cases**, zero warnings/errors/failures/skips, formatting clean |
 | File/service behavior | Valid zero/maximum values, missing directories, corrupt/oversized/invalid UTF-8 content, fresh-instance reload, maximum across runs, expected read/write/security failures, session best/retry tested with isolated data |
 | Preservation on failed save | A test-owned file held open without delete sharing prevents replacement; old value remains unchanged and no temporary file remains after the failure |
 | Native Form regression | Best retained after reset/fresh window; one save on completed new best, none on repeated paints/focus/ticks/reset; failure still allows loss/restart/play. Existing nonparallel native collection retained |
@@ -174,3 +175,5 @@ The added scale test initially found stale button bounds after a fixed Form chan
 All existing Form tests now inject memory storage. All earlier score-producing local probes use explicit `.local` storage, and the polish probe uses a unique path there. Diagnostic images remain ignored and do not fulfill Stage 06 screenshot sign-off. The actual executable smoke stays in Ready, reads its production best at startup, and closes without a completed run or score write. Owner data was not edited. Stage 05 acceptance remains pending; Stage 06 has not started.
 
 [PR #6](https://github.com/alaamadii/FlappyBird/pull/6) is open against main and is not merged. This publication-evidence update is documentation-only; its final-head check is tracked on the PR before handoff. The passing run above identifies its exact tested commit rather than implying a result for a later head.
+
+The later direct-store zero/corrupt fix adds one case beyond that initial hosted run. Production still saves only improved completed bests; this correction makes the public storage boundary consistent for its supported zero value. It does not alter gameplay, UI, or prior visual evidence. Final-head hosted results are tracked in PR #6.
