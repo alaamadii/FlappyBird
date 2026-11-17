@@ -198,3 +198,5 @@ The owner approved merging PR #6 at its checked head 5043189; [Windows run 44052
 | Remaining owner evidence | Full name/student number, screenshot acceptance, human random-gap fairness, physical input/focus/smoothness/cover-uncover, actual 100%/150% and cross-monitor DPI, VS Code F5, another Windows computer, final PR/main sign-off and Classroom profile-link submission |
 
 The helper commands remain local diagnostics, not required build dependencies. The clone is a second folder on this computer, not the second-computer acceptance test. Actual target-window captures do not claim physical-key input or human playtesting. No game source, tuning, dependencies or assets changed beyond the inspected application captures. [SUBMISSION.md](SUBMISSION.md) separates verified technical checks from final owner sign-off.
+
+Published evidence/screenshots in 4dc4d9f and checklist reconciliation in 98bd541 through [draft PR #7](https://github.com/alaamadii/FlappyBird/pull/7), targeting main. Hosted verification was running at publication; the final exact-head run is tracked on the PR before handoff. Owner identity/manual sign-off and merge remain pending.

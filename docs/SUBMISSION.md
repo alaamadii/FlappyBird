@@ -2,6 +2,8 @@
 
 Updated **2026-11-17**. Gameplay and optional persistence are implemented; final evidence is prepared on `docs/final-submission`. PR #6 was merged with explicit owner approval. Unchecked items still require owner action; this document does not claim submission is complete. The deadline is **November 30, 2026, 23:59 Asia/Riyadh**.
 
+Review candidate: [draft PR #7](https://github.com/alaamadii/FlappyBird/pull/7), pushed on 2026-11-17. Its exact head/CI are tracked on the PR. It remains unmerged pending owner details and sign-off; record the final main identifier after approval rather than calling a draft the submitted state.
+
 ## Initialization review
 
 - [x] Solution contains App, independent Core, and xUnit Tests.

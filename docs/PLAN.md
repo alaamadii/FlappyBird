@@ -227,6 +227,6 @@ These are planning targets, not recorded completion dates or guarantees. Owner r
 | 03 | Pipe system merged in PR #4 | Owner merged 2026-11-17; historical manual checks remain recorded in TESTING | 2026-11-17 (merge) |
 | 04 | Mandatory game rules and native restart UI merged in PR #5 | Owner merged 2026-11-17; historical manual checks remain recorded in TESTING | 2026-11-17 (merge) |
 | 05 | UI polish, pause/focus feedback, persistent best and isolated tests merged in PR #6 | Owner approved merge 2026-11-17; final head 5043189 passed 157 cases in Windows CI; historical manual checks remain explicit | 2026-11-17 (merge) |
-| 06 | Final QA evidence, application captures, README/checklist reconciliation and code guide prepared | Clean GitHub clone and native probes pass; public access verified; identity/manual/second-computer/final-review items tracked in SUBMISSION | — |
+| 06 | Final QA evidence, application captures, README/checklist reconciliation and code guide in [draft PR #7](https://github.com/alaamadii/FlappyBird/pull/7) | Clean GitHub clone and native probes pass; public access verified; identity/manual/second-computer/final-review items tracked in SUBMISSION | — |
 
 The next gate is **final owner sign-off**, using [SUBMISSION.md](SUBMISSION.md). Screenshots are included and public access verified; identity, owner screenshot acceptance, human gameplay/DPI review, another computer, final PR merge and Classroom profile-link submission remain open. Do not mark Stage 06 accepted or the assignment submitted until those steps actually occur.

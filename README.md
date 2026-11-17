@@ -49,7 +49,7 @@ App and Core.Tests reference Core; App.Tests references App for rendering/input/
 | 03 | Moving and recycled pipe obstacles | `feat/pipe-system` | Merged in PR #4 |
 | 04 | Collision, score, Game Over, restart | `feat/game-rules` | Merged in PR #5 |
 | 05 | UI polish and persistent high score | `feat/game-polish` | Merged in [PR #6](https://github.com/alaamadii/FlappyBird/pull/6) |
-| 06 | Final QA, screenshots, submission review | `docs/final-submission` | Evidence prepared; owner sign-off pending |
+| 06 | Final QA, screenshots, submission review | `docs/final-submission` | [Draft PR #7](https://github.com/alaamadii/FlappyBird/pull/7); owner sign-off pending |
 
 Every stage uses a separate branch and pull request. Review the diff, test results, and documentation before merging. The owner decides when to merge. The overall brief targets five separate assignments by **November 30, 2026, 23:59 Asia/Riyadh**; this repository covers Flappy Bird only.
 
