@@ -10,6 +10,7 @@ using FlappyBird.Core.Services;
 
 namespace FlappyBird.App.Tests;
 
+[Collection("Native windows")]
 public sealed class GameFormRulesTests
 {
     private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;

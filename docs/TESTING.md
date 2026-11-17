@@ -142,3 +142,7 @@ After the fix, `./scripts/dev.ps1 check` passed again: restore, Release build wi
 | Hosted CI | To be checked on the Stage 04 PR; local passes are separate evidence |
 
 Diagnostic probe/images are ignored under `.local/rules-probe/`. Controlled gaps/direct simulation were used for repeatable score/loss captures; this is not a human random-gap playthrough or a final submission screenshot sign-off. A ground-overlap regression prevents an already overlapping state from producing negative contact time. Initial compile failures from the renderer's new score argument were resolved by updating callers/tests before final verification. Stage 04 acceptance remains pending owner review.
+
+### Hosted test isolation follow-up
+
+The first [Stage 04 CI run](https://github.com/alaamadii/FlappyBird/actions/runs/44043016504) built cleanly and passed all 92 Core cases, but one repeated-paint comparison failed while native Form tests and off-screen renderer tests could run in parallel. The new native-window collection now disables parallel execution with other collections, isolating WinForms process-wide DPI/font initialization from exact bitmap comparisons. The exact assertion is retained. Local/full hosted results after this change must be recorded separately from that failed run.

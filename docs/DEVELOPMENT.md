@@ -130,3 +130,4 @@ This is initialization only. Gameplay remains planned. Detailed local validation
 - Invisible actual-Form probe passed a controlled scored pass, pipe/ground loss, final score, BM_CLICK/Enter reset, held keys, focus/minimize/restore, bounded stall, and close. The actual hidden Release executable launched/closed with exit code 0.
 - Reviewed Ready/Running/GameOver diagnostic previews at 125% DPI and equivalent Running scale images. Human random-gap playtesting and other unperformed checks remain explicit in TESTING.
 - Updated README, architecture, decisions, requirements, testing, and plan. Stage 04 owner acceptance remains pending; no Stage 05 extras were implemented.
+- First hosted run passed build/Core but failed the repeated-paint bitmap comparison with concurrent native UI tests. Isolated the native Form collection from other test collections while keeping the exact comparison assertion; tracked the failed run and subsequent verification separately in TESTING.
