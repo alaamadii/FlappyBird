@@ -22,9 +22,11 @@ CI uses Windows and the same `check` command. It uploads available TRX files eve
 - Ground height equal to or greater than total height.
 - The parameter name reported by rejected input.
 
-The current suite has **125 cases: Core 92, App 33**. Existing model, pipe, gap/randomness, timing, input, scaling, and repaint coverage remains. Stage 04 adds inclusive/swept contact, loss, score threshold/ordering/eligibility, frozen GameOver, existing ground contact, largest supported updates, 40 loss/reset cycles, score/overlay rendering, shared restart layout, and invisible STA Form tests. Twelve UI restart cycles reuse the timer/pairs and alternate button and focused-button Enter; held-Space and time-debt tests cover App reset wiring.
+The current suite has **156 cases: Core 92, App 64**. Existing model, pipe, gap/randomness, timing, input, scaling, and repaint coverage remains. Stage 04 adds inclusive/swept contact, loss, score threshold/ordering/eligibility, frozen GameOver, existing ground contact, largest supported updates, 40 loss/reset cycles, score/overlay rendering, shared restart layout, and invisible STA Form tests. Twelve UI restart cycles reuse the timer/pairs and alternate button and focused-button Enter; held-Space and time-debt tests cover App reset wiring.
 
-Persistence/audio/progression remain unimplemented. Standalone Bird tests intentionally retain pure arithmetic behavior below ground; GameEngine tests enforce contact and loss. Renderer geometry tests can arrange supplied models directly and do not imply a collision-free playthrough. There is no coverage-percentage claim. Invisible window/bitmap checks do not replace human physical-input/visual acceptance.
+Stage 05 adds isolated file/service tests for first launch, valid maximum, fresh-instance reload, invalid/oversized/UTF-8 data, retained maximum, locked reads/replacement, unchanged valid files, retry and status. Form tests prove best survives restart/fresh windows, one save per completed best, no writes from repaint/focus/ticks/reset, failure-tolerant gameplay, pause descriptions, native font/bounds at three logical scales, and keyboard focus color. Renderer checks include best, pause, and warnings without model mutation. See [HIGH_SCORE.md](HIGH_SCORE.md) for isolation. Audio/progression remain deferred.
+
+Standalone Bird tests intentionally retain pure arithmetic behavior below ground; GameEngine tests enforce contact and loss. Renderer geometry tests can arrange supplied models directly and do not imply a collision-free playthrough. There is no coverage-percentage claim. Invisible window/bitmap checks do not replace human physical-input/visual acceptance.
 
 ## Windows UI smoke check
 
@@ -37,6 +39,7 @@ Persistence/audio/progression remain unimplemented. Standalone Bird tests intent
 7. Hold Space, switch away, release while away or return still holding, then test the next fresh press. Motion freezes while inactive; no catch-up jump or repeated held-key flap should occur on return.
 8. Ceiling contact clamps without loss. Pipe/ground contact shows Game Over and final score; motion and score must stop. A safe complete pass adds one point, never two for one pair.
 9. Watch multiple pipe cycles in a valid run, then test New game by click and Enter. Confirm Ready/score zero/initial pipes, release Space if held, and start a fresh run. Repeat restarts; focus the button and check Space does not click it. Focus loss/resume on GameOver must leave the run stopped.
+10. Confirm distinct Score/Best labels, visible Paused guidance while inactive, and the gold New game focus border. Earn a new best and lose, restart, then relaunch: current score returns to zero and best survives. Use an isolated injected store for automated score-producing diagnostics; normal tests must not write the owner's real score.
 
 Automated process/window inspection can establish that the app launches and closes; it does not establish visual correctness or debugger behavior. Record those distinctions explicitly. Do not mark future gameplay scenarios as passing during initialization.
 
@@ -147,4 +150,24 @@ Diagnostic probe/images are ignored under `.local/rules-probe/`. Controlled gaps
 
 The first [Stage 04 CI run](https://github.com/alaamadii/FlappyBird/actions/runs/44043016504) built cleanly and passed all 92 Core cases, but one repeated-paint comparison failed while native Form tests and off-screen renderer tests could run in parallel. The new native-window collection disables parallel execution with other collections, isolating WinForms process-wide DPI/font initialization from exact bitmap comparisons. The exact assertion is retained. After isolation, the full local check and [hosted run 44043723178](https://github.com/alaamadii/FlappyBird/actions/runs/44043723178) passed all 125 tests; the earlier failure remains recorded rather than relabeled.
 
-[PR #5](https://github.com/alaamadii/FlappyBird/pull/5) remains open and unmerged for owner acceptance. The passing run identifies tested commit f0a9300; this publication-evidence update triggers its own check, whose result is visible on the PR before merging.
+[PR #5](https://github.com/alaamadii/FlappyBird/pull/5) was subsequently confirmed merged on 2026-11-17 before Stage 05. Its final head fe75efa passed [Windows run 44044135287](https://github.com/alaamadii/FlappyBird/actions/runs/44044135287). Historical unperformed manual checks remain pending.
+
+## Stage 05 execution record — 2026-11-17
+
+| Check | Actual evidence |
+| --- | --- |
+| `./scripts/dev.ps1 test` | Passed after the layout fix: 92 Core + 64 App = 156 cases, zero failed/skipped |
+| Full `./scripts/dev.ps1 check` | Passed: restore, Release build with zero warnings/errors, all 156 tests, and formatting verification |
+| File/service behavior | Valid zero/maximum values, missing directories, corrupt/oversized/invalid UTF-8 content, fresh-instance reload, maximum across runs, expected read/write/security failures, session best/retry tested with isolated data |
+| Preservation on failed save | A test-owned file held open without delete sharing prevents replacement; old value remains unchanged and no temporary file remains after the failure |
+| Native Form regression | Best retained after reset/fresh window; one save on completed new best, none on repeated paints/focus/ticks/reset; failure still allows loss/restart/play. Existing nonparallel native collection retained |
+| Scaling/focus | Actual invisible Form forced to 480×640, 600×800, 720×960 client sizes: mapped native button bounds, 16/20/24-pixel bold fonts and focus border validated. These are equivalent sizes, not physical desktop DPI changes |
+| `dotnet run --project .local/polish-probe/polish-probe.csproj -c Release` | Passed: isolated missing file, loss/save, restart, fresh-Form reload, locked-file save failure, retained memory best, retry on next completed run, close |
+| `dotnet run --project .local/rules-probe/rules-probe.csproj -c Release` | Passed: scripted scored pass, pipe/ground loss, button/Enter reset, held Space, focus/minimize/restore, bounded stall, disposal; actual hidden Release executable launch and WM_CLOSE exit 0 |
+| Capture inspection | Inspected native DrawToBitmap Ready with reloaded best at 125%, Running at 100%, Paused at 150%, Game Over at 150%, and unsaved-best Game Over/focused button at 100%. Text/card/control placement is readable in these captures |
+| Formatting | `dotnet format FlappyBird.slnx --no-restore` succeeded; full verify recorded below. An initial `dev.ps1 format` attempt was rejected because that command is not supported; use dotnet format directly |
+| Pending owner checks | Human random-gap playthrough/fairness, physical Space/Alt-Tab/Tab/Enter/mouse, real-time smoothness, live cover/uncover, real 100%/125%/150% DPI/cross-monitor transitions, VS Code F5, second computer |
+
+The added scale test initially found stale button bounds after a fixed Form changed client size. GameForm now remaps after ClientSizeChanged as well as layout; the same assertions pass without relaxation. Corrupt-data exceptions are explicitly handled in addition to I/O/access/security exceptions. No Core source or tuning changed. Scripted passes and controlled collision placement are not human playtesting.
+
+All existing Form tests now inject memory storage. All earlier score-producing local probes use explicit `.local` storage, and the polish probe uses a unique path there. Diagnostic images remain ignored and do not fulfill Stage 06 screenshot sign-off. The actual executable smoke stays in Ready, reads its production best at startup, and closes without a completed run or score write. Owner data was not edited. Stage 05 acceptance remains pending; Stage 06 has not started.

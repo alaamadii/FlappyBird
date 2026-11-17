@@ -2,7 +2,7 @@
 
 A C# Windows Forms desktop game project for **Nesne Tabanlı Programlama (YMH219)**. The project demonstrates object-oriented design, event-driven programming, testing, and a reviewed Git workflow.
 
-**Current stage: mandatory game rules (04), awaiting review.** Fly through moving pipes, earn points, lose on pipe/ground contact, and start a new run with Enter or the New game button. Physics, focus pause, and DPI-aware rendering remain intact. PRs #1–#4 are merged; polish and final submission QA remain future stages.
+**Current stage: usability polish and persistent best score (05), awaiting review.** Fly through moving pipes, earn points, lose on pipe/ground contact, and start a new run with Enter or the New game button. Separate Score and Best displays, an inactive-window pause card, and clearer restart guidance preserve the existing gameplay. PRs #1–#5 are merged; final submission QA remains Stage 06.
 
 ## Quick start
 
@@ -24,7 +24,7 @@ Open the root folder in VS Code, install the recommended extensions, and use **C
 
 ```text
 src/
-  FlappyBird.App/           Window, rendering, Input/FlapInput, Timing/FixedStepLoop
+  FlappyBird.App/           Window, rendering, input/timing, high-score services
   FlappyBird.Core/          Models, swept collision, GameEngine/PipeSystem, gap generation
 tests/
   FlappyBird.Core.Tests/    xUnit behavior tests
@@ -47,8 +47,8 @@ App and Core.Tests reference Core; App.Tests references App for rendering/input/
 | 01 | Window rendering, background, ground, bird | `feat/game-window` | Merged in PR #2 |
 | 02 | Gravity, flap, KeyDown/KeyUp input | `feat/bird-physics` | Merged in PR #3 |
 | 03 | Moving and recycled pipe obstacles | `feat/pipe-system` | Merged in PR #4 |
-| 04 | Collision, score, Game Over, restart | `feat/game-rules` | Implemented; owner review pending |
-| 05 | UI polish and optional enhancements | `feat/game-polish` | Planned |
+| 04 | Collision, score, Game Over, restart | `feat/game-rules` | Merged in PR #5 |
+| 05 | UI polish and persistent high score | `feat/game-polish` | Implemented; owner review pending |
 | 06 | Final QA, screenshots, submission review | `docs/final-submission` | Planned |
 
 Every stage uses a separate branch and pull request. Review the diff, test results, and documentation before merging. The owner decides when to merge. The overall brief targets five separate assignments by **November 30, 2026, 23:59 Asia/Riyadh**; this repository covers Flappy Bird only.
@@ -61,6 +61,7 @@ Every stage uses a separate branch and pull request. Review the diff, test resul
 - [Decisions](docs/DECISIONS.md): choices, rationale, and tradeoffs.
 - [Development workflow and log](docs/DEVELOPMENT.md): stages, branching, review, actual changes.
 - [Testing](docs/TESTING.md): commands, assertions, UI checks, and evidence.
+- [High-score storage](docs/HIGH_SCORE.md): location, format, failure handling, and isolated tests.
 - [Requirements](docs/REQUIREMENTS.md): acceptance criteria and implementation status.
 - [Submission checklist](docs/SUBMISSION.md): final verification and oral explanation preparation.
 - [Agent working agreement](AGENTS.md): rules for automated project work.
@@ -69,7 +70,7 @@ Every stage uses a separate branch and pull request. Review the diff, test resul
 
 Use `./scripts/dev.ps1 check` to restore, build Release, run tests, and verify formatting. The Windows GitHub Actions workflow runs the same command on pull requests and pushes to `main`, then uploads TRX results. Workflow configuration does not imply that a hosted CI run has passed; execution evidence is recorded in [TESTING.md](docs/TESTING.md).
 
-Mandatory gameplay is implemented but still needs owner playtesting and final submission QA. High-score persistence, audio, and difficulty progression are not implemented. The bird uses a conservative rectangular hitbox rather than pixel-perfect artwork collision. See the testing document for checks performed and remaining physical keyboard/display checks. No distribution package or third-party assets are included. A license has not yet been selected.
+Mandatory gameplay and optional high-score persistence are implemented but still need owner playtesting and final submission QA. Audio, progressive speed, and selectable difficulties are deferred. Physics and pipe settings are unchanged; scripted checks do not establish human difficulty or fairness. The bird uses a conservative rectangular hitbox rather than pixel-perfect artwork collision. See the testing document for checks performed and remaining physical keyboard/display checks. No distribution package or third-party assets are included. A license has not yet been selected.
 
 ## Technologies and NuGet packages
 
@@ -83,7 +84,7 @@ C#/.NET 10, Windows Forms, original GDI+ drawing, a WinForms timer with Stopwatc
 | Release, then press Space while Running | Flaps once; holding Space does not repeat |
 | Space during Game Over | Ignored; does not click a focused New game button |
 | Enter or click New game during Game Over | Resets to Ready with score zero; release Space, then press to start |
-| Switch away or minimize | Freezes the run and clears timing accumulation |
+| Switch away or minimize | Freezes the run, shows Paused while Running, and clears timing accumulation |
 | Return | Resumes a live run without catch-up; Game Over remains stopped |
 
 Gravity is 900 logical units/s² and flap velocity is −320 units/s. Motion uses fixed 1/60-second updates; each timer tick accepts at most 100 ms and performs at most six updates. Excess stall time is discarded. At the ceiling, Y is clamped and upward velocity cleared. See [architecture](docs/ARCHITECTURE.md) for the formula and policies.
@@ -94,7 +95,15 @@ The bird's logical 86 × 48 rectangle touches either pipe rectangle or the groun
 
 Each pair earns one point when its trailing edge is strictly left of the bird's left edge, during a collision-free simulation step. Contact is evaluated before a new point; a loss keeps earlier points and freezes motion, recycling, and scoring. Pair eligibility resets on recycling.
 
-Game Over shows the final score and a New game button. Button or Enter resets score, bird, pipes/gaps, eligibility, state, input and timing to a clean Ready state. A held Space must be released before it can start the new run. There is no automatic restart or saved high score.
+Game Over shows final score, best score, and a New game button with a visible keyboard focus border. Button or Enter resets score, bird, pipes/gaps, eligibility, state, input and timing to a clean Ready state. A held Space must be released before it can start the new run. Best score survives reset; restart is never automatic.
+
+## Saved best score
+
+Best is loaded once at startup and updated when a completed run improves it. Current Score starts at zero each run. A successful save happens once on entering Game Over for a new best, never during painting or ordinary timer ticks.
+
+The file is `%LOCALAPPDATA%\YMH219-FlappyBird\high-score.txt`: a UTF-8 decimal integer from 0 to 2,147,483,647. Missing data means a normal first launch. Invalid/unreadable data shows “Saved best score unavailable.”; a failed save shows “Best score couldn't be saved.” without a dialog. Your new best remains available for the current session and is retried when the next run finishes. A successful save clears the warning.
+
+Writes use a completed temporary file in the same folder before replacing the score file. A failed replacement preserves the previous valid score. Data is personal to this Windows user, with no cloud sync or coordination between simultaneously running instances. Tests use temporary directories or injected memory stores. See [storage details](docs/HIGH_SCORE.md).
 
 ## Pipe behavior
 
@@ -110,7 +119,7 @@ Settings are finite/positive and validated against Playfield. Engine updates acc
 
 The renderer uses the 480 × 640 logical playfield with ground beginning at Y=560. Shapes, strokes, and pixel-unit fonts scale together to the actual client area. Uniform scaling and centered borders preserve proportions when the client aspect ratio differs. WinForms DPI autoscaling uses a 96-DPI baseline; the window remains fixed-size with maximize disabled.
 
-The renderer reads Bird, state, score, and pipe geometry. It paints pipes before the bird, shows a live score/banner while Running, and a dimmed final-score card on Game Over. A shared SceneViewport mapping keeps the native restart button aligned with painted content at different DPI scales. Painting never changes domain state or randomness. Accessible descriptions cover Ready, Running, Game Over, and restart.
+The renderer reads Bird, state, current/best scores, pause/status presentation, and pipe geometry. It paints pipes before the bird, separate corner score cards while Running, an inactive pause card, and a dimmed final-score card on Game Over. Instructions sit in the ground region. A shared SceneViewport mapping keeps the native restart button and its pixel-unit font aligned with painted content at different client sizes. Painting never changes domain state, randomness, or storage. Accessible descriptions cover Ready, Running, paused, Game Over, best, restart, and storage warnings.
 
 ## Screenshots and student details
 

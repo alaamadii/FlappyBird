@@ -94,7 +94,7 @@ Renderer reads Upper/Lower rectangles and draws original green GDI+ bodies/lips 
 
 ## ADR-013 — Inclusive swept contact and collision-first rules
 
-**Date:** 2026-11-17. **Status:** Implemented in Stage 04; owner review pending.
+**Date:** 2026-11-17. **Status:** Accepted through merged Stage 04 PR #5.
 
 Use Bird's nominal rectangular hitbox and both complete pipe rectangles, with edge/corner touching counted as collision. The bird rectangle conservatively includes empty artwork corners, but not the decorative shadow. Ground contact is the bird bottom at GroundTop; ceiling remains nonfatal.
 
@@ -104,10 +104,30 @@ At earliest contact, advance only the contact fraction, clamp ground presentatio
 
 ## ADR-014 — Per-pair score lifecycle and complete UI restart
 
-**Date:** 2026-11-17. **Status:** Implemented in Stage 04; owner review pending.
+**Date:** 2026-11-17. **Status:** Accepted through merged Stage 04 PR #5.
 
 After a collision-free movement step, award once when pair.Right < Bird.X and HasScored is false; equality does not score. Mark before recycling, then Reset clears eligibility for the new cycle. Separate PipeSystem's internal movement and recycling phases to preserve this ordering while keeping its standalone diagnostic API. Score and game-state mutation stay in Core.
 
 On GameOver, stop the Form timer, clear time debt, show final score and one native New game button. Enter and click share a guarded restart method returning Ready, not directly Running. Reset domain score/motion/pipes/gaps/eligibility and App input/clock/accumulator. Preserve a release requirement if Space is held. Intercept Space preview from the button so native default behavior cannot restart or flap accidentally. Reuse timer, button, handlers, and pairs across runs.
 
 Extract SceneViewport so painted content and native button use the same uniform, centered logical mapping. Accessible copy follows state; activation never resumes GameOver. Keep optional persistence/audio/progression outside this stage. Invisible STA window-message tests validate repeated restart, focused-button keys, focus return, and timing reset separately from pending human checks.
+
+## ADR-015 — App-owned best score and safe local replacement
+
+**Date:** 2026-11-17. **Status:** Implemented in Stage 05; owner review pending.
+
+Choose persistent high score as the only optional feature in this stage. Core continues to know only current-run Score. App uses IHighScoreStore to substitute safe test storage, FileHighScoreStore for the production LocalApplicationData path, and HighScoreService for cached best/status and error handling. This keeps file behavior testable without a database, serializer, dependency injection framework, or Windows paths in Core.
+
+Use `%LOCALAPPDATA%\YMH219-FlappyBird\high-score.txt`, a bounded UTF-8 invariant integer, rather than checkout/build-relative data. Missing is normal zero. Reject corrupt/negative/out-of-range data; expected storage/access/security errors show brief nonmodal copy. A failed save retains the session best. The Form records once per GameOver transition; successful equal/lower runs do not write, and a failed best retries only when the next run finishes. Restart keeps the service instance.
+
+Write/flush a unique temporary file in the same directory, close it, then replace the destination, preserving valid previous data if writing/replacement fails. Re-read the existing valid maximum before saving, but do not promise simultaneous-instance synchronization. Keep the tiny local I/O synchronous at startup/completion; it never occurs in paint or ordinary simulation updates. File tests use owned temporary directories; all Form tests and score-producing probes inject storage. See [HIGH_SCORE.md](HIGH_SCORE.md).
+
+## ADR-016 — Player copy, focus feedback, and consistent native scaling
+
+**Date:** 2026-11-17. **Status:** Implemented in Stage 05; owner review pending.
+
+Use distinct labeled Score and Best cards in opposite top corners, leaving the bird's central ceiling path open. Put control reminders in the ground region and remove development-stage copy. Keep Ready, Game Over, and inactive Paused cards consistent in palette and spacing. Paused is an App presentation flag, not a new Core state; activation retains the existing immediate resume and held-key release policy.
+
+Keep one native New game button for keyboard/mouse/accessibility support, with bold text, hover/press colors, and a gold focus border. Its owned Font uses pixel units at `16 * SceneViewport.Scale`, replacing/disposal only on size change. Recompute native bounds/font after client-size changes as well as layout: the new resize regression exposed that a fixed Form can finish changing ClientSize after the layout callback. This fixes stale control placement without changing fixed-window behavior.
+
+Leave gravity 900, flap 320, pipe speed 140, gap 180, spacing 260 and all collision/timing/input policies unchanged. Scripted checks establish readability and rule stability, not human difficulty/fairness; no human playtesting evidence supports retuning. Defer sound, progressive speed, selectable difficulty, and final submission work. Physical input/DPI transitions and owner acceptance remain pending.

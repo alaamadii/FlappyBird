@@ -8,7 +8,7 @@
 
 **Submission deadline:** 2026-11-30, 23:59 (working schedule: Asia/Riyadh)
 
-**Current position:** Stages 00–03 merged in PRs #1–#4. Stage 04 collision, score, Game Over, and restart are published in [PR #5](https://github.com/alaamadii/FlappyBird/pull/5); owner acceptance is pending. Stage 05 has not started.
+**Current position:** Stages 00–04 merged in PRs #1–#5. Stage 05 usability and persistent best score are implemented on `feat/game-polish`; owner review is pending. Stage 06 has not started.
 
 This is the working plan for finishing **Flappy Bird only**. The other four NTP assignments have separate repositories and are outside this plan. Update this file as stages are accepted, recording actual completion dates rather than replacing targets with assumed results.
 
@@ -144,9 +144,9 @@ Current foundation has a programmatic `GameForm`, validated `Playfield`, and ten
 
 **Branch:** `feat/game-polish`
 
-**Required work:** Improve contrast, instructions, score legibility, overlay layout, keyboard/button focus, and overall consistency. Tune a fair initial difficulty through playtesting.
+**Required work:** Improve contrast, instructions, score legibility, overlay layout, keyboard/button focus, and overall consistency. Review initial difficulty through human playtesting; change tuning only when evidence supports it. No human tuning evidence was available in this implementation, so settings remain unchanged.
 
-**Optional priority:** Persistent high score first; progressive speed second if the mandatory game is stable and time remains. Sound and selectable difficulty are stretch goals. If these extras do not fit the schedule, explicitly defer them; they are not minimum requirements.
+**Selected optional enhancement:** Persistent high score. App loads a cached best and saves improved completed runs to LocalApplicationData; failures retain session best with brief nonmodal feedback. Sound, progressive speed, and selectable difficulty are explicitly deferred and are not minimum requirements. See [HIGH_SCORE.md](HIGH_SCORE.md).
 
 If persistence is selected, use a user-local application-data path, not the checkout. Missing/corrupt/inaccessible files must not prevent play. If speed progression is selected, bound it and preserve playable obstacle spacing and collision reliability.
 
@@ -225,8 +225,8 @@ These are planning targets, not recorded completion dates or guarantees. Owner r
 | 01 | Static renderer and tests merged in PR #2 | Owner merged 2026-11-16; historical visual checks remain recorded in TESTING | 2026-11-16 (merge) |
 | 02 | Bird flight and loop merged in PR #3 | Owner merged 2026-11-16; historical physical input/visual checks remain recorded in TESTING | 2026-11-16 (merge) |
 | 03 | Pipe system merged in PR #4 | Owner merged 2026-11-17; historical manual checks remain recorded in TESTING | 2026-11-17 (merge) |
-| 04 | Mandatory game rules and native restart UI in PR #5 | Local 125-test check, window probe, and Windows CI for f0a9300 pass; owner acceptance pending | — |
-| 05 | Not started | Pending | — |
+| 04 | Mandatory game rules and native restart UI merged in PR #5 | Owner merged 2026-11-17; historical manual checks remain recorded in TESTING | 2026-11-17 (merge) |
+| 05 | UI polish, pause/focus feedback, persistent best and isolated tests implemented | Local checks/probes documented in TESTING; owner acceptance pending | — |
 | 06 | Not started | Pending | — |
 
-After Stage 04 owner review and merge, the next task is **Stage 05: usability/polish and selected extras**. Mandatory gameplay implementation does not complete final manual QA, screenshot, identity, public-access, or second-computer submission checks. Those remain tracked explicitly; Stage 05/06 have not begun.
+The next gate is **owner review of Stage 05**, followed by Stage 06 only after approval/merge. Implementation does not complete final human gameplay/DPI QA, screenshot selection, identity, public-access, or second-computer submission checks. Those remain tracked explicitly; Stage 06 has not begun.
