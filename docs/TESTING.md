@@ -22,9 +22,9 @@ CI uses Windows and the same `check` command. It uploads available TRX files eve
 - Ground height equal to or greater than total height.
 - The parameter name reported by rejected input.
 
-The current suite has **92 cases: Core 67, App 25**. It retains Playfield, Bird/settings/state, press-edge, focus policy, fixed timing, and renderer regression coverage. New Core cases cover PipePair geometry, exclusive gap bounds, settings/playfield clearance, seeded source repeatability, movement, exact off-screen thresholds, both-pair recycling, fractional full-cycle roundoff, reset, unsupported updates, invalid provider results, update partitioning, and 60,000 fixed updates with stable instances/count/spacing. New App cases render actual pipe geometry at 1×/1.25×/1.5× sizes and verify ground alignment and that painting neither mutates pipes nor consumes gap samples.
+The current suite has **125 cases: Core 92, App 33**. Existing model, pipe, gap/randomness, timing, input, scaling, and repaint coverage remains. Stage 04 adds inclusive/swept contact, loss, score threshold/ordering/eligibility, frozen GameOver, existing ground contact, largest supported updates, 40 loss/reset cycles, score/overlay rendering, shared restart layout, and invisible STA Form tests. Twelve UI restart cycles reuse the timer/pairs and alternate button and focused-button Enter; held-Space and time-debt tests cover App reset wiring.
 
-Collision, scoring, Game Over, complete restart, and persistence remain unimplemented/untested. Domain reset primitives are tested but do not imply a restart UI. There is no coverage-percentage claim. Bitmap and helper assertions do not replace human visual/physical keyboard acceptance.
+Persistence/audio/progression remain unimplemented. Standalone Bird tests intentionally retain pure arithmetic behavior below ground; GameEngine tests enforce contact and loss. Renderer geometry tests can arrange supplied models directly and do not imply a collision-free playthrough. There is no coverage-percentage claim. Invisible window/bitmap checks do not replace human physical-input/visual acceptance.
 
 ## Windows UI smoke check
 
@@ -35,8 +35,8 @@ Collision, scoring, Game Over, complete restart, and persistence remain unimplem
 5. Check text readability and clipping at 100%, 125%, and 150% display scaling where available. Distinguish off-screen render sizes from changing the desktop's actual DPI settings.
 6. Minimize/restore and cover/uncover the live window; verify the same complete scene repaints cleanly.
 7. Hold Space, switch away, release while away or return still holding, then test the next fresh press. Motion freezes while inactive; no catch-up jump or repeated held-key flap should occur on return.
-8. Repeated taps can reach the ceiling: the bird stays within Y=0 and later falls. Ground remains decorative in this stage; falling behind it/off-screen is an expected limitation. Close/relaunch to return to Ready.
-9. After starting, confirm two upper/lower pipe pairs move left, are visible together, and recycle with valid gaps. Watch several cycles. Pipe contact currently does not stop play or award points; focus loss must freeze both pipes and bird.
+8. Ceiling contact clamps without loss. Pipe/ground contact shows Game Over and final score; motion and score must stop. A safe complete pass adds one point, never two for one pair.
+9. Watch multiple pipe cycles in a valid run, then test New game by click and Enter. Confirm Ready/score zero/initial pipes, release Space if held, and start a fresh run. Repeat restarts; focus the button and check Space does not click it. Focus loss/resume on GameOver must leave the run stopped.
 
 Automated process/window inspection can establish that the app launches and closes; it does not establish visual correctness or debugger behavior. Record those distinctions explicitly. Do not mark future gameplay scenarios as passing during initialization.
 
@@ -125,4 +125,20 @@ Review identified a fractional-spacing case (spacing 200.1, speed 400.2) at the 
 
 After the fix, `./scripts/dev.ps1 check` passed again: restore, Release build with zero warnings/errors, **67 Core + 25 App = 92 tests**, and clean formatting. The previous day's visual/lifecycle evidence remains identified separately; it was not reclassified as new manual testing.
 
-[PR #4](https://github.com/alaamadii/FlappyBird/pull/4) remains open and unmerged. Hosted validation passed for implementation/documentation commit e847e0f on 2026-11-17. Publication-evidence commits trigger their own CI run; inspect the current-head result on the PR before merging.
+[PR #4](https://github.com/alaamadii/FlappyBird/pull/4) was confirmed merged on 2026-11-17 before Stage 04. Its final head c0f215a also passed [Windows run 44027520323](https://github.com/alaamadii/FlappyBird/actions/runs/44027520323). Historical unperformed manual checks are not reclassified as passed.
+
+## Stage 04 execution record — 2026-11-17
+
+| Check | Actual evidence |
+| --- | --- |
+| Full `./scripts/dev.ps1 check` | Passed: restore, Release build with zero warnings/errors, Core 92/92 and App 33/33, clean formatting |
+| Swept/contact rules | Tests cover upper/lower pipe edges, corners/overlap/misses, thin obstacle between disjoint endpoints, diagonal interval separation, largest one-second update, existing ground touch/overlap, ceiling non-loss |
+| Score/loss/reset | Tests cover exact pass threshold, no double point, score before recycle, eligibility on a later cycle, collision-step priority, retained score/frozen GameOver, invalid elapsed without mutation, 40 reset cycles |
+| Native UI tests | Invisible STA Form, synthetic window messages, twelve repeated button/Enter resets, focused Space suppression, held-Space release requirement, focus-return GameOver preservation, accumulator reset, same timer/pairs |
+| Actual Form probe | Controlled gaps and scripted flaps produced a valid pass/score 1, then pipe loss with final score 1, normal ground loss, BM_CLICK and focused Enter restart; focus/minimize/restore, 500 ms bounded stall, and timer disposal passed |
+| Release executable | Hidden executable created its titled main window and closed normally with exit code 0 |
+| Preview review | Inspected Ready, scored Running, and Game Over full-window DrawToBitmap captures at current 125% DPI; Running 100%/125%/150% equivalents also generated; native button aligns with final-score card |
+| Still manual | Human random-gap playthrough/tuning, physical Space/Alt-Tab/restart, perceived smoothness, cover/uncover, actual monitor DPI transitions, VS Code F5, second computer |
+| Hosted CI | To be checked on the Stage 04 PR; local passes are separate evidence |
+
+Diagnostic probe/images are ignored under `.local/rules-probe/`. Controlled gaps/direct simulation were used for repeatable score/loss captures; this is not a human random-gap playthrough or a final submission screenshot sign-off. A ground-overlap regression prevents an already overlapping state from producing negative contact time. Initial compile failures from the renderer's new score argument were resolved by updating callers/tests before final verification. Stage 04 acceptance remains pending owner review.

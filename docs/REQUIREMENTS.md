@@ -8,13 +8,13 @@ Verified against the instructor's `YMH219_Ek_Uygulama_Odevleri_Ogrenci_Foyu.pdf`
 | --- | --- | --- | --- |
 | R01 | Bird input | Keyboard moves the bird upward, with a documented held-key policy; our implementation uses KeyDown/KeyUp | Merged in PR #3; GameForm, FlapInput, Bird, input/engine tests |
 | R02 | Gravity | Bird vertical velocity changes over elapsed time; tests verify the update contract | Merged in PR #3; BirdTests, FixedStepLoopTests |
-| R03 | Obstacles | At least two obstacles move right to left; our design uses at least two pipe pairs with passable gaps | Implemented / 03; owner review pending; PipePair/PipeSystem, geometry/rendering tests |
-| R04 | Recycling | Off-screen obstacles reappear to the right with valid gaps and spacing | Implemented / 03; owner review pending; PipeSystemTests exact boundary, full-cycle, long-run cases |
-| R05 | Collision | Pipe or ground contact ends the current run with documented boundary rules | Planned / 04 |
-| R06 | Game Over | Gameplay updates stop and the final score is displayed | Planned / 04 |
-| R07 | Score | Each successfully passed obstacle scores once | Planned / 04 |
-| R08 | Restart | New run resets entities, score, game state, and input state consistently | Planned / 04 |
-| R09 | OOP | Bird, obstacles, and game state have separate responsibilities; UI delegates gameplay | Bird, PipePair, PipeSystem, gap source, settings/state/engine separated; complete game rules remain planned |
+| R03 | Obstacles | At least two obstacles move right to left; our design uses at least two pipe pairs with passable gaps | Merged in PR #4; geometry/rendering tests |
+| R04 | Recycling | Off-screen obstacles reappear to the right with valid gaps and spacing | Merged in PR #4; boundary/full-cycle/long-run tests retained |
+| R05 | Collision | Pipe or ground contact ends the current run with documented boundary rules | Implemented / 04; owner review pending; CollisionDetectorTests/GameRulesTests |
+| R06 | Game Over | Gameplay updates stop and the final score is displayed | Implemented / 04; owner review pending; frozen-state and renderer/window tests |
+| R07 | Score | Each successfully passed obstacle scores once | Implemented / 04; owner review pending; exact threshold, eligibility, ordering tests |
+| R08 | Restart | New run resets entities, score, game state, and input state consistently | Implemented / 04; owner review pending; repeated Core reset/STA Form restart tests |
+| R09 | OOP | Bird, obstacles, and game state have separate responsibilities; UI delegates gameplay | Core owns rules/state/score; App owns input/timer/rendering/native restart button |
 
 The PDF requires at least two obstacles rather than specifying pipe pairs. Our plan uses at least two active `PipePair` objects, each with upper/lower pipes, to satisfy the minimum clearly. Page 2 permits KeyDown/KeyUp or PreviewKeyDown; KeyDown/KeyUp is our chosen input approach.
 
