@@ -99,3 +99,21 @@ This is initialization only. Gameplay remains planned. Detailed local validation
 - Inspected Ready/Running previews at current 125% DPI. Physical-key/focus behavior, perceived smoothness, and other unperformed desktop checks remain explicitly listed in TESTING.
 - Updated README, architecture, decisions, requirements, plan, and testing evidence. Owner review and hosted validation remain separate gates; Stage 03 has not begun.
 - Published implementation `78f0362` and documentation `22bf05c` to `feat/bird-physics`, then opened [PR #3](https://github.com/alaamadii/FlappyBird/pull/3). [Windows CI run 43828515337](https://github.com/alaamadii/FlappyBird/actions/runs/43828515337) passed for 22bf05c, including artifact upload. This evidence update is a documentation follow-up; current-head checks are tracked on the PR. No merge was performed.
+
+## 2026-11-16 — Stage 03 pipes and movement
+
+- Confirmed PR #3 merged at `bd464be`; working tree was clean. Fast-forwarded main and created `feat/pipe-system`.
+- Added numeric PipePair/PipeRectangle geometry, a two-pair PipeSystem with a read-only collection, injectable IGapSource, and instance-owned RandomGapSource. Core stays independent of Windows/drawing APIs.
+- Extended settings with speed, dimensions, explicit left-edge spacing, initial offset, gap margins, and bird clearance. Scalar and playfield validation reject impossible gaps/spacing, unrepresentable starts, or travel beyond the supported bounded recycling workload.
+- Engine now advances bird and pipes together only while Running. Right < 0 triggers ordered recycling and fresh gap sampling; the same objects are reused. Reset primitives refresh gaps and restore starting positions. There is no scoring flag or Stage 04 behavior.
+- Renderer draws original green pipe bodies/lips from model rectangles, before the bird, with ground clipping and a compact non-collision instruction banner. It does not generate gaps or change domain state.
+- `./scripts/dev.ps1 check` passed with zero warnings/errors and 91 cases (Core 66, App 25), including exact boundaries, largest supported update, invalid sources/settings, update partitioning, non-mutating rendering, and 60,000-step stability.
+- Invisible Form probe confirmed timer-driven pipe motion, bird/pipe focus freeze, capped stall, two visible pairs, and 32 recycle events over 60 directly simulated seconds with periodic repaint. Hidden executable launch/normal shutdown passed with exit code 0.
+- Inspected pipe previews at 100%/125%/150% equivalent sizes and the actual Form's 125% DPI capture. Real-time human play/visual/input checks remain listed in TESTING.
+- Updated README, architecture, decisions, requirements, testing, and plan progress. Stage 03 owner acceptance remains pending; Stage 04 has not begun.
+
+## 2026-11-17 — Stage 03 boundary review
+
+- Added a fractional-spacing/full-cycle regression after identifying a potential extra recycle caused by floating-point undershoot at the exact left boundary.
+- Clamped only recycled positions to their mathematical `-Width` lower bound, keeping strict off-screen detection unchanged.
+- Re-ran `./scripts/dev.ps1 check`: zero warnings/errors, 67 Core and 25 App tests passing (92 total), formatting clean. Updated current counts and documented the rounding policy separately from the 2026-11-16 visual/lifecycle checks.
