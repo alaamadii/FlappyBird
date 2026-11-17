@@ -2,7 +2,7 @@
 
 A C# Windows Forms desktop game project for **Nesne Tabanlı Programlama (YMH219)**. The project demonstrates object-oriented design, event-driven programming, testing, and a reviewed Git workflow.
 
-**Current stage: usability polish and persistent best score (05), awaiting review.** Fly through moving pipes, earn points, lose on pipe/ground contact, and start a new run with Enter or the New game button. Separate Score and Best displays, an inactive-window pause card, and clearer restart guidance preserve the existing gameplay. PRs #1–#5 are merged; final submission QA remains Stage 06.
+**Gameplay implementation is complete. Final submission review is in progress.** Fly through moving pipes, earn points, lose on pipe/ground contact, and start a new run with Enter or the New game button. Separate Score/Best displays, focus pause, and saved best scores are included. PRs #1–#6 are merged. Automated checks, clean-checkout verification, and application screenshots are complete; student details and owner manual sign-off remain outstanding in the [submission checklist](docs/SUBMISSION.md).
 
 ## Quick start
 
@@ -48,8 +48,8 @@ App and Core.Tests reference Core; App.Tests references App for rendering/input/
 | 02 | Gravity, flap, KeyDown/KeyUp input | `feat/bird-physics` | Merged in PR #3 |
 | 03 | Moving and recycled pipe obstacles | `feat/pipe-system` | Merged in PR #4 |
 | 04 | Collision, score, Game Over, restart | `feat/game-rules` | Merged in PR #5 |
-| 05 | UI polish and persistent high score | `feat/game-polish` | [PR #6](https://github.com/alaamadii/FlappyBird/pull/6); owner review pending |
-| 06 | Final QA, screenshots, submission review | `docs/final-submission` | Planned |
+| 05 | UI polish and persistent high score | `feat/game-polish` | Merged in [PR #6](https://github.com/alaamadii/FlappyBird/pull/6) |
+| 06 | Final QA, screenshots, submission review | `docs/final-submission` | [Draft PR #7](https://github.com/alaamadii/FlappyBird/pull/7); owner sign-off pending |
 
 Every stage uses a separate branch and pull request. Review the diff, test results, and documentation before merging. The owner decides when to merge. The overall brief targets five separate assignments by **November 30, 2026, 23:59 Asia/Riyadh**; this repository covers Flappy Bird only.
 
@@ -64,13 +64,14 @@ Every stage uses a separate branch and pull request. Review the diff, test resul
 - [High-score storage](docs/HIGH_SCORE.md): location, format, failure handling, and isolated tests.
 - [Requirements](docs/REQUIREMENTS.md): acceptance criteria and implementation status.
 - [Submission checklist](docs/SUBMISSION.md): final verification and oral explanation preparation.
+- [Code walkthrough](docs/CODE_GUIDE.md): class responsibilities, event paths, rules, and examples to explain.
 - [Agent working agreement](AGENTS.md): rules for automated project work.
 
 ## Validation and limitations
 
 Use `./scripts/dev.ps1 check` to restore, build Release, run tests, and verify formatting. The Windows GitHub Actions workflow runs the same command on pull requests and pushes to `main`, then uploads TRX results. Workflow configuration does not imply that a hosted CI run has passed; execution evidence is recorded in [TESTING.md](docs/TESTING.md).
 
-Mandatory gameplay and optional high-score persistence are implemented but still need owner playtesting and final submission QA. Audio, progressive speed, and selectable difficulties are deferred. Physics and pipe settings are unchanged; scripted checks do not establish human difficulty or fairness. The bird uses a conservative rectangular hitbox rather than pixel-perfect artwork collision. See the testing document for checks performed and remaining physical keyboard/display checks. No distribution package or third-party assets are included. A license has not yet been selected.
+Mandatory gameplay and optional high-score persistence are implemented and regression-tested: **157 tests (92 Core, 65 App)**. A fresh GitHub clone restored, built, passed the full check, and launched/closed normally on the development computer. Owner playtesting, physical display/input checks, and another-computer sign-off remain pending. Audio, progressive speed, and selectable difficulties are deferred. Physics and pipe settings are unchanged; scripted checks do not establish human difficulty or fairness. The bird uses a conservative rectangular hitbox rather than pixel-perfect artwork collision. No distribution package or third-party assets are included. A license has not yet been selected.
 
 ## Technologies and NuGet packages
 
@@ -123,12 +124,25 @@ The renderer reads Bird, state, current/best scores, pause/status presentation, 
 
 ## Screenshots and student details
 
-Two owner-reviewed screenshots must be embedded before final submission: gameplay with score, and Game Over with final score/restart. Local diagnostic Ready/Running/Game Over captures now exist, but final screenshot selection remains Stage 06. See the [submission checklist](docs/SUBMISSION.md).
+Actual application-window captures taken on November 17, 2026 at 125% desktop scaling. An isolated scripted run uses controlled gaps and normal scoring/contact logic. These images are not evidence of human playtesting; [capture details](docs/screenshots/README.md) record their source and limitations.
 
-Student full name and student number are awaiting the owner's input. These required README details must be filled before submission.
+![Running game with a completed pipe pass, score 1, and a visible next gap](docs/screenshots/gameplay.png)
+
+*Running: score 1 after a valid pass. Best stays 0 until this run finishes.*
+
+![Game Over with final score 1, saved best 1, and the focused New game button](docs/screenshots/game-over.png)
+
+*Game Over after ground contact: final score 1, saved best 1, and keyboard-accessible restart.*
+
+| Student detail | Status |
+| --- | --- |
+| Full name | Awaiting owner-provided value |
+| Student number | Awaiting owner-provided value |
+
+These two required identity fields must be supplied before submission. See the [remaining sign-off items](docs/SUBMISSION.md).
 
 ## Repository and submission
 
-The owner's selected repository is [alaamadii/FlappyBird](https://github.com/alaamadii/FlappyBird). The instructor recommends the name `YMH219-FlappyBird`; the selected name is retained. The PDF was checked on November 16, 2026 and requires public access, meaningful commits, at least two screenshots, student details, and a second-computer check. This remote was private when inspected; public visibility remains a delivery requirement.
+The owner's selected repository is [alaamadii/FlappyBird](https://github.com/alaamadii/FlappyBird). The instructor recommends the name `YMH219-FlappyBird`; the selected name is retained. The PDF was checked on November 16, 2026 and requires public access, meaningful commits, at least two screenshots, student details, and a second-computer check. The owner authorized public visibility on November 17, 2026; anonymous repository access and its public profile listing were verified that day.
 
 The owner submits their GitHub profile link in Classroom. The full [completion plan](docs/PLAN.md) tracks the remaining work and acceptance gates.

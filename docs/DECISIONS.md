@@ -114,7 +114,7 @@ Extract SceneViewport so painted content and native button use the same uniform,
 
 ## ADR-015 — App-owned best score and safe local replacement
 
-**Date:** 2026-11-17. **Status:** Implemented in Stage 05; owner review pending.
+**Date:** 2026-11-17. **Status:** Accepted through owner-approved Stage 05 PR #6 merge.
 
 Choose persistent high score as the only optional feature in this stage. Core continues to know only current-run Score. App uses IHighScoreStore to substitute safe test storage, FileHighScoreStore for the production LocalApplicationData path, and HighScoreService for cached best/status and error handling. This keeps file behavior testable without a database, serializer, dependency injection framework, or Windows paths in Core.
 
@@ -124,10 +124,18 @@ Write/flush a unique temporary file in the same directory, close it, then replac
 
 ## ADR-016 — Player copy, focus feedback, and consistent native scaling
 
-**Date:** 2026-11-17. **Status:** Implemented in Stage 05; owner review pending.
+**Date:** 2026-11-17. **Status:** Accepted through owner-approved Stage 05 PR #6 merge.
 
 Use distinct labeled Score and Best cards in opposite top corners, leaving the bird's central ceiling path open. Put control reminders in the ground region and remove development-stage copy. Keep Ready, Game Over, and inactive Paused cards consistent in palette and spacing. Paused is an App presentation flag, not a new Core state; activation retains the existing immediate resume and held-key release policy.
 
 Keep one native New game button for keyboard/mouse/accessibility support, with bold text, hover/press colors, and a gold focus border. Its owned Font uses pixel units at `16 * SceneViewport.Scale`, replacing/disposal only on size change. Recompute native bounds/font after client-size changes as well as layout: the new resize regression exposed that a fixed Form can finish changing ClientSize after the layout callback. This fixes stale control placement without changing fixed-window behavior.
 
 Leave gravity 900, flap 320, pipe speed 140, gap 180, spacing 260 and all collision/timing/input policies unchanged. Scripted checks establish readability and rule stability, not human difficulty/fairness; no human playtesting evidence supports retuning. Defer sound, progressive speed, selectable difficulty, and final submission work. Physical input/DPI transitions and owner acceptance remain pending.
+
+## ADR-017 — Final evidence and owner-controlled submission
+
+**Date:** 2026-11-17. **Status:** Evidence prepared; final owner acceptance pending.
+
+Freeze application scope. Use a fresh remote clone, full check, isolated native probes and actual GameForm captures as reproducible evidence. Capture the target window with PrintWindow and disclose controlled gaps/direct stepping; this does not establish human playtesting. Commit only inspected game images, never desktop/background captures or personal score data.
+
+The owner approved merging PR #6 and making the repository public. Applied both, reviewed tracked content/history, and verified anonymous access/profile listing. Final PR merging still requires approval; public visibility does not authorize Classroom submission or inventing identity/manual results. Keep missing student details and physical/second-computer checks open in SUBMISSION. No application code, dependencies, tuning or optional features change in Stage 06.

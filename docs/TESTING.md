@@ -177,3 +177,26 @@ All existing Form tests now inject memory storage. All earlier score-producing l
 [PR #6](https://github.com/alaamadii/FlappyBird/pull/6) is open against main and is not merged. This publication-evidence update is documentation-only; its final-head check is tracked on the PR before handoff. The passing run above identifies its exact tested commit rather than implying a result for a later head.
 
 The later direct-store zero/corrupt fix adds one case beyond that initial hosted run. Production still saves only improved completed bests; this correction makes the public storage boundary consistent for its supported zero value. It does not alter gameplay, UI, or prior visual evidence. Final-head hosted results are tracked in PR #6.
+
+## Stage 06 final-evidence record — 2026-11-17
+
+The owner approved merging PR #6 at its checked head 5043189; [Windows run 44052119853](https://github.com/alaamadii/FlappyBird/actions/runs/44052119853) passed all 157 cases, formatting and artifact upload. The merge produced main commit 97416ab. Owner-authorized public visibility was then applied. Historical pending observations above remain as execution history, not current PR status.
+
+| Check | Actual result |
+| --- | --- |
+| Fresh remote checkout | `git clone --branch feat/game-polish --single-branch https://github.com/alaamadii/FlappyBird.git .local/final-qa-checkout` checked out 5043189 with no reused local source/build output |
+| Clean-checkout full check | `./scripts/dev.ps1 check` from that clone passed restore, Release build with zero warnings/errors, 92 Core + 65 App cases, zero failures/skips and formatting verification; checkout remained clean afterward |
+| Final branch local check | `./scripts/dev.ps1 check` on `docs/final-submission` also passed restore, Release build with zero warnings/errors, all 157 tests and formatting. All local Markdown targets resolved across 13 documentation files; whitespace check passed |
+| Clean-checkout executable | Native-window probe launched that clone's actual Release EXE hidden, found its titled window, sent WM_CLOSE and observed exit 0. It stayed Ready and wrote no personal score |
+| Mandatory gameplay regression | Re-ran isolated rules probe: valid scored pass, pipe/ground loss, click/Enter reset, focused-button Space suppression, held Space, focus/minimize/restore, bounded stall, disposal and normal close all passed |
+| Optional persistence regression | Re-ran isolated polish probe: first launch, best save, reset retention, fresh-window reload, locked-file failure, memory best/retry and close passed |
+| Screenshot capture | Temporary final-evidence probe captured the actual GameForm using PrintWindow at 120 DPI, 600×800 client/618×847 window. Controlled gaps/scripted flaps earned a real point; stopping flaps led to natural ground loss, saved best and successful reset |
+| Screenshot inspection | Both target-window PNGs inspected and embedded in README; bird/pipes/gap/Score/Best readable in Running, final/best/restart/focus visible in Game Over. No unrelated desktop content included. [Provenance/checksums](screenshots/README.md) |
+| Dependency inventory | `dotnet list FlappyBird.slnx package` confirmed the README's top-level test packages and no App/Core third-party packages |
+| Public access | Anonymous repository metadata reported private=false, repository page returned HTTP 200, and repository appeared in anonymous public-profile listing after owner-authorized visibility change |
+| Tracked history/content | Reviewed tracked file names across history and current content; limited regex scan found no common GitHub-token/AWS-key/private-key patterns. No .local/bin/obj/TRX/personal score output tracked |
+| Remaining owner evidence | Full name/student number, screenshot acceptance, human random-gap fairness, physical input/focus/smoothness/cover-uncover, actual 100%/150% and cross-monitor DPI, VS Code F5, another Windows computer, final PR/main sign-off and Classroom profile-link submission |
+
+The helper commands remain local diagnostics, not required build dependencies. The clone is a second folder on this computer, not the second-computer acceptance test. Actual target-window captures do not claim physical-key input or human playtesting. No game source, tuning, dependencies or assets changed beyond the inspected application captures. [SUBMISSION.md](SUBMISSION.md) separates verified technical checks from final owner sign-off.
+
+Published evidence/screenshots in 4dc4d9f and checklist reconciliation in 98bd541 through [draft PR #7](https://github.com/alaamadii/FlappyBird/pull/7), targeting main. Hosted verification was running at publication; the final exact-head run is tracked on the PR before handoff. Owner identity/manual sign-off and merge remain pending.
