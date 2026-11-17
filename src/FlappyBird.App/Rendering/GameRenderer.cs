@@ -9,10 +9,12 @@ public sealed class GameRenderer(Playfield playfield)
 {
     private readonly Playfield playfield = playfield ?? throw new ArgumentNullException(nameof(playfield));
 
-    public void Render(Graphics graphics, Size clientSize, Bird bird, GameState gameState)
+    public void Render(Graphics graphics, Size clientSize, Bird bird, GameState gameState,
+        IReadOnlyList<PipePair> pipes)
     {
         ArgumentNullException.ThrowIfNull(graphics);
         ArgumentNullException.ThrowIfNull(bird);
+        ArgumentNullException.ThrowIfNull(pipes);
         if (clientSize.Width <= 0 || clientSize.Height <= 0)
         {
             return;
@@ -37,8 +39,9 @@ public sealed class GameRenderer(Playfield playfield)
             graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
 
             DrawBackground(graphics);
-            DrawHeading(graphics, gameState);
+            DrawPipes(graphics, pipes);
             DrawCurrentBird(graphics, bird);
+            DrawHeading(graphics, gameState);
             if (gameState == GameState.Ready)
             {
                 DrawReadyPanel(graphics);
@@ -49,6 +52,43 @@ public sealed class GameRenderer(Playfield playfield)
         {
             graphics.Restore(state);
         }
+    }
+
+    private void DrawPipes(Graphics graphics, IReadOnlyList<PipePair> pipes)
+    {
+        foreach (var pair in pipes)
+        {
+            if (pair.Right <= 0 || pair.X >= playfield.Width)
+            {
+                continue;
+            }
+
+            DrawPipe(graphics, pair.Upper, upper: true);
+            DrawPipe(graphics, pair.Lower, upper: false);
+        }
+    }
+
+    private static void DrawPipe(Graphics graphics, PipeRectangle pipe, bool upper)
+    {
+        var bounds = new RectangleF((float)pipe.X, (float)pipe.Y, (float)pipe.Width, (float)pipe.Height);
+        if (bounds.Width <= 0 || bounds.Height <= 0)
+        {
+            return;
+        }
+
+        var inset = bounds.Width * 0.08f;
+        var capHeight = Math.Min(18, bounds.Height / 3);
+        var stroke = Math.Min(2, Math.Min(bounds.Width, bounds.Height) / 8);
+        using var body = new LinearGradientBrush(bounds, Color.FromArgb(137, 195, 90),
+            Color.FromArgb(59, 126, 73), LinearGradientMode.Horizontal);
+        using var outline = new Pen(Color.FromArgb(37, 86, 60), stroke);
+        graphics.FillRectangle(body, bounds.X + inset, bounds.Y, bounds.Width - 2 * inset, bounds.Height);
+        graphics.DrawRectangle(outline, bounds.X + inset, bounds.Y + stroke / 2,
+            bounds.Width - 2 * inset, bounds.Height - stroke);
+        var cap = new RectangleF(bounds.X, upper ? bounds.Bottom - capHeight : bounds.Y, bounds.Width, capHeight);
+        graphics.FillRectangle(body, cap);
+        graphics.DrawRectangle(outline, cap.X + stroke / 2, cap.Y + stroke / 2,
+            cap.Width - stroke, cap.Height - stroke);
     }
 
     private void DrawBackground(Graphics graphics)
@@ -78,6 +118,15 @@ public sealed class GameRenderer(Playfield playfield)
 
     private void DrawHeading(Graphics graphics, GameState gameState)
     {
+        if (gameState == GameState.Running)
+        {
+            using var banner = new SolidBrush(Color.FromArgb(235, 255, 255, 244));
+            graphics.FillRectangle(banner, 0, 0, playfield.Width, 34);
+            DrawText(graphics, "Space: flap  /  Pipe contact is not active yet", 12, FontStyle.Regular,
+                Color.FromArgb(39, 85, 96), new RectangleF(12, 4, playfield.Width - 24, 26));
+            return;
+        }
+
         DrawText(graphics, "YMH219  /  NESNE TABANLI PROGRAMLAMA", 11, FontStyle.Bold,
             Color.FromArgb(46, 92, 103), new RectangleF(20, 30, playfield.Width - 40, 24));
         DrawText(graphics, "FLAPPY BIRD", 42, FontStyle.Bold,
@@ -88,7 +137,7 @@ public sealed class GameRenderer(Playfield playfield)
 
     private void DrawCurrentBird(Graphics graphics, Bird bird)
     {
-        // Stage 02 has no ground collision. Cull an off-screen bird before float conversion.
+        // There is no ground collision yet. Cull an off-screen bird before float conversion.
         if (bird.Y > playfield.Height)
         {
             return;
@@ -162,7 +211,7 @@ public sealed class GameRenderer(Playfield playfield)
             graphics.DrawLine(stripe, x, playfield.GroundTop + 24, x + 14, playfield.GroundTop + 38);
         }
 
-        DrawText(graphics, "STAGE 02  /  FLIGHT PRACTICE", 10, FontStyle.Bold,
+        DrawText(graphics, "STAGE 03  /  PIPE PRACTICE", 10, FontStyle.Bold,
             Color.FromArgb(111, 88, 58), new RectangleF(20, playfield.Height - 25, playfield.Width - 40, 18));
     }
 

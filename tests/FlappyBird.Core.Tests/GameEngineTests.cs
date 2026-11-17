@@ -34,4 +34,44 @@ public sealed class GameEngineTests
         var engine = new GameEngine(new Playfield(), new GameSettings());
         Assert.Throws<ArgumentOutOfRangeException>(() => engine.Update(elapsed));
     }
+
+    [Fact]
+    public void ReadyFreezesPipesAndRunningMovesThemUntilReset()
+    {
+        var source = new CountingGapSource();
+        var engine = new GameEngine(new Playfield(), new GameSettings(), source);
+        var first = engine.Pipes.Pairs[0];
+        engine.Update(1);
+        Assert.Equal(520, first.X);
+        Assert.Equal(2, source.Calls);
+        engine.Flap();
+        engine.Update(0.5);
+        Assert.Equal(450, first.X);
+        engine.Reset();
+        Assert.Equal(GameState.Ready, engine.State);
+        Assert.Equal(520, engine.Pipes.Pairs[0].X);
+        Assert.Equal(4, source.Calls);
+    }
+
+    [Fact]
+    public void UnsupportedRunningStepDoesNotMutateBirdOrPipes()
+    {
+        var engine = new GameEngine(new Playfield(), new GameSettings());
+        engine.Flap();
+        var birdY = engine.Bird.Y;
+        Assert.Throws<ArgumentOutOfRangeException>(() => engine.Update(1.1));
+        Assert.Equal(birdY, engine.Bird.Y);
+        Assert.Equal(-320, engine.Bird.VerticalVelocity);
+        Assert.Equal(520, engine.Pipes.Pairs[0].X);
+    }
+
+    private sealed class CountingGapSource : IGapSource
+    {
+        public int Calls { get; private set; }
+        public double NextGapTop(double minimumInclusive, double maximumExclusive)
+        {
+            Calls++;
+            return minimumInclusive;
+        }
+    }
 }

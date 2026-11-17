@@ -3,6 +3,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using FlappyBird.App.Rendering;
 using FlappyBird.Core.Models;
+using FlappyBird.Core.Services;
 
 namespace FlappyBird.App.Tests;
 
@@ -104,12 +105,12 @@ public sealed class GameRendererTests
         using var image = new Bitmap(480, 640);
         using var graphics = Graphics.FromImage(image);
         using var first = new MemoryStream();
-        renderer.Render(graphics, image.Size, bird, GameState.Running);
+        renderer.Render(graphics, image.Size, bird, GameState.Running, CreatePipes());
         image.Save(first, System.Drawing.Imaging.ImageFormat.Png);
 
         for (var paint = 0; paint < 20; paint++)
         {
-            renderer.Render(graphics, image.Size, bird, GameState.Running);
+            renderer.Render(graphics, image.Size, bird, GameState.Running, CreatePipes());
         }
 
         using var last = new MemoryStream();
@@ -127,12 +128,12 @@ public sealed class GameRendererTests
         var renderer = new GameRenderer(playfield);
         using var image = new Bitmap(480, 640);
         using var graphics = Graphics.FromImage(image);
-        renderer.Render(graphics, image.Size, bird, GameState.Ready);
+        renderer.Render(graphics, image.Size, bird, GameState.Ready, CreatePipes());
         var readyPanel = image.GetPixel(100, 410);
 
         bird.Flap();
         bird.Update(0.1);
-        renderer.Render(graphics, image.Size, bird, GameState.Running);
+        renderer.Render(graphics, image.Size, bird, GameState.Running, CreatePipes());
 
         var body = image.GetPixel(240, (int)(bird.Y + bird.Height / 2));
         Assert.True(body.R > 200 && body.G > 150 && body.B < 100);
@@ -149,12 +150,65 @@ public sealed class GameRendererTests
         using var image = new Bitmap(480, 640);
         using var graphics = Graphics.FromImage(image);
 
-        new GameRenderer(playfield).Render(graphics, image.Size, bird, GameState.Running);
+        new GameRenderer(playfield).Render(graphics, image.Size, bird, GameState.Running, CreatePipes());
 
         Assert.Equal(initialY, bird.Y);
         Assert.Equal(255, image.GetPixel(240, 500).A);
     }
 
     private static void RenderReady(GameRenderer renderer, Graphics graphics, Size size) =>
-        renderer.Render(graphics, size, new Bird(new Playfield(), new GameSettings()), GameState.Ready);
+        renderer.Render(graphics, size, new Bird(new Playfield(), new GameSettings()), GameState.Ready, CreatePipes());
+
+    private static IReadOnlyList<PipePair> CreatePipes() =>
+        new PipeSystem(new Playfield(), new GameSettings(), new RandomGapSource(new Random(1))).Pairs;
+
+    [Theory]
+    [InlineData(480, 640)]
+    [InlineData(600, 800)]
+    [InlineData(720, 960)]
+    public void ActualPipeGeometryRendersAtAllSceneScalesWithoutMutation(int width, int height)
+    {
+        var source = new CountingGapSource();
+        var playfield = new Playfield();
+        var engine = new GameEngine(playfield, new GameSettings(), source);
+        engine.Flap();
+        for (var step = 0; step < 3; step++) engine.Update(1);
+        engine.Bird.Reset();
+        var snapshot = engine.Pipes.Pairs.Select(p => (p.X, p.GapTop)).ToArray();
+        var calls = source.Calls;
+        var renderer = new GameRenderer(playfield);
+        using var image = new Bitmap(width, height);
+        using var graphics = Graphics.FromImage(image);
+        for (var paint = 0; paint < 20; paint++)
+        {
+            renderer.Render(graphics, image.Size, engine.Bird, engine.State, engine.Pipes.Pairs);
+        }
+
+        var scale = width / 480f;
+        foreach (var pair in engine.Pipes.Pairs)
+        {
+            var x = (int)((pair.X + pair.Width / 2) * scale);
+            var upper = image.GetPixel(x, (int)(80 * scale));
+            var lower = image.GetPixel(x, (int)((pair.Lower.Y + 60) * scale));
+            var gap = image.GetPixel(x, (int)((pair.GapTop + pair.GapHeight * 0.85) * scale));
+            Assert.True(upper.G > upper.R && upper.G > upper.B && upper.R < 140);
+            Assert.True(lower.G > lower.R && lower.G > lower.B && lower.R < 140);
+            Assert.NotEqual(upper, gap);
+            var soil = image.GetPixel(x, (int)((playfield.GroundTop + 45) * scale));
+            Assert.True(soil.R > soil.G && soil.G > soil.B);
+        }
+
+        Assert.Equal(snapshot, engine.Pipes.Pairs.Select(p => (p.X, p.GapTop)).ToArray());
+        Assert.Equal(calls, source.Calls);
+    }
+
+    private sealed class CountingGapSource : IGapSource
+    {
+        public int Calls { get; private set; }
+        public double NextGapTop(double minimumInclusive, double maximumExclusive)
+        {
+            Calls++;
+            return (minimumInclusive + maximumExclusive) / 2;
+        }
+    }
 }
