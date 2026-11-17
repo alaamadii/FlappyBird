@@ -54,7 +54,7 @@ Add a separate `net10.0-windows` App.Tests project rather than coupling Core tes
 
 ## ADR-009 — Domain bird motion and initial state
 
-**Date:** 2026-11-16. **Status:** Implemented in Stage 02; owner review pending.
+**Date:** 2026-11-16. **Status:** Accepted through merged Stage 02 PR #3.
 
 Bird owns top-left position and vertical velocity, with private mutation through Flap/Update/Reset. GameSettings centralizes finite positive dimensions and tuning: gravity 900 logical units/s², flap-speed magnitude 320 units/s, artwork bounds 86 × 48. Bird must fit above ground initially. The small GameEngine coordinates only Ready/Running and the existing bird; it adds no placeholder obstacles or loss state.
 
@@ -64,10 +64,30 @@ Ground is deliberately not a collider yet: the bird can descend behind the groun
 
 ## ADR-010 — Fixed updates, bounded catch-up, and focus-aware press edges
 
-**Date:** 2026-11-16. **Status:** Implemented in Stage 02; owner review pending.
+**Date:** 2026-11-16. **Status:** Accepted through merged Stage 02 PR #3.
 
 Keep the scheduler in App. A 15 ms WinForms timer measures elapsed seconds through Stopwatch and feeds FixedStepLoop. Updates are fixed at 1/60 second, with at most 0.1 seconds admitted and six updates per tick. Discard excess real time and any remaining whole overdue steps; retain a fractional remainder. A 1e-12-second comparison tolerance handles floating-point step boundaries. This trades wall-clock catch-up for bounded UI work after stalls. Core receives explicit elapsed time and knows nothing about Windows timers.
 
 FlapInput accepts a fresh Space edge, blocks repeated KeyDown until KeyUp, and handles activation separately from domain actions. Focus loss stops the timer and clears time/input accumulation. Focus return resets elapsed tracking and reads Space's held state once with GetAsyncKeyState in App: held Space is blocked until release, otherwise the next fresh press works. No global hook or background key processing is introduced. The first start press also clears Ready-time accumulation. Timer and Stopwatch are stopped, and Timer disposed, with the Form.
 
 Automated helper tests cover the input/timing contracts; window-message probes check adapter wiring separately. Simulating the activation-time held-key result does not replace a human Alt-Tab/physical-key check, which remains explicitly pending.
+
+## ADR-011 — Two reusable pairs and bounded ordered recycling
+
+**Date:** 2026-11-16. **Status:** Implemented in Stage 03; owner review pending.
+
+Keep numeric PipePair/PipeRectangle geometry in Core and manage two pairs in PipeSystem. The engine updates bird and pipes together only while Running. Expose a read-only collection, reuse the same pair objects, and rotate the departing leftmost pair behind the furthest remaining pair. Recycle only at Right < 0; touching X=0 alone does not recycle. Do not add scoring flags or collision rules before their stage.
+
+Use left-edge spacing, not empty-space spacing. Defaults: width 64, spacing 260, speed 140 units/s, gap height 180, off-screen start offset 40, symmetric gap margin 40, and bird clearance 12. Initial left edges 520/780 allow about 1.69 seconds before the first pair reaches the bird's initial right edge; two pairs can be fully visible together after 2.6 seconds. Validate geometry against Playfield, including vertical/horizontal clearance and room for both pairs.
+
+Support Core obstacle steps up to one second and require speed <= two spacings per second. Therefore a supported update crosses at most one two-pair cycle and requires at most two recycling operations, including when both pairs expire together. Reject larger Running engine updates before motion rather than silently skipping generations. The unchanged UI fixed step is 1/60 second; larger steps are diagnostic support, not a future collision-accuracy guarantee.
+
+**Follow-up 2026-11-17:** Clamp recycled X to at least `-Width`, its mathematical full-cycle lower bound. A fractional-spacing regression showed roundoff could otherwise cause a third recycle at the exact boundary. Keep strict Right < 0 for departure; do not add a broad epsilon that delays genuine off-screen recycling.
+
+## ADR-012 — Gap-source substitution and read-only rendering
+
+**Date:** 2026-11-16. **Status:** Implemented in Stage 03; owner review pending.
+
+IGapSource requests an explicit inclusive-minimum/exclusive-maximum interval: [40, 340) with defaults. RandomGapSource owns a Random instance, optionally seeded, instead of using global shared randomness. Protect the exclusive endpoint from rounding and reject provider values outside the interval. Generate only during initialization, recycling, and domain reset. Sample required recycle/reset gaps before changing pipe positions so a faulty supplied source cannot partially reposition pipes.
+
+Renderer reads Upper/Lower rectangles and draws original green GDI+ bodies/lips within those bounds. It does not consume randomness, move pairs, or advance the engine. Draw bird after pipes, and keep a compact Running instruction banner over scenery. Stage 03 explicitly allows passing through pipes and falling behind ground; collision, score, loss, and restart UI remain Stage 04.

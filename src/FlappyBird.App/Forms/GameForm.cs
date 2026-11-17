@@ -36,14 +36,14 @@ public sealed class GameForm : Form
         DoubleBuffered = true;
         ResizeRedraw = true;
         KeyPreview = true;
-        AccessibleName = "Flappy Bird flight practice";
+        AccessibleName = "Flappy Bird pipe practice";
         AccessibleDescription = "Ready. Press Space to start. Release and press Space again to flap.";
     }
 
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
-        renderer.Render(e.Graphics, ClientSize, engine.Bird, engine.State);
+        renderer.Render(e.Graphics, ClientSize, engine.Bird, engine.State, engine.Pipes.Pairs);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
@@ -60,7 +60,7 @@ public sealed class GameForm : Form
                 }
 
                 engine.Flap();
-                AccessibleDescription = "Running. Release and press Space to flap. Ground collision is not implemented yet.";
+                AccessibleDescription = "Running. Release and press Space to flap. Pipe and ground collision are not implemented yet.";
                 Invalidate();
             }
         }

@@ -22,7 +22,7 @@ CI uses Windows and the same `check` command. It uploads available TRX files eve
 - Ground height equal to or greater than total height.
 - The parameter name reported by rejected input.
 
-The current suite has **56 cases: Core 34, App 22**. Core includes the original ten Playfield cases plus settings validation, Bird motion/flap/ceiling/reset/time rejection, and Ready/Running coordination. App tests cover 1×/1.25×/1.5× placement, borders, graphics-state restoration, empty clients, painting without advancing Bird, real-model rendering, and safe off-screen rendering. Input-edge tests cover repeat suppression and focus-held/released cases; fixed-step tests cover partition-independent flight, fractional accumulation, six-step stall caps, reset, and invalid time.
+The current suite has **92 cases: Core 67, App 25**. It retains Playfield, Bird/settings/state, press-edge, focus policy, fixed timing, and renderer regression coverage. New Core cases cover PipePair geometry, exclusive gap bounds, settings/playfield clearance, seeded source repeatability, movement, exact off-screen thresholds, both-pair recycling, fractional full-cycle roundoff, reset, unsupported updates, invalid provider results, update partitioning, and 60,000 fixed updates with stable instances/count/spacing. New App cases render actual pipe geometry at 1×/1.25×/1.5× sizes and verify ground alignment and that painting neither mutates pipes nor consumes gap samples.
 
 Collision, scoring, Game Over, complete restart, and persistence remain unimplemented/untested. Domain reset primitives are tested but do not imply a restart UI. There is no coverage-percentage claim. Bitmap and helper assertions do not replace human visual/physical keyboard acceptance.
 
@@ -36,6 +36,7 @@ Collision, scoring, Game Over, complete restart, and persistence remain unimplem
 6. Minimize/restore and cover/uncover the live window; verify the same complete scene repaints cleanly.
 7. Hold Space, switch away, release while away or return still holding, then test the next fresh press. Motion freezes while inactive; no catch-up jump or repeated held-key flap should occur on return.
 8. Repeated taps can reach the ceiling: the bird stays within Y=0 and later falls. Ground remains decorative in this stage; falling behind it/off-screen is an expected limitation. Close/relaunch to return to Ready.
+9. After starting, confirm two upper/lower pipe pairs move left, are visible together, and recycle with valid gaps. Watch several cycles. Pipe contact currently does not stop play or award points; focus loss must freeze both pipes and bird.
 
 Automated process/window inspection can establish that the app launches and closes; it does not establish visual correctness or debugger behavior. Record those distinctions explicitly. Do not mark future gameplay scenarios as passing during initialization.
 
@@ -99,4 +100,29 @@ Preview images and the temporary invisible-window probe are in ignored `.local/s
 
 The temporary probe and images are ignored under `.local/flight-probe/`; it uses synthetic messages and lifecycle calls, not physical input. The executable probe initially matched a helper window and then exposed an input-idle/main-window startup race. Restricting the lookup to the titled Flappy Bird window with a bounded startup wait resolved the probe; the actual executable then passed launch/normal shutdown. No product fix was needed for those probe failures. Diagnostic images do not fulfill the final gameplay/Game Over screenshot requirement.
 
-[PR #3](https://github.com/alaamadii/FlappyBird/pull/3) remains open and unmerged for owner review. The hosted result identifies the tested implementation/documentation commit. Publication-evidence updates trigger new checks; verify the current head's result in the PR before merging.
+[PR #3](https://github.com/alaamadii/FlappyBird/pull/3) was confirmed merged on 2026-11-16 before Stage 03. Its final head bd393ac passed [Windows run 43828762935](https://github.com/alaamadii/FlappyBird/actions/runs/43828762935). That merge does not convert unperformed physical-input/visual checks into passing evidence.
+
+## Stage 03 execution record — 2026-11-16
+
+| Check | Actual evidence |
+| --- | --- |
+| `./scripts/dev.ps1 check` | Passed: restore, Release build with zero warnings/errors, Core 66/66 and App 25/25 cases, clean formatting |
+| Long-running deterministic model tests | 60,000 fixed steps preserve two original pair instances, valid gaps, left-to-right order, and 260-unit spacing; largest supported one-second step at maximum configured speed recycles both pairs correctly |
+| Boundary/provider checks | Right == 0 does not recycle; moving beyond it does. Minimum gap included, maximum excluded. Invalid recycle samples are rejected before pipe positions change |
+| Invisible real Form/timer probe | Actual timer message pump moves pipes alongside Bird; synthetic focus lifecycle freezes both; held-key and minimize/restore checks retained |
+| Bounded stall | 500 ms UI-thread stall followed by one tick moves pipes only 14 logical units (140 × 0.1), matching six bird steps |
+| Multiple cycles and repaint | Directly advanced the actual Form's engine through 60 simulated seconds with periodic Form repaint: 32 recycle events, count/spacing preserved; two full pairs confirmed together |
+| Visual preview | Inspected actual full-window DrawToBitmap at current 125% desktop DPI plus 480×640, 600×800, and 720×960 off-screen previews; pipe lips/gaps/bottoms, foreground bird, banner, and ground alignment visible |
+| Release executable | Hidden launch created its titled main window; normal close returned exit code 0 |
+| Remaining manual checks | Human observation of real-time cycles/smoothness, physical Space/Alt-Tab, live cover/uncover, actual DPI transitions, and VS Code F5 not performed |
+| Hosted CI follow-up (2026-11-17) | [Windows run 44027176448](https://github.com/alaamadii/FlappyBird/actions/runs/44027176448) passed for e847e0f, including restore/build/test/format and artifact upload |
+
+The temporary probe and images remain ignored in `.local/flight-probe/` (stage03-prefixed images). Simulated seconds were stepped directly while timer paused, so that result does not claim a human watched a real-time minute of play. The probe used domain Bird.Reset solely to place the bird for diagnostic images; it did not add restart UI. No collision, score, or loss behavior was tested or implemented. These previews do not replace final gameplay/Game Over screenshots.
+
+### Stage 03 follow-up — 2026-11-17
+
+Review identified a fractional-spacing case (spacing 200.1, speed 400.2) at the exact left boundary: floating-point addition could place a recycled pair just below `-Width`, prompting a spurious third recycle. Added a regression test and clamped only recycled X to its mathematical lower bound. The original `Right < 0` departure policy remains unchanged.
+
+After the fix, `./scripts/dev.ps1 check` passed again: restore, Release build with zero warnings/errors, **67 Core + 25 App = 92 tests**, and clean formatting. The previous day's visual/lifecycle evidence remains identified separately; it was not reclassified as new manual testing.
+
+[PR #4](https://github.com/alaamadii/FlappyBird/pull/4) remains open and unmerged. Hosted validation passed for implementation/documentation commit e847e0f on 2026-11-17. Publication-evidence commits trigger their own CI run; inspect the current-head result on the PR before merging.
