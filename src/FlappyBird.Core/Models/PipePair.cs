@@ -20,6 +20,7 @@ public sealed class PipePair
     public double Right => X + Width;
     public double GapTop { get; private set; }
     public double GapHeight => settings.PipeGapHeight;
+    public bool HasScored { get; private set; }
     public PipeRectangle Upper => new(X, 0, Width, GapTop);
     public PipeRectangle Lower => new(X, GapTop + GapHeight, Width, groundTop - GapTop - GapHeight);
 
@@ -48,5 +49,8 @@ public sealed class PipePair
 
         X = x;
         GapTop = gapTop;
+        HasScored = false;
     }
+
+    internal void MarkScored() => HasScored = true;
 }

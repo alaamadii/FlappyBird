@@ -5,6 +5,7 @@ public sealed class FlapInput
 {
     private bool isDown;
     private bool waitingForRelease;
+    public bool IsHeld => isDown || waitingForRelease;
 
     public bool Press()
     {

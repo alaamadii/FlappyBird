@@ -105,12 +105,12 @@ public sealed class GameRendererTests
         using var image = new Bitmap(480, 640);
         using var graphics = Graphics.FromImage(image);
         using var first = new MemoryStream();
-        renderer.Render(graphics, image.Size, bird, GameState.Running, CreatePipes());
+        renderer.Render(graphics, image.Size, bird, GameState.Running, CreatePipes(), 0);
         image.Save(first, System.Drawing.Imaging.ImageFormat.Png);
 
         for (var paint = 0; paint < 20; paint++)
         {
-            renderer.Render(graphics, image.Size, bird, GameState.Running, CreatePipes());
+            renderer.Render(graphics, image.Size, bird, GameState.Running, CreatePipes(), 0);
         }
 
         using var last = new MemoryStream();
@@ -128,12 +128,12 @@ public sealed class GameRendererTests
         var renderer = new GameRenderer(playfield);
         using var image = new Bitmap(480, 640);
         using var graphics = Graphics.FromImage(image);
-        renderer.Render(graphics, image.Size, bird, GameState.Ready, CreatePipes());
+        renderer.Render(graphics, image.Size, bird, GameState.Ready, CreatePipes(), 0);
         var readyPanel = image.GetPixel(100, 410);
 
         bird.Flap();
         bird.Update(0.1);
-        renderer.Render(graphics, image.Size, bird, GameState.Running, CreatePipes());
+        renderer.Render(graphics, image.Size, bird, GameState.Running, CreatePipes(), 0);
 
         var body = image.GetPixel(240, (int)(bird.Y + bird.Height / 2));
         Assert.True(body.R > 200 && body.G > 150 && body.B < 100);
@@ -150,14 +150,14 @@ public sealed class GameRendererTests
         using var image = new Bitmap(480, 640);
         using var graphics = Graphics.FromImage(image);
 
-        new GameRenderer(playfield).Render(graphics, image.Size, bird, GameState.Running, CreatePipes());
+        new GameRenderer(playfield).Render(graphics, image.Size, bird, GameState.Running, CreatePipes(), 0);
 
         Assert.Equal(initialY, bird.Y);
         Assert.Equal(255, image.GetPixel(240, 500).A);
     }
 
     private static void RenderReady(GameRenderer renderer, Graphics graphics, Size size) =>
-        renderer.Render(graphics, size, new Bird(new Playfield(), new GameSettings()), GameState.Ready, CreatePipes());
+        renderer.Render(graphics, size, new Bird(new Playfield(), new GameSettings()), GameState.Ready, CreatePipes(), 0);
 
     private static IReadOnlyList<PipePair> CreatePipes() =>
         new PipeSystem(new Playfield(), new GameSettings(), new RandomGapSource(new Random(1))).Pairs;
@@ -172,7 +172,7 @@ public sealed class GameRendererTests
         var playfield = new Playfield();
         var engine = new GameEngine(playfield, new GameSettings(), source);
         engine.Flap();
-        for (var step = 0; step < 3; step++) engine.Update(1);
+        for (var step = 0; step < 3; step++) engine.Pipes.Update(1);
         engine.Bird.Reset();
         var snapshot = engine.Pipes.Pairs.Select(p => (p.X, p.GapTop)).ToArray();
         var calls = source.Calls;
@@ -181,7 +181,7 @@ public sealed class GameRendererTests
         using var graphics = Graphics.FromImage(image);
         for (var paint = 0; paint < 20; paint++)
         {
-            renderer.Render(graphics, image.Size, engine.Bird, engine.State, engine.Pipes.Pairs);
+            renderer.Render(graphics, image.Size, engine.Bird, engine.State, engine.Pipes.Pairs, engine.Score);
         }
 
         var scale = width / 480f;
@@ -210,5 +210,32 @@ public sealed class GameRendererTests
             Calls++;
             return (minimumInclusive + maximumExclusive) / 2;
         }
+    }
+
+    [Fact]
+    public void ScoreAndGameOverPresentationChangeOnlyTheRenderedOutput()
+    {
+        var playfield = new Playfield();
+        var bird = new Bird(playfield, new GameSettings());
+        var pipes = CreatePipes();
+        var renderer = new GameRenderer(playfield);
+        using var image = new Bitmap(480, 640);
+        using var graphics = Graphics.FromImage(image);
+        byte[] Snapshot(GameState state, int score)
+        {
+            renderer.Render(graphics, image.Size, bird, state, pipes, score);
+            using var data = new MemoryStream();
+            image.Save(data, System.Drawing.Imaging.ImageFormat.Png);
+            return data.ToArray();
+        }
+
+        var running = Snapshot(GameState.Running, 0);
+        var scored = Snapshot(GameState.Running, 7);
+        var over = Snapshot(GameState.GameOver, 7);
+        Assert.False(running.SequenceEqual(scored));
+        Assert.False(scored.SequenceEqual(over));
+        Assert.Equal(over, Snapshot(GameState.GameOver, 7));
+        Assert.Equal(0, bird.VerticalVelocity);
+        Assert.All(pipes, pair => Assert.False(pair.HasScored));
     }
 }

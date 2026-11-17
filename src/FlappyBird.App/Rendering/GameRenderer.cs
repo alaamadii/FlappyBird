@@ -10,7 +10,7 @@ public sealed class GameRenderer(Playfield playfield)
     private readonly Playfield playfield = playfield ?? throw new ArgumentNullException(nameof(playfield));
 
     public void Render(Graphics graphics, Size clientSize, Bird bird, GameState gameState,
-        IReadOnlyList<PipePair> pipes)
+        IReadOnlyList<PipePair> pipes, int score)
     {
         ArgumentNullException.ThrowIfNull(graphics);
         ArgumentNullException.ThrowIfNull(bird);
@@ -29,11 +29,9 @@ public sealed class GameRenderer(Playfield playfield)
             graphics.Clear(Color.FromArgb(28, 57, 65));
 
             // Preserve the playfield's aspect ratio; any unused space becomes a border.
-            var scale = Math.Min((float)clientSize.Width / playfield.Width,
-                (float)clientSize.Height / playfield.Height);
-            graphics.TranslateTransform((clientSize.Width - playfield.Width * scale) / 2,
-                (clientSize.Height - playfield.Height * scale) / 2);
-            graphics.ScaleTransform(scale, scale);
+            var viewport = SceneViewport.Create(playfield, clientSize);
+            graphics.TranslateTransform(viewport.OffsetX, viewport.OffsetY);
+            graphics.ScaleTransform(viewport.Scale, viewport.Scale);
             graphics.SetClip(new Rectangle(0, 0, playfield.Width, playfield.Height), CombineMode.Intersect);
             graphics.SmoothingMode = SmoothingMode.AntiAlias;
             graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
@@ -41,12 +39,13 @@ public sealed class GameRenderer(Playfield playfield)
             DrawBackground(graphics);
             DrawPipes(graphics, pipes);
             DrawCurrentBird(graphics, bird);
-            DrawHeading(graphics, gameState);
+            DrawHeading(graphics, gameState, score);
             if (gameState == GameState.Ready)
             {
                 DrawReadyPanel(graphics);
             }
             DrawGround(graphics);
+            if (gameState == GameState.GameOver) DrawGameOver(graphics, score);
         }
         finally
         {
@@ -116,14 +115,16 @@ public sealed class GameRenderer(Playfield playfield)
         graphics.FillPath(cloud, shape);
     }
 
-    private void DrawHeading(Graphics graphics, GameState gameState)
+    private void DrawHeading(Graphics graphics, GameState gameState, int score)
     {
-        if (gameState == GameState.Running)
+        if (gameState != GameState.Ready)
         {
             using var banner = new SolidBrush(Color.FromArgb(235, 255, 255, 244));
             graphics.FillRectangle(banner, 0, 0, playfield.Width, 34);
-            DrawText(graphics, "Space: flap  /  Pipe contact is not active yet", 12, FontStyle.Regular,
-                Color.FromArgb(39, 85, 96), new RectangleF(12, 4, playfield.Width - 24, 26));
+            DrawText(graphics, $"Score: {score}", 16, FontStyle.Bold,
+                Color.FromArgb(37, 86, 76), new RectangleF(12, 4, 130, 26));
+            DrawText(graphics, "Space: flap  /  Avoid pipes and ground", 12, FontStyle.Regular,
+                Color.FromArgb(39, 85, 96), new RectangleF(145, 4, playfield.Width - 157, 26));
             return;
         }
 
@@ -137,7 +138,7 @@ public sealed class GameRenderer(Playfield playfield)
 
     private void DrawCurrentBird(Graphics graphics, Bird bird)
     {
-        // There is no ground collision yet. Cull an off-screen bird before float conversion.
+        // Keep painting safe for independently supplied diagnostic model states too.
         if (bird.Y > playfield.Height)
         {
             return;
@@ -211,8 +212,31 @@ public sealed class GameRenderer(Playfield playfield)
             graphics.DrawLine(stripe, x, playfield.GroundTop + 24, x + 14, playfield.GroundTop + 38);
         }
 
-        DrawText(graphics, "STAGE 03  /  PIPE PRACTICE", 10, FontStyle.Bold,
+        DrawText(graphics, "YMH219  /  FLAPPY BIRD", 10, FontStyle.Bold,
             Color.FromArgb(111, 88, 58), new RectangleF(20, playfield.Height - 25, playfield.Width - 40, 18));
+    }
+
+    private void DrawGameOver(Graphics graphics, int score)
+    {
+        using var veil = new SolidBrush(Color.FromArgb(100, 28, 57, 65));
+        graphics.FillRectangle(veil, 0, 0, playfield.Width, playfield.Height);
+        var panel = SceneViewport.GameOverPanel(playfield);
+        using var background = new SolidBrush(Color.FromArgb(255, 255, 244));
+        using var border = new Pen(Color.FromArgb(191, 215, 191), 1.5f);
+        graphics.FillRoundedRectangle(background, panel, new SizeF(16, 16));
+        graphics.DrawRoundedRectangle(border, panel, new SizeF(16, 16));
+        var ink = Color.FromArgb(37, 86, 76);
+        DrawText(graphics, "GAME OVER", 28, FontStyle.Bold, ink,
+            new RectangleF(panel.X, panel.Y + 18, panel.Width, 42));
+        DrawText(graphics, "Final score", 15, FontStyle.Regular, ink,
+            new RectangleF(panel.X, panel.Y + 78, panel.Width, 24));
+        DrawText(graphics, score.ToString(), 44, FontStyle.Bold, ink,
+            new RectangleF(panel.X, panel.Y + 104, panel.Width, 62));
+        DrawText(graphics, "New game returns to Ready.", 13, FontStyle.Regular, ink,
+            new RectangleF(panel.X, panel.Y + 172, panel.Width, 26));
+        DrawText(graphics, "Press Enter or click New game.", 12, FontStyle.Regular, ink,
+            new RectangleF(panel.X, panel.Bottom - 32, panel.Width, 24));
+        // The native button occupies SceneViewport.RestartButton; painting does not own input.
     }
 
     private static void DrawText(Graphics graphics, string text, float size, FontStyle style,
