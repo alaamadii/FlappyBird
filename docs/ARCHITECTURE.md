@@ -89,12 +89,12 @@ FileHighScoreStore resolves LocalApplicationData in production. It reads a bound
 
 | Type | Planned responsibility |
 | --- | --- |
-| Stage 05 review | Owner gameplay, physical-input, readability and real-DPI acceptance |
-| Stage 06 | Final manual QA, screenshots, second-computer and submission checks |
+| Stage 06 owner sign-off | Human gameplay, physical input, real DPI and second-computer acceptance |
+| Submission | Student identity, screenshot acceptance, final PR/default-branch review and Classroom profile link |
 
 The implemented flow is key event → input edge → Core engine, then timer signal → fixed updates → engine → repaint request. Future game rules must preserve this separation.
 
-The state flow is Ready → Running → GameOver → Ready. Stage 04 merged in PR #5; Stage 05 implementation awaits owner review. Stage 06 has not started.
+The state flow is Ready → Running → GameOver → Ready. Stages 04/05 merged in PRs #5/#6. Stage 06 prepares evidence/documentation without changing architecture, settings or runtime behavior. Final owner sign-off remains explicit in SUBMISSION.
 
 ## Design constraints
 

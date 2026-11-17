@@ -22,11 +22,11 @@ The PDF requires at least two obstacles rather than specifying pipe pairs. Our p
 
 | Enhancement | Acceptance condition if selected | Status |
 | --- | --- | --- |
-| Persistent high score | Survives restart/application relaunch; storage failures handled | Implemented / 05, owner review pending; FileHighScoreStoreTests, HighScoreServiceTests, GameFormRulesTests; [storage contract](HIGH_SCORE.md) |
+| Persistent high score | Survives restart/application relaunch; storage failures handled | Merged in PR #6; FileHighScoreStoreTests, HighScoreServiceTests, GameFormRulesTests; [storage contract](HIGH_SCORE.md) |
 | Progressive speed | Predictable bounded difficulty progression with tests | Deferred; no progression added |
 | Audio or difficulty levels | Clear controls and stable gameplay behavior | Deferred; no audio or selector added |
 
-High score is the only selected optional enhancement. Stage 05 improves controls, score/best contrast, pause explanation, and native restart focus/scaling without changing mandatory gameplay or settings. Human difficulty review and physical input/display acceptance remain pending. Stage 06 submission evidence is not complete.
+High score is the only selected optional enhancement. Stage 05 improves controls, score/best contrast, pause explanation and native restart focus/scaling without changing mandatory gameplay/settings. Human difficulty and physical input/display review remain pending. Stage 06 provides screenshots, clean-checkout and public-access evidence; identity/owner/second-computer sign-off is still pending.
 
 ## Quality and process
 
@@ -38,7 +38,7 @@ High score is the only selected optional enhancement. Stage 05 improves controls
 
 ## Required repository and README deliverables
 
-- One separate **public** repository for this assignment on the student's own GitHub account (PDF page 1). The owner selected `alaamadii/FlappyBird`; the instructor recommends `YMH219-FlappyBird`. The selected remote was private when checked on 2026-11-16, so public visibility is still outstanding.
+- One separate **public** repository for this assignment on the student's own GitHub account (PDF page 1). The owner selected `alaamadii/FlappyBird`; the instructor recommends `YMH219-FlappyBird`. With owner approval it became public on 2026-11-17; anonymous repository page/API access and profile listing were verified.
 - Buildable source, `.gitignore`, and README; exclude `bin`, `obj`, `.vs`, and other generated files.
 - README must include project name/purpose, actual technologies and NuGet packages, setup/run steps, basic features, at least **two embedded real screenshots**, known limitations/development notes, and the student's full name and student number (pages 2 and 5).
 - Meaningful commits must show the real development process; a single final-day upload may lose Git/GitHub credit.
