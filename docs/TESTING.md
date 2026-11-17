@@ -115,7 +115,7 @@ The temporary probe and images are ignored under `.local/flight-probe/`; it uses
 | Visual preview | Inspected actual full-window DrawToBitmap at current 125% desktop DPI plus 480×640, 600×800, and 720×960 off-screen previews; pipe lips/gaps/bottoms, foreground bird, banner, and ground alignment visible |
 | Release executable | Hidden launch created its titled main window; normal close returned exit code 0 |
 | Remaining manual checks | Human observation of real-time cycles/smoothness, physical Space/Alt-Tab, live cover/uncover, actual DPI transitions, and VS Code F5 not performed |
-| Hosted CI | To be checked on the Stage 03 PR; local validation is separate evidence |
+| Hosted CI follow-up (2026-11-17) | [Windows run 44027176448](https://github.com/alaamadii/FlappyBird/actions/runs/44027176448) passed for e847e0f, including restore/build/test/format and artifact upload |
 
 The temporary probe and images remain ignored in `.local/flight-probe/` (stage03-prefixed images). Simulated seconds were stepped directly while timer paused, so that result does not claim a human watched a real-time minute of play. The probe used domain Bird.Reset solely to place the bird for diagnostic images; it did not add restart UI. No collision, score, or loss behavior was tested or implemented. These previews do not replace final gameplay/Game Over screenshots.
 
@@ -124,3 +124,5 @@ The temporary probe and images remain ignored in `.local/flight-probe/` (stage03
 Review identified a fractional-spacing case (spacing 200.1, speed 400.2) at the exact left boundary: floating-point addition could place a recycled pair just below `-Width`, prompting a spurious third recycle. Added a regression test and clamped only recycled X to its mathematical lower bound. The original `Right < 0` departure policy remains unchanged.
 
 After the fix, `./scripts/dev.ps1 check` passed again: restore, Release build with zero warnings/errors, **67 Core + 25 App = 92 tests**, and clean formatting. The previous day's visual/lifecycle evidence remains identified separately; it was not reclassified as new manual testing.
+
+[PR #4](https://github.com/alaamadii/FlappyBird/pull/4) remains open and unmerged. Hosted validation passed for implementation/documentation commit e847e0f on 2026-11-17. Publication-evidence commits trigger their own CI run; inspect the current-head result on the PR before merging.
