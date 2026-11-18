@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
+using FlappyBird.App.Animation;
 using FlappyBird.App.Forms;
 using FlappyBird.App.Input;
 using FlappyBird.App.Rendering;
@@ -192,6 +193,45 @@ public sealed class GameFormRulesTests
         Invoke(form, "OnTimerTick", null, EventArgs.Empty);
         Assert.Equal(GameState.GameOver, engine.State);
     }
+
+    [Fact]
+    public void PresentationAnimatesReadyFreezesOnFocusLossAndLossAndResetsOnRestart() => RunOnSta((form, engine, button) =>
+    {
+        var animation = Field<SceneAnimation>(form, "animation");
+        var initialBird = (engine.Bird.Y, engine.Bird.VerticalVelocity);
+        Thread.Sleep(40);
+        Invoke(form, "OnTimerTick", null, EventArgs.Empty);
+        Assert.NotEqual(SceneAnimationFrame.Still, animation.Frame);
+        Assert.Equal(GameState.Ready, engine.State);
+        Assert.Equal(initialBird, (engine.Bird.Y, engine.Bird.VerticalVelocity));
+        Invoke(form, "OnDeactivate", EventArgs.Empty);
+        var paused = animation.Frame;
+        Thread.Sleep(30);
+        Invoke(form, "OnTimerTick", null, EventArgs.Empty);
+        Assert.Equal(paused, animation.Frame);
+        Invoke(form, "OnActivated", EventArgs.Empty);
+        Key(form, Keys.Space, down: true);
+        Assert.Equal(0, animation.Frame.WingFrame);
+        Assert.Equal(0, animation.Frame.BobOffset);
+        Key(form, Keys.Space, down: false);
+        Thread.Sleep(40);
+        Invoke(form, "OnTimerTick", null, EventArgs.Empty);
+        Assert.True(animation.Frame.GroundOffset > 0);
+        animation.Advance(0.15, GameState.Running, engine.Bird.VerticalVelocity);
+        Key(form, Keys.Space, down: true);
+        animation.Advance(0.15, GameState.Running, engine.Bird.VerticalVelocity);
+        var beforeRepeat = animation.Frame;
+        Key(form, Keys.Space, down: true);
+        Assert.Equal(beforeRepeat, animation.Frame);
+        Key(form, Keys.Space, down: false);
+        Lose(form, engine);
+        var stopped = animation.Frame;
+        Thread.Sleep(30);
+        Invoke(form, "OnTimerTick", null, EventArgs.Empty);
+        Assert.Equal(stopped, animation.Frame);
+        button.PerformClick();
+        Assert.Equal(SceneAnimationFrame.Still, animation.Frame);
+    });
 
     private static void Key(Control control, Keys key, bool down) =>
         SendMessage(control.Handle, down ? 0x0100u : 0x0101u, (IntPtr)key, IntPtr.Zero);

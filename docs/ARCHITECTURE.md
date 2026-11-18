@@ -6,12 +6,12 @@ The solution contains four projects:
 
 | Project | Target | Responsibility | Dependencies |
 | --- | --- | --- | --- |
-| `FlappyBird.App` | `net10.0-windows` | Window, input/focus adapter, timing, rendering, high-score storage | Core, Windows Forms |
+| `FlappyBird.App` | `net10.0-windows` | Window, input/focus adapter, timing, pixel rendering/animation, score storage | Core, Windows Forms |
 | `FlappyBird.Core` | `net10.0` | Geometry, motion, gaps, swept contact, scoring, three-state game/reset | .NET base libraries |
 | `FlappyBird.Core.Tests` | `net10.0` | Core behavior tests | Core, xUnit, test SDK, coverage collector |
 | `FlappyBird.App.Tests` | `net10.0-windows` | Rendering, input/timing, native restart, and isolated storage tests | App, xUnit, test SDK, Windows drawing APIs |
 
-Program initializes WinForms on an STA thread. GameForm owns window/input/focus, FixedStepLoop, Stopwatch, one timer and one restart Button. GameEngine owns Bird, PipeSystem, Score, and Ready/Running/GameOver. Renderer receives read-only presentation inputs; it owns no game rules. The existing fixed-window/DPI/double-buffering behavior remains.
+Program initializes WinForms on an STA thread. GameForm owns window/input/focus, FixedStepLoop, Stopwatch, SceneAnimation, one timer and one restart Button. GameEngine owns Bird, PipeSystem, Score, and Ready/Running/GameOver. Renderer receives read-only model inputs and an immutable animation snapshot; it owns no game rules or animation clock. The existing fixed-window/DPI/double-buffering behavior remains.
 
 Playfield remains 480 × 640 with an 80-unit ground region. GroundTop=560 is shared by geometry, collision, and rendering. Mandatory contact, score, loss, and restart behavior and optional best-score persistence are implemented. Audio, progressive speed, and selectable difficulty are deferred.
 
@@ -67,17 +67,19 @@ Deactivation stops the timer and clears timing/input accumulation. Activation sa
 
 ## Renderer and coordinate mapping
 
-Coordinates use top-left origin, X rightward, Y downward. Ground is anchored at `GroundTop` (560). Artwork is centered in the model's bird rectangle and scaled from nominal 86 × 48 bounds. The shadow is decorative. Birds below the viewport are culled before converting coordinates to floats.
+Coordinates use top-left origin, X rightward, Y downward. Ground is anchored at `GroundTop` (560). Original block artwork is centered/inset in the nominal 86 × 48 bird rectangle. Wing pose and small tilt are visual only; Ready bob does not move Core's bird. Birds below the viewport are culled before converting coordinates to floats.
 
-Renderer receives current Score, cached BestScore, paused flag, and a cached storage-status string. SceneViewport computes `scale = min(clientWidth/logicalWidth, clientHeight/logicalHeight)` and centered offsets for both graphics and native button bounds. It maps the logical restart rectangle (centered, Y=390, 220 × 48) inside the Game Over panel. GameForm updates the mapping on layout and after client-size changes, since a fixed Form can finalize its client size after layout. Graphics transforms/clipping remain unchanged; empty clients are ignored.
+Renderer receives current Score, cached BestScore, paused flag, cached storage status and SceneAnimationFrame. Omitting the frame supplies a deterministic still pose for callers/tests. SceneViewport computes `scale = min(clientWidth/logicalWidth, clientHeight/logicalHeight)` and centered offsets for graphics and native button bounds. It maps the logical restart rectangle (centered, Y=390, 220 × 48) inside the Game Over panel. GameForm remaps on layout/client-size change. Empty clients are ignored.
 
-Renderer paints scenery/pipes/bird, distinct Score/Best corner cards, Ready panel if applicable, ground with controls/status, and a dimmed Game Over/final-score card when finished. The corner cards leave the bird's central ceiling path clear. An inactive Running window gets a Paused card; there is no additional Core state or change in resume semantics. The native Button owns input and paints above the card, with hover/press colors and a gold focus border. Lips remain within model bounds. Pixel-unit fonts scale with geometry; no paint advances rules, randomness, or storage. A 125% desktop yields a 600 × 800 client area.
+Renderer paints flat night-sky blocks/stars, highlighted pipes, a pixel bird, Score/Best cards, Ready/pause/loss panels and scrolling ground with controls/status. A code-authored five-by-seven PixelFont draws large headings and numbers; smaller instructions use the Windows monospace font. Non-antialiased rectangles keep the retro edges sharp. The native Button owns input above the loss card and keeps hover/press/focus feedback. Pipe lips remain within model bounds; a 125% desktop yields a 600 × 800 client area.
 
-Each render saves and restores the caller's graphics state, including transforms and clipping. Fonts, brushes, pens, paths, and string formats are locally owned with `using` disposal. The renderer retains only the immutable Playfield; it owns no persistent native drawing resources and therefore needs no disposal lifecycle. Painting reads dimensions and does not create or advance gameplay state.
+Each render saves/restores caller graphics state, including transforms, clipping and drawing modes. Fonts, brushes, pens and string formats are locally owned with using disposal. Renderer retains only immutable Playfield, with no persistent native drawing resources or per-frame image loading. Painting never advances presentation, physics, randomness or storage.
 
 The Windows-only App test project renders into off-screen bitmaps; it does not introduce Windows dependencies into Core or make the Core tests require a UI.
 
 GameForm owns a reusable bold restart Font sized to `16 * viewport.Scale` pixels, replacing/disposing it when size changes and disposing it with the Form after its controls. This avoids an independent point/DPI conversion for the native control. Other renderer resources retain scoped ownership.
+
+SceneAnimation advances only in the bounded fixed-step callback. Ready advances wings/bob without engine updates; Running advances both engine and presentation; GameOver does neither. Fresh accepted Space resets the wing pulse, activation preserves phase without catch-up, and restart clears visual phases. Ground scrolling reads the same immutable GameSettings.PipeSpeed as the engine. Animation snapshots are plain values, so repeated paint/focus/minimize operations cannot advance time. See [ANIMATION.md](ANIMATION.md) for rates, assets and tests. Core remains unchanged by this visual follow-up.
 
 ## Best-score ownership and I/O
 

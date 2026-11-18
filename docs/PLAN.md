@@ -8,7 +8,7 @@
 
 **Submission deadline:** 2026-11-30, 23:59 (working schedule: Asia/Riyadh)
 
-**Current position (verified 2026-11-18):** Stage 06 technical evidence merged in PR #7; readiness/privacy documentation merged in PR #8 at main commit 5ab0563. Following the owner's fast-fall report, `fix/floatier-flight` adjusts gravity/flap defaults for a gentler arc without changing game rules. Owner review of that tuning, the full name, physical/second-computer checks, screenshot acceptance and final submission sign-off remain pending. The student number stays omitted per owner choice.
+**Current position (verified 2026-11-18):** Stage 06 evidence merged in PR #7; readiness/privacy documentation merged in PR #8; flight tuning merged in PR #9. The owner additionally requested retro artwork/animation: `feat/retro-arcade` preserves that flight configuration without modifying Core. Visual acceptance, full name, physical/second-computer checks, refreshed screenshot approval and final submission sign-off remain pending. Student number stays omitted per owner choice.
 
 This is the working plan for finishing **Flappy Bird only**. The other four NTP assignments have separate repositories and are outside this plan. Update this file as stages are accepted, recording actual completion dates rather than replacing targets with assumed results.
 

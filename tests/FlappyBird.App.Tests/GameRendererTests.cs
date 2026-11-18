@@ -1,6 +1,7 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
+using FlappyBird.App.Animation;
 using FlappyBird.App.Rendering;
 using FlappyBird.Core.Models;
 using FlappyBird.Core.Services;
@@ -24,7 +25,7 @@ public sealed class GameRendererTests
 
         var scale = width / (float)playfield.Width;
         var grass = image.GetPixel(width / 2, (int)((playfield.GroundTop + 6) * scale));
-        var soil = image.GetPixel(width / 2, (int)((playfield.GroundTop + 45) * scale));
+        var soil = image.GetPixel(width / 2, (int)((playfield.GroundTop + 18) * scale));
         var bird = image.GetPixel(width / 2, (int)(playfield.GroundTop * 0.51f * scale));
         Assert.True(grass.G > grass.R, "Grass should start at the shared ground boundary.");
         Assert.True(soil.R > soil.G && soil.G > soil.B, "Soil should remain below the grass.");
@@ -52,8 +53,8 @@ public sealed class GameRendererTests
         Assert.Equal(image.GetPixel(0, 0), image.GetPixel(width - 1, height - 1));
         Assert.NotEqual(image.GetPixel(0, 0), image.GetPixel(width / 2, height / 2));
         // A flat area of soil must map to the same point inside the centered viewport.
-        Assert.Equal(baseline.GetPixel(240, 605),
-            image.GetPixel(offsetX + (int)(240 * scale), offsetY + (int)(605 * scale)));
+        Assert.Equal(baseline.GetPixel(240, 578),
+            image.GetPixel(offsetX + (int)(240 * scale), offsetY + (int)(578 * scale)));
     }
 
     [Fact]
@@ -194,7 +195,7 @@ public sealed class GameRendererTests
             Assert.True(upper.G > upper.R && upper.G > upper.B && upper.R < 140);
             Assert.True(lower.G > lower.R && lower.G > lower.B && lower.R < 140);
             Assert.NotEqual(upper, gap);
-            var soil = image.GetPixel(x, (int)((playfield.GroundTop + 45) * scale));
+            var soil = image.GetPixel(x, (int)((playfield.GroundTop + 18) * scale));
             Assert.True(soil.R > soil.G && soil.G > soil.B);
         }
 
@@ -269,5 +270,39 @@ public sealed class GameRendererTests
         Assert.Equal(pipes, engine.Pipes.Pairs.Select(p => (p.X, p.GapTop, p.HasScored)).ToArray());
         Assert.Equal(0, engine.Score);
         Assert.Equal(GameState.Running, engine.State);
+    }
+
+    [Theory]
+    [InlineData(480, 640)]
+    [InlineData(600, 800)]
+    [InlineData(720, 960)]
+    public void AnimationSnapshotsChangePixelsWithoutAdvancingModelsOrPaintTime(int width, int height)
+    {
+        var engine = new GameEngine(new Playfield(), new GameSettings());
+        engine.Flap();
+        var model = (engine.Bird.Y, engine.Bird.VerticalVelocity, engine.Score, engine.State);
+        var pipes = engine.Pipes.Pairs.Select(p => (p.X, p.GapTop, p.HasScored)).ToArray();
+        var renderer = new GameRenderer(new Playfield());
+        using var bitmap = new Bitmap(width, height);
+        using var graphics = Graphics.FromImage(bitmap);
+        byte[] Snapshot(SceneAnimationFrame frame)
+        {
+            renderer.Render(graphics, bitmap.Size, engine.Bird, engine.State, engine.Pipes.Pairs, 0,
+                animation: frame);
+            using var data = new MemoryStream();
+            bitmap.Save(data, System.Drawing.Imaging.ImageFormat.Png);
+            return data.ToArray();
+        }
+        var still = SceneAnimationFrame.Still;
+        var baseline = Snapshot(still);
+        Assert.False(baseline.SequenceEqual(Snapshot(still with { WingFrame = 0 })));
+        Assert.False(baseline.SequenceEqual(Snapshot(still with { WingFrame = 2 })));
+        Assert.False(baseline.SequenceEqual(Snapshot(still with { TiltDegrees = 12 })));
+        Assert.False(baseline.SequenceEqual(Snapshot(still with { GroundOffset = 8, BackdropOffset = 20 })));
+        Assert.Equal(baseline, Snapshot(still with { BackdropOffset = 480 }));
+        Assert.Equal(baseline, Snapshot(still));
+        Assert.Equal(SceneAnimationFrame.Still, still);
+        Assert.Equal(model, (engine.Bird.Y, engine.Bird.VerticalVelocity, engine.Score, engine.State));
+        Assert.Equal(pipes, engine.Pipes.Pairs.Select(p => (p.X, p.GapTop, p.HasScored)).ToArray());
     }
 }

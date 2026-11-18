@@ -186,3 +186,20 @@ This is initialization only. Gameplay remains planned. Detailed local validation
 - Actual-model samples show about 37% less hop height, similar airtime, and 40% less descent after half a second versus the first candidate. Added terminal-speed/upward-flap and necessary gap-transition budget coverage; updated reference/ground/native loss fixtures without relaxing contact assertions.
 - Updated current README, architecture, walkthrough and ADR-020. No pipe/input/timing/scoring/reset/storage behavior, screenshot pixels or student-number privacy choice changed. New feel confirmation remains an owner check.
 - Final full check passed with 162 cases (97 Core, 65 App), zero warnings/errors and clean formatting. Final-cap native rule/executable and persistence probes passed; local links, whitespace and ignored-output checks passed. The rebuilt game is prepared for the owner's next test; hosted exact-head checks remain separate.
+
+## 2026-11-18 — Owner-requested retro artwork and animation
+
+- Owner requested an Atari-like look and improved animation, suggesting Higgsfield. Checked the connection and attempted one sprite generation; no asset was produced. Implemented original code-authored block artwork and glyphs without external/generated media or a runtime service dependency.
+- Created `feat/retro-arcade` from the f231b51 flight candidate, preserving the smaller hop, 360 gravity and 240 fall cap. Core source is unchanged by this follow-up.
+- Added App-owned SceneAnimation/immutable frame values, three wing poses with fresh-press pulse, Ready bob, velocity-based visual tilt, wrapped layered scrolling and original five-by-seven headings. Kept native accessible restart, viewport/DPI mapping, double buffering and graphics disposal.
+- Drove presentation from the existing bounded loop; Ready stays stationary in Core, inactive/lost frames freeze, held repeat cannot reset the pulse and restart clears phases. Rendering only reads the supplied snapshot.
+- Full check passed: zero warnings/errors, 180 cases (97 Core, 83 App), formatting clean. Native/persistence probes and actual Release launch/close passed. Exact repaint/wrap and state-preservation assertions remain; no manual acceptance is inferred.
+- Inspected equivalent-scale previews and actual target-window captures. Updated README screenshots/provenance from runtime source 0a17073, plus animation ownership/asset documentation and ADR-021. Owner review of the new look/smoothness and final submission fields remains pending; student-number omission is preserved.
+- PR #9 was confirmed merged before visual publication, so the retro PR targets main directly. The separate visual branch preserves its f231b51 runtime configuration; no merge was performed by the assistant. Documentation links and screenshot hashes were rechecked before publication.
+
+### Follow-up: README presentation and current screenshots
+
+- Owner requested current screenshots and more professional README wording. Inspected all three existing retro window captures and retained their original PNGs and recorded provenance; application source has not changed since those captures.
+- Moved a linked Ready/Running/Game Over gallery near the top of README with consistent image widths, descriptive alternative text, captions, and the capture date. Kept the distinction between scripted evidence and human acceptance explicit.
+- Reorganized README around features, setup, controls, architecture, storage, validation, and documentation. Replaced detailed implementation narrative with links to maintained technical guides and recorded PR #10 as pending owner review.
+- Validation passed: local Markdown targets across 14 files, all three HTML gallery embeds and alternative text, unchanged screenshot SHA-256 hashes, and `git diff --check`. This follow-up changes Markdown only; the prior 180-test result is retained without claiming a new local code test run. Hosted checks are tracked on PR #10; no new gameplay, manual-test result, identity detail, or merge is implied.

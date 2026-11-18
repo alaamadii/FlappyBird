@@ -1,147 +1,131 @@
 # YMH219 — Flappy Bird
 
-A C# Windows Forms desktop game project for **Nesne Tabanlı Programlama (YMH219)**. The project demonstrates object-oriented design, event-driven programming, testing, and a reviewed Git workflow.
+A retro arcade game built with **C#/.NET 10 and Windows Forms** for **Nesne Tabanlı Programlama (YMH219)**. Guide a pixel-art bird through moving pipes, improve your score, and try again after each collision.
 
-**Gameplay implementation is complete. Final submission review is in progress.** Fly through moving pipes, earn points, lose on pipe/ground contact, and start a new run with Enter or the New game button. Separate Score/Best displays, focus pause, and saved best scores are included. PRs #1–#8 are merged. Automated checks, clean-checkout verification, and application screenshots are complete; the owner's full name and manual sign-off remain outstanding in the [submission checklist](docs/SUBMISSION.md).
+The project demonstrates object-oriented design through an independent game engine, Windows presentation and input, automated tests, and development reviewed through pull requests. Gameplay is implemented; final submission sign-off and review of the retro presentation remain in progress.
 
-## Quick start
+## Features
 
-Requirements: Windows 10/11, the .NET **10.0.402 SDK** (or a newer patch in the 10.0.4xx feature band), Git, and optionally VS Code with the recommended C# extensions. A runtime alone cannot build the project. NuGet access is required for the first restore. No Unity, database, API key, or additional .NET workload is required.
+- Original pixel-art scenery, animated wings, visual bird tilt, and scrolling terrain.
+- Keyboard-controlled flight with a smaller hop, gentle gravity, and capped falling speed.
+- Recycled pipe obstacles, collision detection, and one point for each completed pass.
+- Ready, Running, and Game Over states with keyboard-accessible restart.
+- Automatic pause when the window loses focus or is minimized.
+- A best score saved locally between sessions, with nonmodal feedback if storage is unavailable.
+- A fixed-size window with proportional rendering and DPI-aware native controls.
 
-From the repository root in PowerShell:
+Artwork and animation are authored in C#; the game runs without external media services or third-party visual assets.
+
+## Screenshots
+
+The current retro design, captured from the application on **November 18, 2026**. Select an image to view it at full size.
+
+| Ready | Running | Game Over |
+| :---: | :---: | :---: |
+| [<img src="docs/screenshots/ready.png" width="240" alt="Retro Ready screen with a pixel-art bird and Space-to-start instructions">](docs/screenshots/ready.png) | [<img src="docs/screenshots/gameplay.png" width="240" alt="Retro gameplay with moving pipes, score 1, and best 0">](docs/screenshots/gameplay.png) | [<img src="docs/screenshots/game-over.png" width="240" alt="Game Over with final score 1, saved best 1, and a focused New game button">](docs/screenshots/game-over.png) |
+| Start with Space. | Earn a point by clearing a pipe pair. | Restart with Enter or New game. |
+
+These are actual window captures at 125% display scaling from an isolated, scripted run with controlled gaps. They demonstrate the interface and normal scoring/collision behavior; they do not establish human playtesting or animation smoothness. [Capture provenance and checksums](docs/screenshots/README.md) document their source and limitations.
+
+## Getting started
+
+### Requirements
+
+- Windows 10 or Windows 11.
+- The **.NET 10.0.402 SDK**, or a newer patch in the 10.0.4xx feature band selected by `global.json`.
+- Git and access to NuGet for the initial restore.
+- Optionally, VS Code with the repository's recommended C# extensions.
+
+The SDK is required to build; installing only the runtime is insufficient. No Unity installation, database, API key, or additional .NET workload is required.
+
+### Build and run
+
+Clone the repository, then run these commands from its root in PowerShell:
 
 ```powershell
+git clone https://github.com/alaamadii/FlappyBird.git
+cd FlappyBird
 ./scripts/dev.ps1 doctor
 ./scripts/dev.ps1 check
 ./scripts/dev.ps1 run
 ```
 
-The launcher resolves `dotnet` from `PATH`, uses that installation as `DOTNET_ROOT`, and keeps CLI state in the ignored `.local/dotnet` folder. It restores inherited environment values when it exits. See [setup and troubleshooting](docs/SETUP.md).
+`doctor` checks the environment. `check` restores packages, builds Release, runs tests, and verifies formatting. `run` launches the game. The script resolves `dotnet` from `PATH` and keeps CLI state in the ignored `.local/dotnet` directory. See [setup and troubleshooting](docs/SETUP.md) for environment details.
 
-Open the root folder in VS Code, install the recommended extensions, and use **Ctrl+Shift+B** to build or **F5** to debug. The application uses programmatically constructed controls rather than Designer files.
+In VS Code, open the repository root and install the recommended extensions. Use **Ctrl+Shift+B** to build or **F5** to debug.
 
-## Project layout
+## Controls
+
+| Input | Action |
+| --- | --- |
+| Space on the Ready screen | Start the run and flap upward. |
+| Release, then press Space during play | Flap once. Holding Space does not repeat. |
+| Enter or New game after Game Over | Reset to Ready. Release Space before starting again. |
+| Space after Game Over | Ignored, including when New game has keyboard focus. |
+| Switch away or minimize | Pause the current run and animation. |
+| Return to the window | Resume without advancing through the time spent away. |
+
+Clearing a pipe pair earns one point. Touching a pipe or the ground ends the run; touching the ceiling stops upward motion. Restart clears the current score while retaining the best score.
+
+## Technology and architecture
+
+The application uses **C#/.NET 10**, **Windows Forms**, **GDI+**, and **xUnit**. App and Core have no third-party package dependencies. The interface is built programmatically without WinForms Designer files.
 
 ```text
 src/
-  FlappyBird.App/           Window, rendering, input/timing, high-score services
-  FlappyBird.Core/          Models, swept collision, GameEngine/PipeSystem, gap generation
+  FlappyBird.Core/          Game state, flight, pipes, collision, and scoring
+  FlappyBird.App/           Window, rendering, animation, input, timing, and storage
 tests/
-  FlappyBird.Core.Tests/    xUnit behavior tests
-  FlappyBird.App.Tests/     Renderer, input/timing, invisible Form/restart tests
-scripts/dev.ps1            Local setup diagnostics and development commands
-docs/                      Architecture, decisions, workflow, QA, and requirements
+  FlappyBird.Core.Tests/    Game-rule and model tests
+  FlappyBird.App.Tests/     Rendering, animation, input, storage, and native UI tests
+scripts/dev.ps1            Setup diagnostics and development commands
+docs/                      Architecture, decisions, testing, and submission records
 .github/                   Windows CI and pull request template
 .vscode/                   Shared build, test, and debug configuration
-FlappyBird.slnx             Solution containing App, Core, and Tests
+FlappyBird.slnx             Solution
 global.json                SDK selection
 ```
 
-App and Core.Tests reference Core; App.Tests references App for rendering/input/timing checks. Core must not reference App or Windows Forms. Additional folders will be added when they contain implemented features.
+Core remains independent of Windows Forms, drawing APIs, timers, and file storage. App maps the 480 × 640 logical playfield to the client area using uniform scaling. Painting reads game state and an immutable animation snapshot without advancing either. See [architecture](docs/ARCHITECTURE.md), [animation](docs/ANIMATION.md), and the [code walkthrough](docs/CODE_GUIDE.md).
 
-## Roadmap
+### Best-score storage
 
-| Stage | Deliverable | Branch | Status |
-| --- | --- | --- | --- |
-| 00 | Solution, shell, tests, CI, and documentation | `chore/initialize-project` | Merged in PR #1 |
-| 01 | Window rendering, background, ground, bird | `feat/game-window` | Merged in PR #2 |
-| 02 | Gravity, flap, KeyDown/KeyUp input | `feat/bird-physics` | Merged in PR #3 |
-| 03 | Moving and recycled pipe obstacles | `feat/pipe-system` | Merged in PR #4 |
-| 04 | Collision, score, Game Over, restart | `feat/game-rules` | Merged in PR #5 |
-| 05 | UI polish and persistent high score | `feat/game-polish` | Merged in [PR #6](https://github.com/alaamadii/FlappyBird/pull/6) |
-| 06 | Final QA, screenshots, submission review | `docs/final-submission` | Evidence merged in [PR #7](https://github.com/alaamadii/FlappyBird/pull/7); name/manual sign-off pending |
+The game stores the best completed score in:
 
-Every stage uses a separate branch and pull request. Review the diff, test results, and documentation before merging. The owner decides when to merge. The overall brief targets five separate assignments by **November 30, 2026, 23:59 Asia/Riyadh**; this repository covers Flappy Bird only.
+```text
+%LOCALAPPDATA%\YMH219-FlappyBird\high-score.txt
+```
+
+A missing file is normal on first launch. If loading or saving fails, the game displays a nonmodal message and retains any new best for the current session. Scores belong to the current Windows user; cloud synchronization and concurrent-instance coordination are not implemented. Tests use isolated storage. See [storage behavior](docs/HIGH_SCORE.md).
+
+## Validation and current limitations
+
+The documented local check passes **180 tests: 97 Core and 83 App**, with zero build warnings or errors. Windows GitHub Actions runs `./scripts/dev.ps1 check` for pull requests and pushes to `main`, and uploads test results. Exact execution records and remaining manual checks are maintained in [TESTING.md](docs/TESTING.md); the [retro presentation PR](https://github.com/alaamadii/FlappyBird/pull/10) carries its hosted CI results.
+
+Owner acceptance of the revised flight and artwork, physical keyboard/display checks, and testing on a second Windows computer remain pending. Scripted runs do not establish human difficulty or fairness. Collision uses a conservative rectangular hitbox. Audio, progressive speed, selectable difficulty, and a distribution package are outside the current implementation. A license has not yet been selected.
 
 ## Documentation
 
-- [Completion plan](docs/PLAN.md): stage-by-stage tasks, acceptance criteria, target dates, and review gates for finishing Flappy Bird.
-- [Setup and troubleshooting](docs/SETUP.md): tools, environment, VS Code, common failures.
-- [Architecture](docs/ARCHITECTURE.md): current responsibilities and intended game design.
-- [Decisions](docs/DECISIONS.md): choices, rationale, and tradeoffs.
-- [Development workflow and log](docs/DEVELOPMENT.md): stages, branching, review, actual changes.
-- [Testing](docs/TESTING.md): commands, assertions, UI checks, and evidence.
-- [High-score storage](docs/HIGH_SCORE.md): location, format, failure handling, and isolated tests.
-- [Requirements](docs/REQUIREMENTS.md): acceptance criteria and implementation status.
-- [Submission checklist](docs/SUBMISSION.md): final verification and oral explanation preparation.
-- [Code walkthrough](docs/CODE_GUIDE.md): class responsibilities, event paths, rules, and examples to explain.
-- [Agent working agreement](AGENTS.md): rules for automated project work.
-
-## Validation and limitations
-
-Use `./scripts/dev.ps1 check` to restore, build Release, run tests, and verify formatting. The Windows GitHub Actions workflow runs the same command on pull requests and pushes to `main`, then uploads TRX results. Workflow configuration does not imply that a hosted CI run has passed; execution evidence is recorded in [TESTING.md](docs/TESTING.md).
-
-Mandatory gameplay and optional high-score persistence are implemented and regression-tested: **162 tests (97 Core, 65 App)**. A fresh GitHub clone restored, built, passed the full check, and launched/closed normally on the development computer. After the owner reported fast falling and oversized Space hops, flight now uses a smaller hop, lighter gravity and capped descent. Acceptance of the revised feel, other physical display/input checks, and another-computer sign-off remain pending. Audio, progressive speed, and selectable difficulties are deferred. Scripted checks do not establish human difficulty or fairness. The bird uses a conservative rectangular hitbox rather than pixel-perfect artwork collision. No distribution package or third-party assets are included. A license has not yet been selected.
-
-## Technologies and NuGet packages
-
-C#/.NET 10, Windows Forms, original GDI+ drawing, a WinForms timer with Stopwatch timing, and an independent .NET domain library. Both test projects reference `Microsoft.NET.Test.Sdk` 17.14.1, `xunit` 2.9.3, and `xunit.runner.visualstudio` 3.1.4; Core.Tests also references `coverlet.collector` 6.0.4. App and Core have no third-party package dependencies.
-
-## Controls and flight
-
-| Action | Behavior |
+| Guide | Contents |
 | --- | --- |
-| Space while Ready | Starts Running and flaps upward |
-| Release, then press Space while Running | Flaps once; holding Space does not repeat |
-| Space during Game Over | Ignored; does not click a focused New game button |
-| Enter or click New game during Game Over | Resets to Ready with score zero; release Space, then press to start |
-| Switch away or minimize | Freezes the run, shows Paused while Running, and clears timing accumulation |
-| Return | Resumes a live run without catch-up; Game Over remains stopped |
+| [Setup](docs/SETUP.md) | Environment, VS Code, and troubleshooting |
+| [Architecture](docs/ARCHITECTURE.md) | Responsibilities, coordinates, timing, and rules |
+| [Animation](docs/ANIMATION.md) | Original artwork, visual timing, and pause/reset behavior |
+| [Code walkthrough](docs/CODE_GUIDE.md) | Classes and execution paths for explaining the implementation |
+| [Design decisions](docs/DECISIONS.md) | Rationale and tradeoffs |
+| [Testing](docs/TESTING.md) | Automated results, UI evidence, and pending checks |
+| [Development](docs/DEVELOPMENT.md) | Workflow and dated implementation log |
+| [Requirements](docs/REQUIREMENTS.md) | Assignment criteria and implementation status |
+| [Completion plan](docs/PLAN.md) | Stages, review gates, and remaining work |
+| [Submission checklist](docs/SUBMISSION.md) | Owner details, final review, and course submission |
+| [Working agreement](AGENTS.md) | Repository rules for automated contributions |
 
-Gravity is 360 logical units/s², flap velocity is −160 units/s, and downward speed is capped at 240 units/s. A single flap rises about 34 units and returns to its starting height in about 0.88 seconds. This reduces the previous candidate's roughly 54-unit hop without shortening its floaty cadence, and prevents long falls from accelerating indefinitely. Motion uses fixed 1/60-second updates; each timer tick accepts at most 100 ms and performs at most six updates. Excess stall time is discarded. At the ceiling, Y is clamped and upward velocity cleared. See [architecture](docs/ARCHITECTURE.md) for the formula and policies.
+## Project status and course submission
 
-## Collision, score, and restart
-
-The bird's logical 86 × 48 rectangle touches either pipe rectangle or the ground to trigger Game Over; exact edge/corner contact counts. The decorative shadow is excluded. Ceiling contact clamps movement without ending the run. Swept contact checks prevent fast movement from skipping thin obstacles.
-
-Each pair earns one point when its trailing edge is strictly left of the bird's left edge, during a collision-free simulation step. Contact is evaluated before a new point; a loss keeps earlier points and freezes motion, recycling, and scoring. Pair eligibility resets on recycling.
-
-Game Over shows final score, best score, and a New game button with a visible keyboard focus border. Button or Enter resets score, bird, pipes/gaps, eligibility, state, input and timing to a clean Ready state. A held Space must be released before it can start the new run. Best score survives reset; restart is never automatic.
-
-## Saved best score
-
-Best is loaded once at startup and updated when a completed run improves it. Current Score starts at zero each run. A successful save happens once on entering Game Over for a new best, never during painting or ordinary timer ticks.
-
-The file is `%LOCALAPPDATA%\YMH219-FlappyBird\high-score.txt`: a UTF-8 decimal integer from 0 to 2,147,483,647. Missing data means a normal first launch. Invalid/unreadable data shows “Saved best score unavailable.”; a failed save shows “Best score couldn't be saved.” without a dialog. Your new best remains available for the current session and is retried when the next run finishes. A successful save clears the warning.
-
-Writes use a completed temporary file in the same folder before replacing the score file. A failed replacement preserves the previous valid score. Data is personal to this Windows user, with no cloud sync or coordination between simultaneously running instances. Tests use temporary directories or injected memory stores. See [storage details](docs/HIGH_SCORE.md).
-
-## Pipe behavior
-
-Two pairs (four pipe shapes) remain still while Ready and move left at 140 logical units/s while Running. Their initial left edges are X=520 and X=780, giving about 1.69 seconds before the first pair reaches the bird's initial right edge. Both pairs can be fully visible together.
-
-Each pair is 64 units wide with a 180-unit vertical opening. Spacing is **260 units between left edges**, leaving 196 units of empty horizontal space. Gap tops are sampled in **[40, 340)**: minimum included, maximum excluded. Upper/lower rectangles end at the gap edges and shared ground boundary. Generation uses an instance-owned random source that tests can replace.
-
-A pair recycles only when its right edge is strictly below X=0. It moves after the other pair at the same spacing and receives a fresh gap sample; the same two objects are reused. The engine checks collision and score before recycling, preserving the departing pair's pass. Focus pause freezes the whole engine.
-
-Settings are finite/positive and validated against Playfield. Engine updates accept [0, 1] seconds in every state and split Running updates into at most 60 rule steps of no more than 1/60 second. Swept contact is checked before movement/recycling. The UI retains its existing fixed-step loop and catch-up cap.
-
-## Scene behavior
-
-The renderer uses the 480 × 640 logical playfield with ground beginning at Y=560. Shapes, strokes, and pixel-unit fonts scale together to the actual client area. Uniform scaling and centered borders preserve proportions when the client aspect ratio differs. WinForms DPI autoscaling uses a 96-DPI baseline; the window remains fixed-size with maximize disabled.
-
-The renderer reads Bird, state, current/best scores, pause/status presentation, and pipe geometry. It paints pipes before the bird, separate corner score cards while Running, an inactive pause card, and a dimmed final-score card on Game Over. Instructions sit in the ground region. A shared SceneViewport mapping keeps the native restart button and its pixel-unit font aligned with painted content at different client sizes. Painting never changes domain state, randomness, or storage. Accessible descriptions cover Ready, Running, paused, Game Over, best, restart, and storage warnings.
-
-## Screenshots and student details
-
-Actual application-window captures taken on November 17, 2026 at 125% desktop scaling. An isolated scripted run uses controlled gaps and normal scoring/contact logic. These images are not evidence of human playtesting; [capture details](docs/screenshots/README.md) record their source and limitations.
-
-![Running game with a completed pipe pass, score 1, and a visible next gap](docs/screenshots/gameplay.png)
-
-*Running: score 1 after a valid pass. Best stays 0 until this run finishes.*
-
-![Game Over with final score 1, saved best 1, and the focused New game button](docs/screenshots/game-over.png)
-
-*Game Over after ground contact: final score 1, saved best 1, and keyboard-accessible restart.*
+Stages 00–05 and the Stage 06 technical evidence are merged through [PR #7](https://github.com/alaamadii/FlappyBird/pull/7). Subsequent flight tuning is merged in [PR #9](https://github.com/alaamadii/FlappyBird/pull/9). Retro presentation and this README update are proposed in [PR #10](https://github.com/alaamadii/FlappyBird/pull/10); the owner reviews and approves merging. The [completion plan](docs/PLAN.md) records the detailed stage history.
 
 | Student detail | Status |
 | --- | --- |
 | Full name | Awaiting owner-provided value |
 
-The owner's full name remains pending. See the [remaining sign-off items](docs/SUBMISSION.md).
-
-## Repository and submission
-
-The owner's selected repository is [alaamadii/FlappyBird](https://github.com/alaamadii/FlappyBird). The instructor recommends the name `YMH219-FlappyBird`; the selected name is retained. The PDF was checked on November 16, 2026 and requires public access, meaningful commits, at least two screenshots, student details, and a second-computer check. The owner authorized public visibility on November 17, 2026; anonymous repository access and its public profile listing were verified that day.
-
-The owner submits their GitHub profile link in Classroom. The full [completion plan](docs/PLAN.md) tracks the remaining work and acceptance gates.
+This public repository covers only the Flappy Bird assignment. The course brief covers five separate C#/.NET repositories and sets a deadline of **November 30, 2026, 23:59 Asia/Riyadh**. The owner submits their GitHub profile link through Classroom. Required screenshots are included; remaining identity and manual sign-off items are tracked in the [submission checklist](docs/SUBMISSION.md).
