@@ -139,3 +139,11 @@ Leave gravity 900, flap 320, pipe speed 140, gap 180, spacing 260 and all collis
 Freeze application scope. Use a fresh remote clone, full check, isolated native probes and actual GameForm captures as reproducible evidence. Capture the target window with PrintWindow and disclose controlled gaps/direct stepping; this does not establish human playtesting. Commit only inspected game images, never desktop/background captures or personal score data.
 
 The owner approved merging PR #6 and making the repository public. Applied both, reviewed tracked content/history, and verified anonymous access/profile listing. Final PR merging still requires approval; public visibility does not authorize Classroom submission or inventing identity/manual results. Keep missing student details and physical/second-computer checks open in SUBMISSION. No application code, dependencies, tuning or optional features change in Stage 06.
+
+## ADR-018 — Owner-selected public identity fields
+
+**Date:** 2026-11-18. **Status:** Owner-directed documentation choice.
+
+Omit the student number from the public README as explicitly requested by the owner. Remove its placeholder and requests to supply it for publication; keep the still-unknown full name pending. No actual student number has been supplied or published by this work.
+
+Preserve the instructor's stated identity requirement in REQUIREMENTS and identify the omission as an owner-directed exception. Do not claim the requirement was fulfilled or waived. This changes public documentation only; gameplay, tests and manual acceptance results are unaffected.

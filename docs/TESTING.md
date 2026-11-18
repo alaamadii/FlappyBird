@@ -200,3 +200,20 @@ The owner approved merging PR #6 at its checked head 5043189; [Windows run 44052
 The helper commands remain local diagnostics, not required build dependencies. The clone is a second folder on this computer, not the second-computer acceptance test. Actual target-window captures do not claim physical-key input or human playtesting. No game source, tuning, dependencies or assets changed beyond the inspected application captures. [SUBMISSION.md](SUBMISSION.md) separates verified technical checks from final owner sign-off.
 
 Published evidence/screenshots in 4dc4d9f and checklist reconciliation in 98bd541 through [draft PR #7](https://github.com/alaamadii/FlappyBird/pull/7), targeting main. Hosted verification was running at publication; the final exact-head run is tracked on the PR before handoff. Owner identity/manual sign-off and merge remain pending.
+
+## Stage 06 readiness recheck — 2026-11-18
+
+PR #7 was found already merged on 2026-11-17 at main commit de91ef86f5e77b2ddb871468727331147b7bbe24. Its final head ccf5b35 passed [Windows run 44060035990](https://github.com/alaamadii/FlappyBird/actions/runs/44060035990), and the merge passed [main run 44080796874](https://github.com/alaamadii/FlappyBird/actions/runs/44080796874). The earlier draft observations above remain historical. Follow-up documentation uses `docs/stage06-readiness`; no new commit can be added to the closed merged PR.
+
+| Check | Executed result |
+| --- | --- |
+| Working tree/base | Initial tree clean at ccf5b35. Fetched origin, fast-forwarded main to de91ef8 and created the follow-up branch; no existing changes discarded |
+| `./scripts/dev.ps1 check` | Passed on the merged source: restore, Release build with zero warnings/errors, 92 Core + 65 App = 157 cases, zero failures/skips and clean formatting |
+| Markdown/screenshot embeds | All local Markdown targets across 13 files resolved; both README screenshot targets exist and SHA-256 hashes match their unchanged capture record |
+| Exclusions | Tracked-file check found no .local/bin/obj/TRX/personal-score output. `git check-ignore` confirmed those output/data paths remain excluded |
+| Public access | Anonymous repository page HTTP 200, metadata private=false, and both screenshot URLs at de91ef8 HTTP 200 |
+| New owner evidence | None supplied: the request's name, student number, manual-test and screenshot-approval fields remained template placeholders. Existing pending items stay pending; no literal placeholders are inserted as identity values |
+
+No application code, dependencies, tuning or screenshot pixels changed. No new human playthrough, physical input/display test, VS Code F5 run or second-computer result is claimed. Missing owner evidence is a readiness blocker, separate from successful automated checks. Follow-up exact-head hosted CI is tracked on [draft PR #8](https://github.com/alaamadii/FlappyBird/pull/8) and checked before handoff.
+
+Owner clarification later on 2026-11-18: the student number must not be published in README. Its placeholder and publication requests are removed; the original brief requirement is retained separately as an owner-directed exception. Full name, manual results and screenshot acceptance are still not supplied. The clarification is not a test result or screenshot approval.

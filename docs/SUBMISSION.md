@@ -1,8 +1,8 @@
 # Submission and review checklist
 
-Updated **2026-11-17**. Gameplay and optional persistence are implemented; final evidence is prepared on `docs/final-submission`. PR #6 was merged with explicit owner approval. Unchecked items still require owner action; this document does not claim submission is complete. The deadline is **November 30, 2026, 23:59 Asia/Riyadh**.
+Updated **2026-11-18**. Gameplay, optional persistence and technical submission evidence are on main through PR #7. The owner's full name and manual evidence remain missing. The owner chose to omit the student number from public README; the original instructor requirement remains recorded in REQUIREMENTS. Unchecked items still require owner action; this document does not claim submission is complete. The deadline is **November 30, 2026, 23:59 Asia/Riyadh**.
 
-Review candidate: [draft PR #7](https://github.com/alaamadii/FlappyBird/pull/7), pushed on 2026-11-17. Its exact head/CI are tracked on the PR. It remains unmerged pending owner details and sign-off; record the final main identifier after approval rather than calling a draft the submitted state.
+Reviewed technical base: [PR #7](https://github.com/alaamadii/FlappyBird/pull/7) merged on 2026-11-17 at main commit `de91ef86f5e77b2ddb871468727331147b7bbe24`. Its [exact-head CI](https://github.com/alaamadii/FlappyBird/actions/runs/44060035990) and [post-merge main CI](https://github.com/alaamadii/FlappyBird/actions/runs/44080796874) passed. This records the merged technical candidate, not a final submitted state. [Draft readiness PR #8](https://github.com/alaamadii/FlappyBird/pull/8) stays separate from the already merged PR.
 
 ## Initialization review
 
@@ -32,7 +32,8 @@ Review candidate: [draft PR #7](https://github.com/alaamadii/FlappyBird/pull/7),
 - [x] Release build, 157 tests, formatting and reviewed gameplay CI pass; final documentation PR CI is a separate gate below.
 - [x] Fresh GitHub checkout at 5043189 restored/built/checked and its Release executable launched/closed normally on this computer.
 - [x] Two actual application-window captures in `docs/screenshots/` embedded in README with scripted-run captions.
-- [ ] README includes the student's full name and student number.
+- [ ] README includes the owner-confirmed full name.
+- [x] Student-number publication omitted per the owner's 2026-11-18 instruction; this records the owner choice, not fulfillment of the original instructor identity requirement.
 - [x] README lists actual technologies/NuGet packages; references checked with `dotnet list FlappyBird.slnx package`.
 - [x] README explains actual controls, features, storage, limitations and supported environment.
 - [x] Original instructor PDF read and requirements reconciled in REQUIREMENTS and PLAN on 2026-11-16.
@@ -46,14 +47,15 @@ Review candidate: [draft PR #7](https://github.com/alaamadii/FlappyBird/pull/7),
 
 ## Owner sign-off before calling the assignment complete
 
-- [ ] Supply the full name and student number for README; review those public identity fields.
+- [ ] Supply the full name for README and review its public presentation. Student-number publication is not requested.
 - [ ] Accept the two screenshots or replace them with owner captures.
 - [ ] Play random-gap runs using physical Space. Check tap/hold/release, a valid scored pass, pipe/ground loss, repeated click/Enter restart, and focused-button Space suppression.
 - [ ] Hold Space while switching away, release away/return held, and confirm pause/resume and fresh-press protection. Check real-time smoothness, minimize/restore and cover/uncover.
 - [ ] Inspect actual 100%, 125% and 150% Windows display scaling and cross-monitor transitions where available; bitmap-size equivalents alone do not complete this check.
 - [ ] Verify VS Code F5 debugging on the final checkout.
 - [ ] Record another Windows computer's result below. CI/invisible-window tests and a second folder on this computer do not replace this manual check.
-- [ ] Review the final documentation PR and exact-head Windows CI; approve merging, then verify/record the resulting main commit and its checks.
+- [x] PR #7 merge, exact-head Windows CI and resulting main commit/checks verified on 2026-11-18; details recorded above.
+- [ ] Review any readiness follow-up PR and approve merging. Complete the remaining identity/manual checks before final submission sign-off.
 - [ ] Submit only [the GitHub profile URL](https://github.com/alaamadii) in Classroom before the deadline; automated Classroom submission is not authorized.
 
 ## Another-computer record
