@@ -22,7 +22,7 @@ CI uses Windows and the same `check` command. It uploads available TRX files eve
 - Ground height equal to or greater than total height.
 - The parameter name reported by rejected input.
 
-The current suite has **157 cases: Core 92, App 65**. Existing model, pipe, gap/randomness, timing, input, scaling, and repaint coverage remains. Stage 04 adds inclusive/swept contact, loss, score threshold/ordering/eligibility, frozen GameOver, existing ground contact, largest supported updates, 40 loss/reset cycles, score/overlay rendering, shared restart layout, and invisible STA Form tests. Twelve UI restart cycles reuse the timer/pairs and alternate button and focused-button Enter; held-Space and time-debt tests cover App reset wiring.
+The current suite has **159 cases: Core 94, App 65**. Existing model, pipe, gap/randomness, timing, input, scaling, and repaint coverage remains. Stage 04 adds inclusive/swept contact, loss, score threshold/ordering/eligibility, frozen GameOver, existing ground contact, largest supported updates, 40 loss/reset cycles, score/overlay rendering, shared restart layout, and invisible STA Form tests. Twelve UI restart cycles reuse the timer/pairs and alternate button and focused-button Enter; held-Space and time-debt tests cover App reset wiring. Two owner-feedback tuning regressions verify a longer default flap with nearly unchanged rise and gentler unassisted descent.
 
 Stage 05 adds isolated file/service tests for first launch, valid maximum, fresh-instance reload, invalid/oversized/UTF-8 data, retained maximum, locked reads/replacement, unchanged valid files, retry and status. Form tests prove best survives restart/fresh windows, one save per completed best, no writes from repaint/focus/ticks/reset, failure-tolerant gameplay, pause descriptions, native font/bounds at three logical scales, and keyboard focus color. Renderer checks include best, pause, and warnings without model mutation. See [HIGH_SCORE.md](HIGH_SCORE.md) for isolation. Audio/progression remain deferred.
 
@@ -217,3 +217,20 @@ PR #7 was found already merged on 2026-11-17 at main commit de91ef86f5e77b2ddb87
 No application code, dependencies, tuning or screenshot pixels changed. No new human playthrough, physical input/display test, VS Code F5 run or second-computer result is claimed. Missing owner evidence is a readiness blocker, separate from successful automated checks. Follow-up exact-head hosted CI is tracked on [draft PR #8](https://github.com/alaamadii/FlappyBird/pull/8) and checked before handoff.
 
 Owner clarification later on 2026-11-18: the student number must not be published in README. Its placeholder and publication requests are removed; the original brief requirement is retained separately as an owner-directed exception. Full name, manual results and screenshot acceptance are still not supplied. The clarification is not a test result or screenshot approval.
+
+## Owner-requested flight tuning — 2026-11-18
+
+The owner said the program was good but the bird fell a little too quickly, requesting more float. Changed only default gravity 900 → 600 and flap speed 320 → 260. Started `fix/floatier-flight` from updated main at 5ab0563 after PR #8 was confirmed merged; the working tree was clean.
+
+| Check | Executed result |
+| --- | --- |
+| `./scripts/dev.ps1 test` | Passed: 94 Core + 65 App = 159 cases, zero failures/skips |
+| Full `./scripts/dev.ps1 check` | Passed: restore, Release build with zero warnings/errors, all 159 cases, formatting verification. Markdown targets across 13 files and whitespace checks passed; generated/probe/score output remains excluded |
+| New behavior regressions | Default flap lasts at least 15% longer than the original and stays within 2 units of its previous rise. Half-second unassisted descent covers at least 25% less distance |
+| Actual-model measurement | `dotnet run --project .local/flight-tuning/flight-tuning.csproj -c Release`: at 1/60-second samples, return-to-start 0.70 → 0.85 s, rise 54.25 → 54.17 units, half-second fall distance 116.25 → 77.5 units and velocity 450 → 300 units/s |
+| Native rule/executable probe | Re-ran `.local/rules-probe`: scripted valid pass, pipe/ground loss, button/Enter restart, held keys, focus/minimize/restore, bounded stall and disposal passed. Actual hidden Release EXE launch/normal close exited 0 |
+| Persistence probe | Re-ran `.local/polish-probe`: isolated first launch/save/reset/reload, locked-file failure, retained best/retry and close passed |
+
+Existing numerical integration cases use an explicit reference configuration so they continue testing the formula rather than the current tuning. Engine/Form flap assertions read the configured impulse. No collision/input/timing/persistence assertions are weakened. Diagnostic probes use isolated storage and do not overwrite the owner's score. Existing committed screenshots remain unchanged with their original capture provenance.
+
+Owner confirmation of the revised feel remains pending. The owner's original fast-fall report does not establish completion of unrelated physical display/F5/second-computer or screenshot-sign-off checks. Scripted measurements are identified separately from human feedback.

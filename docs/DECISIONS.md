@@ -147,3 +147,18 @@ The owner approved merging PR #6 and making the repository public. Applied both,
 Omit the student number from the public README as explicitly requested by the owner. Remove its placeholder and requests to supply it for publication; keep the still-unknown full name pending. No actual student number has been supplied or published by this work.
 
 Preserve the instructor's stated identity requirement in REQUIREMENTS and identify the omission as an owner-directed exception. Do not claim the requirement was fulfilled or waived. This changes public documentation only; gameplay, tests and manual acceptance results are unaffected.
+
+## ADR-019 — Gentler flight after owner feedback
+
+**Date:** 2026-11-18. **Status:** Implemented for owner review.
+
+The owner reported that the bird falls a little too quickly and requested more float while airborne. This supplies qualitative play feedback for a focused tuning change after the earlier decision to keep original settings until feedback existed.
+
+| Default | Previous | Tuned | Reason |
+| --- | ---: | ---: | --- |
+| Gravity (logical units/s²) | 900 | 600 | Reduce downward acceleration by one third |
+| Flap speed magnitude (logical units/s) | 320 | 260 | Match the lighter gravity so the bird does not jump much higher |
+
+Using the actual Bird model in 1/60-second samples, flap rise changes from 54.25 to 54.17 units and return to starting height from 0.70 to 0.85 seconds (about 21% longer). From rest, half a second of descent covers 77.5 instead of 116.25 units; velocity is 300 instead of 450 units/s. These are sampled model results, not a new human acceptance test.
+
+Keep the integration formula, ceiling clamp, fixed step/catch-up bounds, held-key policy, contact/score/reset order, pipe geometry/speed and storage unchanged. Do not add a fall-speed cap or damping model for this tuning request. Regression tests compare the new default arc and descent against the previous explicit settings, while existing arithmetic tests pin their sample configuration independently of mutable gameplay defaults. Owner confirmation of the new feel remains pending.
