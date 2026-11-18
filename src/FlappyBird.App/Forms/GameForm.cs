@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using FlappyBird.App.Animation;
 using FlappyBird.App.Input;
 using FlappyBird.App.Rendering;
 using FlappyBird.App.Services;
@@ -19,6 +20,7 @@ public sealed class GameForm : Form
     private Font? restartFont;
     private readonly FlapInput input = new();
     private readonly FixedStepLoop loop = new();
+    private readonly SceneAnimation animation;
     private readonly Stopwatch clock = new();
     private readonly System.Windows.Forms.Timer timer = new() { Interval = 15 };
     private bool active;
@@ -42,8 +44,10 @@ public sealed class GameForm : Form
     public GameForm(IHighScoreStore highScoreStore)
     {
         highScores = new HighScoreService(highScoreStore);
+        var settings = new GameSettings();
+        animation = new SceneAnimation(settings);
         renderer = new GameRenderer(playfield);
-        engine = new GameEngine(playfield, new GameSettings());
+        engine = new GameEngine(playfield, settings);
         timer.Tick += OnTimerTick;
         Text = "YMH219 — Flappy Bird";
         ClientSize = new Size(playfield.Width, playfield.Height);
@@ -72,7 +76,8 @@ public sealed class GameForm : Form
     {
         base.OnPaint(e);
         renderer.Render(e.Graphics, ClientSize, engine.Bird, engine.State, engine.Pipes.Pairs, engine.Score,
-            highScores.BestScore, paused: !active && engine.State == GameState.Running, highScores.StatusMessage);
+            highScores.BestScore, paused: !active && engine.State == GameState.Running,
+            highScores.StatusMessage, animation.Frame);
     }
 
     protected override void OnKeyDown(KeyEventArgs e)
@@ -89,6 +94,7 @@ public sealed class GameForm : Form
                 }
 
                 engine.Flap();
+                animation.Flap();
                 SynchronizePresentation();
                 Invalidate();
             }
@@ -161,7 +167,7 @@ public sealed class GameForm : Form
             if (restartFont is null || Math.Abs(restartFont.Size - size) > 0.01)
             {
                 var previous = restartFont;
-                restartFont = new Font("Segoe UI", size, FontStyle.Bold, GraphicsUnit.Pixel);
+                restartFont = new Font("Consolas", size, FontStyle.Bold, GraphicsUnit.Pixel);
                 restartButton.Font = restartFont;
                 previous?.Dispose();
             }
@@ -209,16 +215,19 @@ public sealed class GameForm : Form
 
     private void OnTimerTick(object? sender, EventArgs e)
     {
-        if (!active || engine.State != GameState.Running)
+        if (!active || engine.State == GameState.GameOver)
         {
             SynchronizePresentation();
-            if (engine.State != GameState.GameOver) clock.Restart();
             return;
         }
 
         var elapsed = clock.Elapsed.TotalSeconds;
         clock.Restart();
-        if (loop.Advance(elapsed, engine.Update) > 0)
+        if (loop.Advance(elapsed, seconds =>
+        {
+            if (engine.State == GameState.Running) engine.Update(seconds);
+            animation.Advance(seconds, engine.State, engine.Bird.VerticalVelocity);
+        }) > 0)
         {
             SynchronizePresentation();
             Invalidate();
@@ -261,6 +270,7 @@ public sealed class GameForm : Form
         if (!active || engine.State != GameState.GameOver) return;
         var held = input.IsHeld || SpaceHeld();
         engine.Reset();
+        animation.Reset();
         input.Resume(held);
         loop.Reset();
         clock.Restart();
