@@ -215,3 +215,5 @@ PR #7 was found already merged on 2026-11-17 at main commit de91ef86f5e77b2ddb87
 | New owner evidence | None supplied: the request's name, student number, manual-test and screenshot-approval fields remained template placeholders. Existing pending items stay pending; no literal placeholders are inserted as identity values |
 
 No application code, dependencies, tuning or screenshot pixels changed. No new human playthrough, physical input/display test, VS Code F5 run or second-computer result is claimed. Missing owner evidence is a readiness blocker, separate from successful automated checks. Follow-up exact-head hosted CI is tracked on [draft PR #8](https://github.com/alaamadii/FlappyBird/pull/8) and checked before handoff.
+
+Owner clarification later on 2026-11-18: the student number must not be published in README. Its placeholder and publication requests are removed; the original brief requirement is retained separately as an owner-directed exception. Full name, manual results and screenshot acceptance are still not supplied. The clarification is not a test result or screenshot approval.

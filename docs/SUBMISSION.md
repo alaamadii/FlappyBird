@@ -1,6 +1,6 @@
 # Submission and review checklist
 
-Updated **2026-11-18**. Gameplay, optional persistence and technical submission evidence are on main through PR #7. Required identity and owner/manual evidence remain missing. Unchecked items still require owner action; this document does not claim submission is complete. The deadline is **November 30, 2026, 23:59 Asia/Riyadh**.
+Updated **2026-11-18**. Gameplay, optional persistence and technical submission evidence are on main through PR #7. The owner's full name and manual evidence remain missing. The owner chose to omit the student number from public README; the original instructor requirement remains recorded in REQUIREMENTS. Unchecked items still require owner action; this document does not claim submission is complete. The deadline is **November 30, 2026, 23:59 Asia/Riyadh**.
 
 Reviewed technical base: [PR #7](https://github.com/alaamadii/FlappyBird/pull/7) merged on 2026-11-17 at main commit `de91ef86f5e77b2ddb871468727331147b7bbe24`. Its [exact-head CI](https://github.com/alaamadii/FlappyBird/actions/runs/44060035990) and [post-merge main CI](https://github.com/alaamadii/FlappyBird/actions/runs/44080796874) passed. This records the merged technical candidate, not a final submitted state. [Draft readiness PR #8](https://github.com/alaamadii/FlappyBird/pull/8) stays separate from the already merged PR.
 
@@ -32,7 +32,8 @@ Reviewed technical base: [PR #7](https://github.com/alaamadii/FlappyBird/pull/7)
 - [x] Release build, 157 tests, formatting and reviewed gameplay CI pass; final documentation PR CI is a separate gate below.
 - [x] Fresh GitHub checkout at 5043189 restored/built/checked and its Release executable launched/closed normally on this computer.
 - [x] Two actual application-window captures in `docs/screenshots/` embedded in README with scripted-run captions.
-- [ ] README includes the student's full name and student number.
+- [ ] README includes the owner-confirmed full name.
+- [x] Student-number publication omitted per the owner's 2026-11-18 instruction; this records the owner choice, not fulfillment of the original instructor identity requirement.
 - [x] README lists actual technologies/NuGet packages; references checked with `dotnet list FlappyBird.slnx package`.
 - [x] README explains actual controls, features, storage, limitations and supported environment.
 - [x] Original instructor PDF read and requirements reconciled in REQUIREMENTS and PLAN on 2026-11-16.
@@ -46,7 +47,7 @@ Reviewed technical base: [PR #7](https://github.com/alaamadii/FlappyBird/pull/7)
 
 ## Owner sign-off before calling the assignment complete
 
-- [ ] Supply the full name and student number for README; review those public identity fields.
+- [ ] Supply the full name for README and review its public presentation. Student-number publication is not requested.
 - [ ] Accept the two screenshots or replace them with owner captures.
 - [ ] Play random-gap runs using physical Space. Check tap/hold/release, a valid scored pass, pipe/ground loss, repeated click/Enter restart, and focused-button Space suppression.
 - [ ] Hold Space while switching away, release away/return held, and confirm pause/resume and fresh-press protection. Check real-time smoothness, minimize/restore and cover/uncover.

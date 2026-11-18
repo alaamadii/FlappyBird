@@ -29,7 +29,7 @@ Completion also requires understandable OOP code, meaningful tests, successful W
 ## 3. Working agreement and responsibilities
 
 - The assistant implements the approved stage, runs relevant checks, updates documentation, and publishes changes when authorized. It reports actual evidence and known limitations.
-- The owner reviews the PR, tries the application, supplies full name/student number, and approves merging. The owner also submits the GitHub profile URL through Classroom.
+- The owner reviews the PR, tries the application, supplies the public full name, and approves merging. On 2026-11-18 the owner chose to omit the student number from public README; the original brief requirement remains recorded in REQUIREMENTS. The owner also submits the GitHub profile URL through Classroom.
 - Each stage has its own branch and PR. Review and merge the previous stage before beginning dependent implementation. Never auto-merge.
 - Use focused commits that represent real changes; do not backdate activity or split finished work into artificial history.
 - Publish actual source and docs, excluding build output, test output, local tool state, and secrets.
@@ -168,7 +168,7 @@ If persistence is selected, use a user-local application-data path, not the chec
 - Perform the full manual gameplay checklist, repeated restart/focus tests, and display-scale review.
 - Test on another Windows computer, as the instructor's checklist requests. A second folder or clean checkout on the same computer establishes reproducibility but does not replace the second-computer check.
 - Capture at least **two real application screenshots**, preferably active gameplay with score and Game Over with final score/restart. Store them in `docs/screenshots/` and embed both in README with captions.
-- Fill in the owner's full name and student number in README. The assistant must not guess these values.
+- Fill in the owner's confirmed full name in README; do not guess it. Omit the student number per the owner's 2026-11-18 instruction, with the original brief requirement recorded separately in REQUIREMENTS.
 - List actual technologies and NuGet dependencies, final controls, setup/run commands, features, known limitations, and asset attribution.
 - Verify the repository is public and visible from the owner's GitHub profile without authentication. Obtain owner authorization before changing private visibility; it exposes the entire repository history.
 - Confirm generated output/secrets are excluded and the final reviewed code is on the default branch.
@@ -209,7 +209,7 @@ These are planning targets, not recorded completion dates or guarantees. Owner r
 | Item | Handling |
 | --- | --- |
 | Public repository | Owner-authorized public visibility and anonymous profile/repository access verified 2026-11-17. |
-| Missing identity details | Owner supplies full name and student number before final README sign-off. |
+| Public identity | Full name remains pending. Student number is intentionally omitted per owner direction; the original brief requirement is documented separately. |
 | Visual Studio named in PDF | Retain required WinForms output; confirm whether an editor-specific deliverable is expected. |
 | Timer delays or held keys | Fixed updates, bounded catch-up, key latch, focus reset, and manual checks. |
 | Random obstacle tests | Inject controlled randomness; verify bounds deterministically. |

@@ -2,7 +2,7 @@
 
 A C# Windows Forms desktop game project for **Nesne Tabanlı Programlama (YMH219)**. The project demonstrates object-oriented design, event-driven programming, testing, and a reviewed Git workflow.
 
-**Gameplay implementation is complete. Final submission review is in progress.** Fly through moving pipes, earn points, lose on pipe/ground contact, and start a new run with Enter or the New game button. Separate Score/Best displays, focus pause, and saved best scores are included. PRs #1–#7 are merged. Automated checks, clean-checkout verification, and application screenshots are complete; student details and owner manual sign-off remain outstanding in the [submission checklist](docs/SUBMISSION.md).
+**Gameplay implementation is complete. Final submission review is in progress.** Fly through moving pipes, earn points, lose on pipe/ground contact, and start a new run with Enter or the New game button. Separate Score/Best displays, focus pause, and saved best scores are included. PRs #1–#7 are merged. Automated checks, clean-checkout verification, and application screenshots are complete; the owner's full name and manual sign-off remain outstanding in the [submission checklist](docs/SUBMISSION.md).
 
 ## Quick start
 
@@ -49,7 +49,7 @@ App and Core.Tests reference Core; App.Tests references App for rendering/input/
 | 03 | Moving and recycled pipe obstacles | `feat/pipe-system` | Merged in PR #4 |
 | 04 | Collision, score, Game Over, restart | `feat/game-rules` | Merged in PR #5 |
 | 05 | UI polish and persistent high score | `feat/game-polish` | Merged in [PR #6](https://github.com/alaamadii/FlappyBird/pull/6) |
-| 06 | Final QA, screenshots, submission review | `docs/final-submission` | Evidence merged in [PR #7](https://github.com/alaamadii/FlappyBird/pull/7); identity/manual sign-off pending |
+| 06 | Final QA, screenshots, submission review | `docs/final-submission` | Evidence merged in [PR #7](https://github.com/alaamadii/FlappyBird/pull/7); name/manual sign-off pending |
 
 Every stage uses a separate branch and pull request. Review the diff, test results, and documentation before merging. The owner decides when to merge. The overall brief targets five separate assignments by **November 30, 2026, 23:59 Asia/Riyadh**; this repository covers Flappy Bird only.
 
@@ -137,9 +137,8 @@ Actual application-window captures taken on November 17, 2026 at 125% desktop sc
 | Student detail | Status |
 | --- | --- |
 | Full name | Awaiting owner-provided value |
-| Student number | Awaiting owner-provided value |
 
-These two required identity fields must be supplied before submission. See the [remaining sign-off items](docs/SUBMISSION.md).
+The owner's full name remains pending. See the [remaining sign-off items](docs/SUBMISSION.md).
 
 ## Repository and submission
 

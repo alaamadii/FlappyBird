@@ -48,6 +48,10 @@ High score is the only selected optional enhancement. Stage 05 improves controls
 
 The instructor lists Visual Studio/C#/.NET/Windows Forms. VS Code is the owner's development choice; it does not change the required Windows Forms deliverable. English documentation, xUnit, CI, custom GDI+ drawing, and PR stages are our project practices, not extra instructor requirements.
 
+### Owner direction on public identity — 2026-11-18
+
+The owner explicitly chose to omit the student number from the public README. The placeholder/request for that value is removed, and the assistant will not collect or publish it for this README. The full name remains pending. The original PDF requirement above is preserved as source attribution; omission is an owner-directed exception, not a claim that the instructor's student-number requirement has been fulfilled or waived.
+
 ## Evaluation weights verified against PDF page 5
 
 | Area | Points |
