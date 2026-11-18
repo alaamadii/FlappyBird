@@ -71,7 +71,7 @@ Every stage uses a separate branch and pull request. Review the diff, test resul
 
 Use `./scripts/dev.ps1 check` to restore, build Release, run tests, and verify formatting. The Windows GitHub Actions workflow runs the same command on pull requests and pushes to `main`, then uploads TRX results. Workflow configuration does not imply that a hosted CI run has passed; execution evidence is recorded in [TESTING.md](docs/TESTING.md).
 
-Mandatory gameplay and optional high-score persistence are implemented and regression-tested: **159 tests (94 Core, 65 App)**. A fresh GitHub clone restored, built, passed the full check, and launched/closed normally on the development computer. The owner reported that falling felt too fast; flight defaults now provide gentler descent and a longer flap arc. Acceptance of the new feel, other physical display/input checks, and another-computer sign-off remain pending. Audio, progressive speed, and selectable difficulties are deferred. Scripted checks do not establish human difficulty or fairness. The bird uses a conservative rectangular hitbox rather than pixel-perfect artwork collision. No distribution package or third-party assets are included. A license has not yet been selected.
+Mandatory gameplay and optional high-score persistence are implemented and regression-tested: **162 tests (97 Core, 65 App)**. A fresh GitHub clone restored, built, passed the full check, and launched/closed normally on the development computer. After the owner reported fast falling and oversized Space hops, flight now uses a smaller hop, lighter gravity and capped descent. Acceptance of the revised feel, other physical display/input checks, and another-computer sign-off remain pending. Audio, progressive speed, and selectable difficulties are deferred. Scripted checks do not establish human difficulty or fairness. The bird uses a conservative rectangular hitbox rather than pixel-perfect artwork collision. No distribution package or third-party assets are included. A license has not yet been selected.
 
 ## Technologies and NuGet packages
 
@@ -88,7 +88,7 @@ C#/.NET 10, Windows Forms, original GDI+ drawing, a WinForms timer with Stopwatc
 | Switch away or minimize | Freezes the run, shows Paused while Running, and clears timing accumulation |
 | Return | Resumes a live run without catch-up; Game Over remains stopped |
 
-Gravity is 600 logical units/s² and flap velocity is −260 units/s. The lower gravity slows descent; the matched flap impulse keeps the rise near 54 units while extending return to the starting height from about 0.70 to 0.85 seconds. Motion uses fixed 1/60-second updates; each timer tick accepts at most 100 ms and performs at most six updates. Excess stall time is discarded. At the ceiling, Y is clamped and upward velocity cleared. See [architecture](docs/ARCHITECTURE.md) for the formula and policies.
+Gravity is 360 logical units/s², flap velocity is −160 units/s, and downward speed is capped at 240 units/s. A single flap rises about 34 units and returns to its starting height in about 0.88 seconds. This reduces the previous candidate's roughly 54-unit hop without shortening its floaty cadence, and prevents long falls from accelerating indefinitely. Motion uses fixed 1/60-second updates; each timer tick accepts at most 100 ms and performs at most six updates. Excess stall time is discarded. At the ceiling, Y is clamped and upward velocity cleared. See [architecture](docs/ARCHITECTURE.md) for the formula and policies.
 
 ## Collision, score, and restart
 

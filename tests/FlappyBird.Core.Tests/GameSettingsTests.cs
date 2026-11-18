@@ -14,6 +14,7 @@ public sealed class GameSettingsTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new GameSettings(gravity: invalid));
         Assert.Throws<ArgumentOutOfRangeException>(() => new GameSettings(flapSpeed: invalid));
+        Assert.Throws<ArgumentOutOfRangeException>(() => new GameSettings(maxFallSpeed: invalid));
         Assert.Throws<ArgumentOutOfRangeException>(() => new GameSettings(birdWidth: invalid));
         Assert.Throws<ArgumentOutOfRangeException>(() => new GameSettings(birdHeight: invalid));
     }

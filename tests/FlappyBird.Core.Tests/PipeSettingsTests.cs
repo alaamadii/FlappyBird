@@ -42,7 +42,21 @@ public sealed class PipeSettingsTests
         settings.ValidateFor(new Playfield());
         Assert.True(settings.PipeGapHeight > settings.BirdHeight + 2 * settings.BirdClearance);
         Assert.True(settings.PipeSpacing - settings.PipeWidth > settings.BirdWidth + 2 * settings.BirdClearance);
-        Assert.Equal(600, settings.Gravity);
-        Assert.Equal(260, settings.FlapSpeed);
+        Assert.Equal(360, settings.Gravity);
+        Assert.Equal(160, settings.FlapSpeed);
+        Assert.Equal(240, settings.MaxFallSpeed);
+    }
+
+    [Fact]
+    public void DefaultFallSpeedBudgetCanCoverTheLargestDownwardGapChange()
+    {
+        var field = new Playfield();
+        var settings = new GameSettings();
+        var gapTopRange = field.GroundTop - 2 * settings.GapMargin - settings.PipeGapHeight;
+        var birdTravelRequired = gapTopRange - (settings.PipeGapHeight - settings.BirdHeight);
+        var unobstructedTime = (settings.PipeSpacing - settings.PipeWidth - settings.BirdWidth) / settings.PipeSpeed;
+
+        // Necessary speed budget only; this does not claim every random run is human-playable.
+        Assert.True(settings.MaxFallSpeed * unobstructedTime > birdTravelRequired);
     }
 }

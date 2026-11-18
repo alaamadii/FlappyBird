@@ -32,7 +32,7 @@ flowchart LR
     O --> H[App records completed best once]
 ```
 
-Ready → Running happens on a fresh Space press. Flap sets velocity to −260 units/s; holding the key cannot repeat until release. Gravity adds 600 × dt to velocity. At the default 1/60 second step, one gravity increment is 10 units/s. Explain the actual semi-implicit formula: update velocity first, then position using the updated velocity.
+Ready → Running happens on a fresh Space press. Flap sets velocity to −160 units/s; holding the key cannot repeat until release. Gravity adds 360 × dt to velocity. At the default 1/60 second step, one gravity increment is 6 units/s. Downward velocity is limited to 240 units/s; upward impulse is not limited by this cap. Explain the semi-implicit formula: update and cap velocity first, then position using that velocity.
 
 The UI timer schedules work; Stopwatch measures elapsed time. FixedStepLoop admits at most 100 ms and six updates per tick. Excess stall time is discarded. Focus loss stops updates and clears accumulation; return samples held Space and resumes only live runs. Painting cannot move the bird.
 

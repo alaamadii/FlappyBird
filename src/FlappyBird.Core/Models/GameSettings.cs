@@ -3,14 +3,15 @@ namespace FlappyBird.Core.Models;
 /// <summary>Immutable flight and obstacle tuning in logical units and seconds.</summary>
 public sealed class GameSettings
 {
-    public GameSettings(double gravity = 600, double flapSpeed = 260,
+    public GameSettings(double gravity = 360, double flapSpeed = 160,
         double birdWidth = 86, double birdHeight = 48,
         double pipeSpeed = 140, double pipeWidth = 64, double pipeGapHeight = 180,
         double pipeSpacing = 260, double initialPipeOffset = 40,
-        double gapMargin = 40, double birdClearance = 12)
+        double gapMargin = 40, double birdClearance = 12, double maxFallSpeed = 240)
     {
         RequirePositiveFinite(gravity, nameof(gravity));
         RequirePositiveFinite(flapSpeed, nameof(flapSpeed));
+        RequirePositiveFinite(maxFallSpeed, nameof(maxFallSpeed));
         RequirePositiveFinite(birdWidth, nameof(birdWidth));
         RequirePositiveFinite(birdHeight, nameof(birdHeight));
         RequirePositiveFinite(pipeSpeed, nameof(pipeSpeed));
@@ -22,6 +23,7 @@ public sealed class GameSettings
         RequirePositiveFinite(birdClearance, nameof(birdClearance));
         Gravity = gravity;
         FlapSpeed = flapSpeed;
+        MaxFallSpeed = maxFallSpeed;
         BirdWidth = birdWidth;
         BirdHeight = birdHeight;
         PipeSpeed = pipeSpeed;
@@ -35,6 +37,7 @@ public sealed class GameSettings
 
     public double Gravity { get; }
     public double FlapSpeed { get; }
+    public double MaxFallSpeed { get; }
     public double BirdWidth { get; }
     public double BirdHeight { get; }
     public double PipeSpeed { get; }

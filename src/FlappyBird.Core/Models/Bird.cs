@@ -47,8 +47,13 @@ public sealed class Bird
 
         // Semi-implicit Euler: update velocity first, then position using that velocity.
         var velocity = VerticalVelocity + settings.Gravity * elapsedSeconds;
+        if (!double.IsFinite(velocity))
+        {
+            throw new ArgumentOutOfRangeException(nameof(elapsedSeconds), "Update would overflow bird motion.");
+        }
+        velocity = Math.Min(velocity, settings.MaxFallSpeed);
         var position = Y + velocity * elapsedSeconds;
-        if (!double.IsFinite(velocity) || !double.IsFinite(position))
+        if (!double.IsFinite(position))
         {
             throw new ArgumentOutOfRangeException(nameof(elapsedSeconds), "Update would overflow bird motion.");
         }

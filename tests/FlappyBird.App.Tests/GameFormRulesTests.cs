@@ -83,6 +83,7 @@ public sealed class GameFormRulesTests
         engine.Flap();
         engine.Update(1);
         engine.Update(1);
+        engine.Update(1); // Slower, capped descent can outlast two seconds with a high random gap.
         Invoke(form, "OnTimerTick", null, EventArgs.Empty);
         Assert.Equal(GameState.GameOver, engine.State);
     }

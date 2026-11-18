@@ -103,7 +103,10 @@ public sealed class GameRulesTests
     public void NormalFlightHitsGroundAndStopsExactlyAtGroundTop()
     {
         var engine = new GameEngine(new Playfield(), new GameSettings(), new MiddleGapSource());
+        // Keep the slower descent isolated from pipes so this still tests ground contact.
+        foreach (var pair in engine.Pipes.Pairs) pair.Reset(pair.X + 2000, pair.GapTop);
         engine.Flap();
+        engine.Update(1);
         engine.Update(1);
         engine.Update(1);
         Assert.Equal(GameState.GameOver, engine.State);
@@ -117,7 +120,8 @@ public sealed class GameRulesTests
     [InlineData(900)]
     public void ExistingGroundTouchOrOverlapEndsImmediatelyWithoutNegativeTime(double gravity)
     {
-        var engine = new GameEngine(new Playfield(), new GameSettings(gravity: gravity), new MiddleGapSource());
+        var engine = new GameEngine(new Playfield(),
+            new GameSettings(gravity: gravity, maxFallSpeed: double.MaxValue), new MiddleGapSource());
         engine.Flap();
         engine.Bird.Reset();
         engine.Bird.Update(1); // Independent model deliberately supplies an already overlapping state.
