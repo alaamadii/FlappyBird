@@ -1,4 +1,4 @@
-# YMH219 — Flappy Bird
+# YMH219 :Flappy Bird
 
 A retro arcade game built with **C#/.NET 10 and Windows Forms** for **Nesne Tabanlı Programlama (YMH219)**. Guide a pixel-art bird through moving pipes, improve your score, and try again after each collision.
 
