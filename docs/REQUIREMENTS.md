@@ -23,10 +23,11 @@ The PDF requires at least two obstacles rather than specifying pipe pairs. Our p
 | Enhancement | Acceptance condition if selected | Status |
 | --- | --- | --- |
 | Persistent high score | Survives restart/application relaunch; storage failures handled | Merged in PR #6; FileHighScoreStoreTests, HighScoreServiceTests, GameFormRulesTests; [storage contract](HIGH_SCORE.md) |
+| Retro artwork and animation | Readable original pixel theme, wing/tilt/scroll motion, pause/loss freeze and pure painting | Owner-requested follow-up; SceneAnimationTests, renderer/native tests; [animation contract](ANIMATION.md); visual acceptance pending |
 | Progressive speed | Predictable bounded difficulty progression with tests | Deferred; no progression added |
 | Audio or difficulty levels | Clear controls and stable gameplay behavior | Deferred; no audio or selector added |
 
-High score is the only selected optional enhancement. Stage 05 improves controls, score/best contrast, pause explanation and native restart focus/scaling without changing mandatory gameplay/settings. Human difficulty and physical input/display review remain pending. Stage 06 provides screenshots, clean-checkout and public-access evidence; identity/owner/second-computer sign-off is still pending.
+High score and the owner-requested retro presentation are selected enhancements. Flight tuning follows the owner's playtest feedback; this visual follow-up preserves those physics and mandatory rules. Human feel, visual and physical input/display acceptance remain pending. Stage 06 provides screenshots, clean-checkout and public-access evidence; full-name/owner/second-computer sign-off is still pending.
 
 ## Quality and process
 

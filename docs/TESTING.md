@@ -22,7 +22,7 @@ CI uses Windows and the same `check` command. It uploads available TRX files eve
 - Ground height equal to or greater than total height.
 - The parameter name reported by rejected input.
 
-The current suite has **162 cases: Core 97, App 65**. Existing model, pipe, gap/randomness, timing, input, scaling, and repaint coverage remains. Stage 04 adds inclusive/swept contact, loss, score threshold/ordering/eligibility, frozen GameOver, existing ground contact, largest supported updates, 40 loss/reset cycles, score/overlay rendering, shared restart layout, and invisible STA Form tests. Twelve UI restart cycles reuse the timer/pairs and alternate button and focused-button Enter; held-Space and time-debt tests cover App reset wiring. Owner-feedback regressions verify a smaller hop with retained airtime, gentler descent, configurable downward caps with upward flap unaffected, and a necessary default downward gap-transition speed budget.
+The current suite has **180 cases: Core 97, App 83**. Model, pipe, randomness, timing, input, collision, scoring, restart and persistence coverage remains. App adds presentation-phase/reset/freeze/validation tests, custom scrolling speed, explicit wing/tilt/parallax snapshots at three scales, exact repeat/wrap output and native idle/pause/loss/restart wiring. Native-window tests retain their nonparallel collection. Flight tuning regressions preserve the smaller hop/capped descent; this visual follow-up changes no Core code.
 
 Stage 05 adds isolated file/service tests for first launch, valid maximum, fresh-instance reload, invalid/oversized/UTF-8 data, retained maximum, locked reads/replacement, unchanged valid files, retry and status. Form tests prove best survives restart/fresh windows, one save per completed best, no writes from repaint/focus/ticks/reset, failure-tolerant gameplay, pause descriptions, native font/bounds at three logical scales, and keyboard focus color. Renderer checks include best, pause, and warnings without model mutation. See [HIGH_SCORE.md](HIGH_SCORE.md) for isolation. Audio/progression remain deferred.
 
@@ -246,3 +246,19 @@ Added two cap cases (90 and 240 units/s) that exercise long falls, terminal moti
 The initial revised test run passed 161 cases before the speed-budget regression was added. Native rules/executable and isolated persistence probes passed that candidate; final full-check and probe results are recorded separately below. No committed screenshots or personal score data are changed. Physical feel confirmation remains pending.
 
 Final candidate validation: `./scripts/dev.ps1 check` passed restore, zero-warning/error Release build, **162 cases (97 Core + 65 App)** and formatting. Re-ran the native rules/executable and isolated high-score probes with the final 240-unit/s cap: all passed, including isolated exact ground contact and normal executable close (exit 0). All 13 Markdown files' local targets resolved; whitespace/output-exclusion checks passed. Hosted exact-head results are recorded on PR #9.
+
+## Retro artwork and animation — 2026-11-18
+
+Owner requested an Atari-like appearance and improved animation. `feat/retro-arcade` starts from the f231b51 flight candidate. GameForm/renderer/animation changes stay in App; Core physics, inputs, collision/score/reset policy and score storage are preserved. External generation produced no asset; delivered artwork and heading glyphs are original code.
+
+| Check | Executed evidence |
+| --- | --- |
+| Full `./scripts/dev.ps1 check` | Passed: restore, Release build with zero warnings/errors, **97 Core + 83 App = 180 cases**, zero failures/skips and clean formatting |
+| Presentation tests | Ready bob/wings with stationary Core, running offsets/wrap/tilt, custom pipe speed, immediate fresh-flap pose, held-repeat suppression, GameOver freeze, reset and invalid-input no-mutation |
+| Renderer checks | Wing/tilt/scroll snapshots differ as expected at 100%/125%/150% equivalents, repeated frames and a full parallax wrap are byte-identical, Core values remain unchanged, caller graphics state restored |
+| Native Form check | Ready animates without physics, inactive frame freezes, Running scrolls, loss freezes, and restart resets the snapshot; existing nonparallel initialization isolation retained |
+| Existing native/persistence probes | Re-ran rules and polish helpers: controlled scoring/contact, reset/held keys/focus/minimize/restore/bounded stall/disposal, save/reload/failure/retry and normal close passed. Actual hidden Release EXE launch/close exited 0 |
+| Visual inspection | Inspected Ready 125%, Running 100% and GameOver 150% renderer equivalents. Moved the moon away from instruction text and verified seamless backdrop wrap. These previews are diagnostics, not gameplay evidence |
+| Actual screenshots | Captured/inspected real target-window Ready, scored Running and GameOver at 120 DPI from 0a17073. Isolated scripted gaps/flaps earned score 1 through ordinary logic; natural collision saved best 1 and button restart passed. Updated PNGs/provenance; no desktop or owner score data included |
+
+Ground alignment checks now sample a flat soil area clear of the control text/scrolling texture, retaining their geometry/color assertions. Omitted animation parameters still render a fixed deterministic snapshot. No system clock, network or file I/O occurs in paint. Human smoothness, actual DPI transitions, revised visual acceptance and unrelated manual sign-off remain pending. See [ANIMATION.md](ANIMATION.md).

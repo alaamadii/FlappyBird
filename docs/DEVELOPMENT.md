@@ -186,3 +186,12 @@ This is initialization only. Gameplay remains planned. Detailed local validation
 - Actual-model samples show about 37% less hop height, similar airtime, and 40% less descent after half a second versus the first candidate. Added terminal-speed/upward-flap and necessary gap-transition budget coverage; updated reference/ground/native loss fixtures without relaxing contact assertions.
 - Updated current README, architecture, walkthrough and ADR-020. No pipe/input/timing/scoring/reset/storage behavior, screenshot pixels or student-number privacy choice changed. New feel confirmation remains an owner check.
 - Final full check passed with 162 cases (97 Core, 65 App), zero warnings/errors and clean formatting. Final-cap native rule/executable and persistence probes passed; local links, whitespace and ignored-output checks passed. The rebuilt game is prepared for the owner's next test; hosted exact-head checks remain separate.
+
+## 2026-11-18 — Owner-requested retro artwork and animation
+
+- Owner requested an Atari-like look and improved animation, suggesting Higgsfield. Checked the connection and attempted one sprite generation; no asset was produced. Implemented original code-authored block artwork and glyphs without external/generated media or a runtime service dependency.
+- Created `feat/retro-arcade` from the f231b51 flight candidate, preserving the smaller hop, 360 gravity and 240 fall cap. Core source is unchanged by this follow-up.
+- Added App-owned SceneAnimation/immutable frame values, three wing poses with fresh-press pulse, Ready bob, velocity-based visual tilt, wrapped layered scrolling and original five-by-seven headings. Kept native accessible restart, viewport/DPI mapping, double buffering and graphics disposal.
+- Drove presentation from the existing bounded loop; Ready stays stationary in Core, inactive/lost frames freeze, held repeat cannot reset the pulse and restart clears phases. Rendering only reads the supplied snapshot.
+- Full check passed: zero warnings/errors, 180 cases (97 Core, 83 App), formatting clean. Native/persistence probes and actual Release launch/close passed. Exact repaint/wrap and state-preservation assertions remain; no manual acceptance is inferred.
+- Inspected equivalent-scale previews and actual target-window captures. Updated README screenshots/provenance from runtime source 0a17073, plus animation ownership/asset documentation and ADR-021. Owner review of the new look/smoothness and final submission fields remains pending; student-number omission is preserved.

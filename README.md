@@ -2,7 +2,7 @@
 
 A C# Windows Forms desktop game project for **Nesne Tabanlı Programlama (YMH219)**. The project demonstrates object-oriented design, event-driven programming, testing, and a reviewed Git workflow.
 
-**Gameplay implementation is complete. Final submission review is in progress.** Fly through moving pipes, earn points, lose on pipe/ground contact, and start a new run with Enter or the New game button. Separate Score/Best displays, focus pause, and saved best scores are included. PRs #1–#8 are merged. Automated checks, clean-checkout verification, and application screenshots are complete; the owner's full name and manual sign-off remain outstanding in the [submission checklist](docs/SUBMISSION.md).
+**Gameplay implementation is complete. Final submission review is in progress.** Fly through moving pipes with an animated pixel-art bird, earn points, lose on contact, and start again with Enter or New game. The retro night scene includes wing flaps, gentle visual tilt, scrolling terrain, Score/Best displays, focus pause and saved best scores. PRs #1–#8 are merged; owner-requested flight tuning and retro visuals remain review follow-ups. The owner's full name and manual sign-off remain outstanding in the [submission checklist](docs/SUBMISSION.md).
 
 ## Quick start
 
@@ -24,7 +24,7 @@ Open the root folder in VS Code, install the recommended extensions, and use **C
 
 ```text
 src/
-  FlappyBird.App/           Window, rendering, input/timing, high-score services
+  FlappyBird.App/           Window, pixel rendering/animation, input/timing, score storage
   FlappyBird.Core/          Models, swept collision, GameEngine/PipeSystem, gap generation
 tests/
   FlappyBird.Core.Tests/    xUnit behavior tests
@@ -58,6 +58,7 @@ Every stage uses a separate branch and pull request. Review the diff, test resul
 - [Completion plan](docs/PLAN.md): stage-by-stage tasks, acceptance criteria, target dates, and review gates for finishing Flappy Bird.
 - [Setup and troubleshooting](docs/SETUP.md): tools, environment, VS Code, common failures.
 - [Architecture](docs/ARCHITECTURE.md): current responsibilities and intended game design.
+- [Retro artwork and animation](docs/ANIMATION.md): original pixel assets, timing, pause/reset behavior and verification.
 - [Decisions](docs/DECISIONS.md): choices, rationale, and tradeoffs.
 - [Development workflow and log](docs/DEVELOPMENT.md): stages, branching, review, actual changes.
 - [Testing](docs/TESTING.md): commands, assertions, UI checks, and evidence.
@@ -71,7 +72,7 @@ Every stage uses a separate branch and pull request. Review the diff, test resul
 
 Use `./scripts/dev.ps1 check` to restore, build Release, run tests, and verify formatting. The Windows GitHub Actions workflow runs the same command on pull requests and pushes to `main`, then uploads TRX results. Workflow configuration does not imply that a hosted CI run has passed; execution evidence is recorded in [TESTING.md](docs/TESTING.md).
 
-Mandatory gameplay and optional high-score persistence are implemented and regression-tested: **162 tests (97 Core, 65 App)**. A fresh GitHub clone restored, built, passed the full check, and launched/closed normally on the development computer. After the owner reported fast falling and oversized Space hops, flight now uses a smaller hop, lighter gravity and capped descent. Acceptance of the revised feel, other physical display/input checks, and another-computer sign-off remain pending. Audio, progressive speed, and selectable difficulties are deferred. Scripted checks do not establish human difficulty or fairness. The bird uses a conservative rectangular hitbox rather than pixel-perfect artwork collision. No distribution package or third-party assets are included. A license has not yet been selected.
+Mandatory gameplay, persistence and retro presentation are regression-tested: **180 tests (97 Core, 83 App)**. A fresh GitHub clone previously restored, built, checked and launched/closed normally on the development computer; current execution evidence is in TESTING. After the owner reported fast falling and oversized Space hops, flight uses a smaller hop, lighter gravity and capped descent. Animation advances separately and preserves those physics. Acceptance of the revised feel/art, physical display/input checks and another-computer sign-off remain pending. Audio, progressive speed and selectable difficulties are deferred. Scripted checks do not establish human difficulty or fairness. The nominal rectangular hitbox remains conservative. No distribution package or third-party visual assets are included. A license has not yet been selected.
 
 ## Technologies and NuGet packages
 
@@ -120,11 +121,11 @@ Settings are finite/positive and validated against Playfield. Engine updates acc
 
 The renderer uses the 480 × 640 logical playfield with ground beginning at Y=560. Shapes, strokes, and pixel-unit fonts scale together to the actual client area. Uniform scaling and centered borders preserve proportions when the client aspect ratio differs. WinForms DPI autoscaling uses a 96-DPI baseline; the window remains fixed-size with maximize disabled.
 
-The renderer reads Bird, state, current/best scores, pause/status presentation, and pipe geometry. It paints pipes before the bird, separate corner score cards while Running, an inactive pause card, and a dimmed final-score card on Game Over. Instructions sit in the ground region. A shared SceneViewport mapping keeps the native restart button and its pixel-unit font aligned with painted content at different client sizes. Painting never changes domain state, randomness, or storage. Accessible descriptions cover Ready, Running, paused, Game Over, best, restart, and storage warnings.
+The renderer reads Bird, state, scores, pipe geometry and an immutable animation snapshot. Original block shapes and five-by-seven heading glyphs create an 8-bit arcade look. Ready has gentle bob/wing motion; Running adds velocity-based visual tilt and layered world scrolling. Fresh Space pulses the wing pose. Focus loss freezes presentation, Game Over holds its last frame, and restart resets it. Painting never advances animation, domain state, randomness or storage. Small instructions and the native restart button retain readable monospace text. SceneViewport keeps native controls aligned with the same scaled scene; accessible descriptions retain controls, state, best and storage warnings. See [animation details](docs/ANIMATION.md).
 
 ## Screenshots and student details
 
-Actual application-window captures taken on November 17, 2026 at 125% desktop scaling. An isolated scripted run uses controlled gaps and normal scoring/contact logic. These images are not evidence of human playtesting; [capture details](docs/screenshots/README.md) record their source and limitations.
+Actual application-window captures refreshed on November 18, 2026 at 125% desktop scaling. An isolated scripted run uses controlled gaps and normal scoring/contact logic. These images are not evidence of human playtesting; [capture details](docs/screenshots/README.md) record their source and limitations. A [Ready-screen capture](docs/screenshots/ready.png) also shows the new pixel theme.
 
 ![Running game with a completed pipe pass, score 1, and a visible next gap](docs/screenshots/gameplay.png)
 
@@ -132,7 +133,7 @@ Actual application-window captures taken on November 17, 2026 at 125% desktop sc
 
 ![Game Over with final score 1, saved best 1, and the focused New game button](docs/screenshots/game-over.png)
 
-*Game Over after ground contact: final score 1, saved best 1, and keyboard-accessible restart.*
+*Game Over after collision: final score 1, saved best 1, and keyboard-accessible restart.*
 
 | Student detail | Status |
 | --- | --- |

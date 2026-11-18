@@ -2,6 +2,8 @@
 
 Updated **2026-11-18**. Gameplay, optional persistence and technical submission evidence are on main through PR #7. The owner's full name and manual evidence remain missing. The owner chose to omit the student number from public README; the original instructor requirement remains recorded in REQUIREMENTS. Unchecked items still require owner action; this document does not claim submission is complete. The deadline is **November 30, 2026, 23:59 Asia/Riyadh**.
 
+Owner-requested flight tuning and retro animation remain review follow-ups. The current branch refreshes actual application screenshots for the new visuals; their acceptance and real-time smoothness remain owner checks. Presentation work does not change the flight candidate or complete unrelated manual sign-off.
+
 Reviewed technical base: [PR #7](https://github.com/alaamadii/FlappyBird/pull/7) merged on 2026-11-17 at main commit `de91ef86f5e77b2ddb871468727331147b7bbe24`. Its [exact-head CI](https://github.com/alaamadii/FlappyBird/actions/runs/44060035990) and [post-merge main CI](https://github.com/alaamadii/FlappyBird/actions/runs/44080796874) passed. [Readiness PR #8](https://github.com/alaamadii/FlappyBird/pull/8) subsequently merged at 5ab0563. The owner requested gentler flight after trying the game; the `fix/floatier-flight` tuning still needs owner confirmation. These records do not replace final submission sign-off or the remaining manual checks.
 
 ## Initialization review
