@@ -147,3 +147,30 @@ The owner approved merging PR #6 and making the repository public. Applied both,
 Omit the student number from the public README as explicitly requested by the owner. Remove its placeholder and requests to supply it for publication; keep the still-unknown full name pending. No actual student number has been supplied or published by this work.
 
 Preserve the instructor's stated identity requirement in REQUIREMENTS and identify the omission as an owner-directed exception. Do not claim the requirement was fulfilled or waived. This changes public documentation only; gameplay, tests and manual acceptance results are unaffected.
+
+## ADR-019 — Gentler flight after owner feedback
+
+**Date:** 2026-11-18. **Status:** Implemented for owner review.
+
+The owner reported that the bird falls a little too quickly and requested more float while airborne. This supplies qualitative play feedback for a focused tuning change after the earlier decision to keep original settings until feedback existed.
+
+| Default | Previous | Tuned | Reason |
+| --- | ---: | ---: | --- |
+| Gravity (logical units/s²) | 900 | 600 | Reduce downward acceleration by one third |
+| Flap speed magnitude (logical units/s) | 320 | 260 | Match the lighter gravity so the bird does not jump much higher |
+
+Using the actual Bird model in 1/60-second samples, flap rise changes from 54.25 to 54.17 units and return to starting height from 0.70 to 0.85 seconds (about 21% longer). From rest, half a second of descent covers 77.5 instead of 116.25 units; velocity is 300 instead of 450 units/s. These are sampled model results, not a new human acceptance test.
+
+Keep the integration formula, ceiling clamp, fixed step/catch-up bounds, held-key policy, contact/score/reset order, pipe geometry/speed and storage unchanged. Do not add a fall-speed cap or damping model for this tuning request. Regression tests compare the new default arc and descent against the previous explicit settings, while existing arithmetic tests pin their sample configuration independently of mutable gameplay defaults. Owner confirmation of the new feel remains pending.
+
+## ADR-020 — Smaller Space hop and bounded descent
+
+**Date:** 2026-11-18. **Status:** Revised candidate following owner playtest feedback.
+
+After testing ADR-019's 600/260 candidate, the owner reported that both falling and the Space hop remained too large. Supersede its height-preservation and uncapped-descent choices: use gravity 360, flap speed 160 and a validated MaxFallSpeed of 240 logical units/s. Apply the cap only to downward velocity before position prediction/update; validate raw velocity overflow before clamping so the cap cannot hide invalid arithmetic. Keep the setting in Core, appended as an optional constructor argument to preserve existing call sites.
+
+At 1/60-second samples, hop rise falls from 54.17 to 34.23 units (about 37% smaller), while return time remains similar at 0.883 instead of 0.85 seconds. Half-second descent from rest covers 46.5 instead of 77.5 units and reaches 180 instead of 300 units/s. Sustained descent cannot exceed 240 units/s.
+
+Keep pipe dimensions/speed and inclusive swept collision ordering. The cap retains more travel capacity than the minimum positional change across the widest downward gap transition in the default geometry; a regression guards this necessary speed budget without claiming all random runs are human-playable. Ground-only fixtures keep pipes out of the way and wait long enough for slower descent, retaining their exact-contact assertions. Native loss helpers allow an extra bounded engine update so high random gaps cannot make them timing-dependent.
+
+No additional input, timer, state, score, restart or persistence behavior changes. Existing arithmetic fixtures explicitly choose a practically unbounded cap when testing the original integration configuration. Revised feel still needs owner confirmation; other manual sign-offs remain separate.

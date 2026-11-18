@@ -169,3 +169,20 @@ This is initialization only. Gameplay remains planned. Detailed local validation
 - Application code, dependencies, settings and images remain unchanged. Screenshot owner acceptance, physical/manual/second-computer checks, identity and Classroom submission remain pending. The follow-up stays draft until required owner information is complete; no automatic merge or Classroom action is authorized.
 - Published readiness correction 17c32b0 on `docs/stage06-readiness` and opened [draft PR #8](https://github.com/alaamadii/FlappyBird/pull/8) against main. Final exact-head checks and outstanding owner inputs are recorded on that PR; PR #7 remains merged and is not reopened.
 - Owner clarified that the student number should not be published in README. Removed its placeholder/publication request, updated current plan/checklist expectations, and recorded ADR-018 plus the original instructor requirement as a separate owner-directed exception. Full name and manual/screenshot acceptance remain pending; no actual student number was collected or published.
+
+## 2026-11-18 — Gentler flight from owner feedback
+
+- The owner reported fast falling and asked for more float. Confirmed PR #8 merged at 5ab0563, fast-forwarded main and created `fix/floatier-flight` from a clean tree.
+- Changed default gravity from 900 to 600 and flap-speed magnitude from 320 to 260, keeping the previous flap height while increasing time aloft. Integration, ceilings, inputs, timer limits, contact/scoring/reset rules, pipes and persistence remain unchanged.
+- Added two behavior regressions comparing new defaults with the prior explicit configuration; preserved numerical integration tests with fixed reference settings and made engine/Form wiring assertions use the configured impulse.
+- Test run passed 159 cases (94 Core, 65 App). Actual Bird sampling measured about 21% longer return to starting height with nearly unchanged rise; native rule/executable and isolated high-score probes passed. Results/limitations are recorded in TESTING.
+- Updated current flight values, walkthrough examples and ADR-019. Recorded qualitative owner feedback without claiming approval of the new tuning or unrelated manual checks. The student-number omission remains in place.
+- Full `./scripts/dev.ps1 check` passed: restore, zero-warning/error Release build, all 159 cases and formatting verification. Local Markdown targets across 13 files, whitespace checks and generated-file exclusions also passed. Hosted results are tracked separately on the tuning PR.
+
+### Follow-up: smaller hop and capped falling
+
+- The owner tried the 600/260 build and reported that both the fall and the Space hop were still too large. Continued PR #9 on its existing branch instead of merging it.
+- Revised gravity to 360 and flap speed to 160, and added a validated positive MaxFallSpeed default of 240. Bird caps only downward velocity, rejects overflow before capping and keeps its nonmutating prediction contract for collision.
+- Actual-model samples show about 37% less hop height, similar airtime, and 40% less descent after half a second versus the first candidate. Added terminal-speed/upward-flap and necessary gap-transition budget coverage; updated reference/ground/native loss fixtures without relaxing contact assertions.
+- Updated current README, architecture, walkthrough and ADR-020. No pipe/input/timing/scoring/reset/storage behavior, screenshot pixels or student-number privacy choice changed. New feel confirmation remains an owner check.
+- Final full check passed with 162 cases (97 Core, 65 App), zero warnings/errors and clean formatting. Final-cap native rule/executable and persistence probes passed; local links, whitespace and ignored-output checks passed. The rebuilt game is prepared for the owner's next test; hosted exact-head checks remain separate.

@@ -4,7 +4,9 @@ namespace FlappyBird.Core.Tests;
 
 public sealed class BirdTests
 {
-    private static Bird CreateBird() => new(new Playfield(), new GameSettings());
+    // Fixed values keep integration assertions independent of gameplay-default tuning.
+    private static Bird CreateBird() => new(new Playfield(),
+        new GameSettings(gravity: 900, flapSpeed: 320, maxFallSpeed: double.MaxValue));
 
     [Fact]
     public void InitialBirdIsCenteredAboveGroundAndStationary()
@@ -70,7 +72,7 @@ public sealed class BirdTests
     [Fact]
     public void CeilingClampsAndClearsUpwardVelocityThenGravityResumes()
     {
-        var bird = new Bird(new Playfield(), new GameSettings(flapSpeed: 1000));
+        var bird = new Bird(new Playfield(), new GameSettings(gravity: 900, flapSpeed: 1000));
         bird.Flap();
         bird.Update(0.5);
         Assert.Equal(0, bird.Y);
@@ -108,5 +110,80 @@ public sealed class BirdTests
     {
         Assert.Throws<ArgumentException>(() => new Bird(new Playfield(),
             new GameSettings(birdWidth: width, birdHeight: height)));
+    }
+
+    [Fact]
+    public void DefaultFlapIsSmallerThanFirstTuningWhileRetainingHangTime()
+    {
+        var previous = SampleFlap(new GameSettings(gravity: 600, flapSpeed: 260, maxFallSpeed: double.MaxValue));
+        var current = SampleFlap(new GameSettings());
+
+        Assert.True(current.SecondsAloft >= previous.SecondsAloft - 1d / 60,
+            "A smaller hop must not turn into a much faster flap cadence.");
+        Assert.InRange(current.SecondsAloft, 0.8, 1.0);
+        Assert.InRange(current.Rise, 28, 38);
+        Assert.True(current.Rise <= previous.Rise * 0.7,
+            "The revised hop should be at least 30% lower than the first tuning.");
+    }
+
+    [Fact]
+    public void DefaultGravityMakesAnUnassistedDescentGentler()
+    {
+        var previous = new Bird(new Playfield(),
+            new GameSettings(gravity: 600, flapSpeed: 260, maxFallSpeed: double.MaxValue));
+        var current = new Bird(new Playfield(), new GameSettings());
+        var startY = current.Y;
+        for (var step = 0; step < 30; step++)
+        {
+            previous.Update(1d / 60);
+            current.Update(1d / 60);
+        }
+
+        Assert.True(current.Y > startY);
+        Assert.True(current.VerticalVelocity > 0);
+        Assert.True(current.VerticalVelocity < previous.VerticalVelocity);
+        Assert.True(current.Y - startY <= (previous.Y - startY) * 0.7,
+            "Half a second of falling should cover at least 30% less distance than the first tuning.");
+    }
+
+    [Theory]
+    [InlineData(90)]
+    [InlineData(240)]
+    public void LongDescentRespectsConfiguredSpeedLimitAndFlapStillWorks(double maxFallSpeed)
+    {
+        var settings = new GameSettings(maxFallSpeed: maxFallSpeed);
+        var bird = new Bird(new Playfield(), settings);
+        for (var step = 0; step < 180; step++)
+        {
+            bird.Update(1d / 60);
+            Assert.InRange(bird.VerticalVelocity, 0, maxFallSpeed);
+        }
+        Assert.Equal(maxFallSpeed, bird.VerticalVelocity);
+        var beforeFall = bird.Y;
+        bird.Update(0.5);
+        Assert.Equal(beforeFall + maxFallSpeed * 0.5, bird.Y, 8);
+        bird.Flap();
+        Assert.Equal(-settings.FlapSpeed, bird.VerticalVelocity);
+        var beforeFlap = bird.Y;
+        bird.Update(1d / 60);
+        Assert.True(bird.Y < beforeFlap);
+        Assert.Equal(-settings.FlapSpeed + settings.Gravity / 60, bird.VerticalVelocity, 9);
+    }
+
+    private static (double Rise, double SecondsAloft) SampleFlap(GameSettings settings)
+    {
+        var bird = new Bird(new Playfield(), settings);
+        var startY = bird.Y;
+        var highestY = startY;
+        bird.Flap();
+        for (var step = 1; step <= 120; step++)
+        {
+            bird.Update(1d / 60);
+            highestY = Math.Min(highestY, bird.Y);
+            if (bird.Y >= startY && bird.VerticalVelocity > 0)
+                return (startY - highestY, step / 60d);
+        }
+
+        throw new InvalidOperationException("Flap did not return to its starting height within two seconds.");
     }
 }

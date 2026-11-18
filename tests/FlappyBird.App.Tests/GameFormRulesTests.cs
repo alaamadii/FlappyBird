@@ -59,7 +59,7 @@ public sealed class GameFormRulesTests
         Key(form, Keys.Space, down: false);
         Key(form, Keys.Space, down: true);
         Assert.Equal(GameState.Running, engine.State);
-        Assert.Equal(-320, engine.Bird.VerticalVelocity);
+        Assert.Equal(-new GameSettings().FlapSpeed, engine.Bird.VerticalVelocity);
     });
 
     [Fact]
@@ -83,6 +83,7 @@ public sealed class GameFormRulesTests
         engine.Flap();
         engine.Update(1);
         engine.Update(1);
+        engine.Update(1); // Slower, capped descent can outlast two seconds with a high random gap.
         Invoke(form, "OnTimerTick", null, EventArgs.Empty);
         Assert.Equal(GameState.GameOver, engine.State);
     }

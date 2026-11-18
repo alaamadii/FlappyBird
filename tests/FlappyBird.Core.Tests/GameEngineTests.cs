@@ -8,7 +8,8 @@ public sealed class GameEngineTests
     [Fact]
     public void ReadyDoesNotAdvanceUntilFirstFlapStartsRunning()
     {
-        var engine = new GameEngine(new Playfield(), new GameSettings());
+        var settings = new GameSettings();
+        var engine = new GameEngine(new Playfield(), settings);
         var initialY = engine.Bird.Y;
         Assert.Equal(GameState.Ready, engine.State);
         engine.Update(1);
@@ -16,7 +17,7 @@ public sealed class GameEngineTests
 
         engine.Flap();
         Assert.Equal(GameState.Running, engine.State);
-        Assert.Equal(-320, engine.Bird.VerticalVelocity);
+        Assert.Equal(-settings.FlapSpeed, engine.Bird.VerticalVelocity);
         engine.Update(1d / 60);
         Assert.True(engine.Bird.Y < initialY);
         engine.Reset();
@@ -56,12 +57,13 @@ public sealed class GameEngineTests
     [Fact]
     public void UnsupportedRunningStepDoesNotMutateBirdOrPipes()
     {
-        var engine = new GameEngine(new Playfield(), new GameSettings());
+        var settings = new GameSettings();
+        var engine = new GameEngine(new Playfield(), settings);
         engine.Flap();
         var birdY = engine.Bird.Y;
         Assert.Throws<ArgumentOutOfRangeException>(() => engine.Update(1.1));
         Assert.Equal(birdY, engine.Bird.Y);
-        Assert.Equal(-320, engine.Bird.VerticalVelocity);
+        Assert.Equal(-settings.FlapSpeed, engine.Bird.VerticalVelocity);
         Assert.Equal(520, engine.Pipes.Pairs[0].X);
     }
 
