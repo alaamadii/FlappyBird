@@ -8,7 +8,7 @@
 
 **Submission deadline:** 2026-11-30, 23:59 (working schedule: Asia/Riyadh)
 
-**Current position:** Stages 00–05 merged in PRs #1–#6. The owner requested final completion and approved merging PR #6/public visibility on 2026-11-17. Stage 06 automated QA, clean-checkout evidence, screenshots and documentation are prepared on `docs/final-submission`; student identity, physical/second-computer checks and final owner acceptance remain pending.
+**Current position (verified 2026-11-18):** Stage 06 technical evidence, screenshots and documentation merged in PR #7 on 2026-11-17 at main commit de91ef8. Its exact-head and post-merge Windows CI passed. The readiness follow-up uses `docs/stage06-readiness` because PR #7 is already merged. Student identity, physical/second-computer checks, screenshot acceptance and final submission sign-off remain pending; merging technical evidence does not complete those requirements.
 
 This is the working plan for finishing **Flappy Bird only**. The other four NTP assignments have separate repositories and are outside this plan. Update this file as stages are accepted, recording actual completion dates rather than replacing targets with assumed results.
 
@@ -227,6 +227,6 @@ These are planning targets, not recorded completion dates or guarantees. Owner r
 | 03 | Pipe system merged in PR #4 | Owner merged 2026-11-17; historical manual checks remain recorded in TESTING | 2026-11-17 (merge) |
 | 04 | Mandatory game rules and native restart UI merged in PR #5 | Owner merged 2026-11-17; historical manual checks remain recorded in TESTING | 2026-11-17 (merge) |
 | 05 | UI polish, pause/focus feedback, persistent best and isolated tests merged in PR #6 | Owner approved merge 2026-11-17; final head 5043189 passed 157 cases in Windows CI; historical manual checks remain explicit | 2026-11-17 (merge) |
-| 06 | Final QA evidence, application captures, README/checklist reconciliation and code guide in [draft PR #7](https://github.com/alaamadii/FlappyBird/pull/7) | Clean GitHub clone and native probes pass; public access verified; identity/manual/second-computer/final-review items tracked in SUBMISSION | — |
+| 06 | Final QA evidence, application captures, README/checklist reconciliation and code guide merged in [PR #7](https://github.com/alaamadii/FlappyBird/pull/7) on 2026-11-17 | Reverified 2026-11-18: local 157-test check, exact-head/post-merge CI, public access, links and screenshot hashes pass. Identity/manual/second-computer/screenshot acceptance remain pending in SUBMISSION | — (submission acceptance pending) |
 
-The next gate is **final owner sign-off**, using [SUBMISSION.md](SUBMISSION.md). Screenshots are included and public access verified; identity, owner screenshot acceptance, human gameplay/DPI review, another computer, final PR merge and Classroom profile-link submission remain open. Do not mark Stage 06 accepted or the assignment submitted until those steps actually occur.
+The next gate is **final owner sign-off**, using [SUBMISSION.md](SUBMISSION.md). PR #7 is merged, screenshots are included and public access verified. Identity, owner screenshot acceptance, human gameplay/DPI review, another computer, any readiness follow-up approval and Classroom profile-link submission remain open. Do not mark Stage 06 accepted or the assignment submitted until the required evidence is supplied and reviewed.
