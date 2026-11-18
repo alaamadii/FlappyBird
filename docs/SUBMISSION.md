@@ -2,7 +2,7 @@
 
 Updated **2026-11-18**. Gameplay, optional persistence and technical submission evidence are on main through PR #7. Required identity and owner/manual evidence remain missing. Unchecked items still require owner action; this document does not claim submission is complete. The deadline is **November 30, 2026, 23:59 Asia/Riyadh**.
 
-Reviewed technical base: [PR #7](https://github.com/alaamadii/FlappyBird/pull/7) merged on 2026-11-17 at main commit `de91ef86f5e77b2ddb871468727331147b7bbe24`. Its [exact-head CI](https://github.com/alaamadii/FlappyBird/actions/runs/44060035990) and [post-merge main CI](https://github.com/alaamadii/FlappyBird/actions/runs/44080796874) passed. This records the merged technical candidate, not a final submitted state. The readiness follow-up stays separate from the already merged PR.
+Reviewed technical base: [PR #7](https://github.com/alaamadii/FlappyBird/pull/7) merged on 2026-11-17 at main commit `de91ef86f5e77b2ddb871468727331147b7bbe24`. Its [exact-head CI](https://github.com/alaamadii/FlappyBird/actions/runs/44060035990) and [post-merge main CI](https://github.com/alaamadii/FlappyBird/actions/runs/44080796874) passed. This records the merged technical candidate, not a final submitted state. [Draft readiness PR #8](https://github.com/alaamadii/FlappyBird/pull/8) stays separate from the already merged PR.
 
 ## Initialization review
 

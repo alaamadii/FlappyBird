@@ -8,7 +8,7 @@
 
 **Submission deadline:** 2026-11-30, 23:59 (working schedule: Asia/Riyadh)
 
-**Current position (verified 2026-11-18):** Stage 06 technical evidence, screenshots and documentation merged in PR #7 on 2026-11-17 at main commit de91ef8. Its exact-head and post-merge Windows CI passed. The readiness follow-up uses `docs/stage06-readiness` because PR #7 is already merged. Student identity, physical/second-computer checks, screenshot acceptance and final submission sign-off remain pending; merging technical evidence does not complete those requirements.
+**Current position (verified 2026-11-18):** Stage 06 technical evidence, screenshots and documentation merged in PR #7 on 2026-11-17 at main commit de91ef8. Its exact-head and post-merge Windows CI passed. [Draft follow-up PR #8](https://github.com/alaamadii/FlappyBird/pull/8) uses `docs/stage06-readiness` because PR #7 is already merged. Student identity, physical/second-computer checks, screenshot acceptance and final submission sign-off remain pending; merging technical evidence does not complete those requirements.
 
 This is the working plan for finishing **Flappy Bird only**. The other four NTP assignments have separate repositories and are outside this plan. Update this file as stages are accepted, recording actual completion dates rather than replacing targets with assumed results.
 
