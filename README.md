@@ -126,6 +126,6 @@ Stages 00–05 and the Stage 06 technical evidence are merged through [PR #7](ht
 
 | Student detail | Status |
 | --- | --- |
-| Full name | Awaiting owner-provided value |
+| ALAA MADI | Awaiting owner-provided value |
 
 This public repository covers only the Flappy Bird assignment. The course brief covers five separate C#/.NET repositories and sets a deadline of **November 30, 2026, 23:59 Asia/Riyadh**. The owner submits their GitHub profile link through Classroom. Required screenshots are included; remaining identity and manual sign-off items are tracked in the [submission checklist](docs/SUBMISSION.md).
