@@ -2,7 +2,7 @@
 
 A C# Windows Forms desktop game project for **Nesne Tabanlı Programlama (YMH219)**. The project demonstrates object-oriented design, event-driven programming, testing, and a reviewed Git workflow.
 
-**Gameplay implementation is complete. Final submission review is in progress.** Fly through moving pipes with an animated pixel-art bird, earn points, lose on contact, and start again with Enter or New game. The retro night scene includes wing flaps, gentle visual tilt, scrolling terrain, Score/Best displays, focus pause and saved best scores. PRs #1–#8 are merged; owner-requested flight tuning and retro visuals remain review follow-ups. The owner's full name and manual sign-off remain outstanding in the [submission checklist](docs/SUBMISSION.md).
+**Gameplay implementation is complete. Final submission review is in progress.** Fly through moving pipes with an animated pixel-art bird, earn points, lose on contact, and start again with Enter or New game. The retro night scene includes wing flaps, gentle visual tilt, scrolling terrain, Score/Best displays, focus pause and saved best scores. Previous implementation stages and flight tuning are merged; retro presentation awaits owner review. The owner's full name and manual sign-off remain outstanding in the [submission checklist](docs/SUBMISSION.md).
 
 ## Quick start
 
