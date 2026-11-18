@@ -42,7 +42,7 @@ public sealed class PipeSettingsTests
         settings.ValidateFor(new Playfield());
         Assert.True(settings.PipeGapHeight > settings.BirdHeight + 2 * settings.BirdClearance);
         Assert.True(settings.PipeSpacing - settings.PipeWidth > settings.BirdWidth + 2 * settings.BirdClearance);
-        Assert.Equal(900, settings.Gravity);
-        Assert.Equal(320, settings.FlapSpeed);
+        Assert.Equal(600, settings.Gravity);
+        Assert.Equal(260, settings.FlapSpeed);
     }
 }

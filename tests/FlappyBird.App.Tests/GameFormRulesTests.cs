@@ -59,7 +59,7 @@ public sealed class GameFormRulesTests
         Key(form, Keys.Space, down: false);
         Key(form, Keys.Space, down: true);
         Assert.Equal(GameState.Running, engine.State);
-        Assert.Equal(-320, engine.Bird.VerticalVelocity);
+        Assert.Equal(-new GameSettings().FlapSpeed, engine.Bird.VerticalVelocity);
     });
 
     [Fact]

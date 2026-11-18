@@ -3,7 +3,7 @@ namespace FlappyBird.Core.Models;
 /// <summary>Immutable flight and obstacle tuning in logical units and seconds.</summary>
 public sealed class GameSettings
 {
-    public GameSettings(double gravity = 900, double flapSpeed = 320,
+    public GameSettings(double gravity = 600, double flapSpeed = 260,
         double birdWidth = 86, double birdHeight = 48,
         double pipeSpeed = 140, double pipeWidth = 64, double pipeGapHeight = 180,
         double pipeSpacing = 260, double initialPipeOffset = 40,

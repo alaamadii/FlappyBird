@@ -4,7 +4,8 @@ namespace FlappyBird.Core.Tests;
 
 public sealed class BirdTests
 {
-    private static Bird CreateBird() => new(new Playfield(), new GameSettings());
+    // Fixed values keep integration assertions independent of gameplay-default tuning.
+    private static Bird CreateBird() => new(new Playfield(), new GameSettings(gravity: 900, flapSpeed: 320));
 
     [Fact]
     public void InitialBirdIsCenteredAboveGroundAndStationary()
@@ -70,7 +71,7 @@ public sealed class BirdTests
     [Fact]
     public void CeilingClampsAndClearsUpwardVelocityThenGravityResumes()
     {
-        var bird = new Bird(new Playfield(), new GameSettings(flapSpeed: 1000));
+        var bird = new Bird(new Playfield(), new GameSettings(gravity: 900, flapSpeed: 1000));
         bird.Flap();
         bird.Update(0.5);
         Assert.Equal(0, bird.Y);
@@ -108,5 +109,53 @@ public sealed class BirdTests
     {
         Assert.Throws<ArgumentException>(() => new Bird(new Playfield(),
             new GameSettings(birdWidth: width, birdHeight: height)));
+    }
+
+    [Fact]
+    public void DefaultFlapStaysAloftLongerWithoutIncreasingItsHeight()
+    {
+        var legacy = SampleFlap(new GameSettings(gravity: 900, flapSpeed: 320));
+        var current = SampleFlap(new GameSettings());
+
+        Assert.True(current.SecondsAloft >= legacy.SecondsAloft * 1.15,
+            "The tuned flap should give at least 15% more time before returning to its starting height.");
+        Assert.InRange(current.SecondsAloft, 0.8, 0.9);
+        Assert.InRange(current.Rise, legacy.Rise - 2, legacy.Rise + 2);
+    }
+
+    [Fact]
+    public void DefaultGravityMakesAnUnassistedDescentGentler()
+    {
+        var legacy = CreateBird();
+        var current = new Bird(new Playfield(), new GameSettings());
+        var startY = current.Y;
+        for (var step = 0; step < 30; step++)
+        {
+            legacy.Update(1d / 60);
+            current.Update(1d / 60);
+        }
+
+        Assert.True(current.Y > startY);
+        Assert.True(current.VerticalVelocity > 0);
+        Assert.True(current.VerticalVelocity < legacy.VerticalVelocity);
+        Assert.True(current.Y - startY <= (legacy.Y - startY) * 0.75,
+            "Half a second of falling should cover at least 25% less distance than the original tuning.");
+    }
+
+    private static (double Rise, double SecondsAloft) SampleFlap(GameSettings settings)
+    {
+        var bird = new Bird(new Playfield(), settings);
+        var startY = bird.Y;
+        var highestY = startY;
+        bird.Flap();
+        for (var step = 1; step <= 120; step++)
+        {
+            bird.Update(1d / 60);
+            highestY = Math.Min(highestY, bird.Y);
+            if (bird.Y >= startY && bird.VerticalVelocity > 0)
+                return (startY - highestY, step / 60d);
+        }
+
+        throw new InvalidOperationException("Flap did not return to its starting height within two seconds.");
     }
 }
